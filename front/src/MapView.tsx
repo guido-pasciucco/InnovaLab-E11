@@ -1,4 +1,4 @@
-//Componente de mapa interactivo//
+//Componente de mapa interactivo - React//
 
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-leaflet';
 import L from 'leaflet';
