@@ -1,6 +1,6 @@
 #Backend
 
-Esta carpeta contiene la API de " CONCO" y la lógica del backend.
+Esta carpeta contiene la API de " CONCO", "Sistema Inteligente de Gestión, Consultas, Comerciales, Para Emprendedores" y la lógica del backend.
 
 Tecnologías:
 
