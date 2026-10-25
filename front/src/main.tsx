@@ -1,5 +1,3 @@
-Añadir punto de entrada del frontend//
-
 import React from "react";
 import { createRoot } from "react-dom/client";
 
