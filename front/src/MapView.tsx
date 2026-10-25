@@ -1,5 +1,3 @@
-//Componente de mapa interactivo - React//
-
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import type { GeoPoint, TerritorialFeature } from '../types';
