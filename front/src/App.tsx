@@ -1,4 +1,4 @@
-Interfaz principal y formulario de consulta//
+Interfaz principal y formulario de consulta - TypeScript//
 
 import { useState, type FormEvent } from 'react';
 import QueryForm from './components/QueryForm';
