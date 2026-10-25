@@ -1,1 +1,398 @@
-Diseño, colores, tipografía y estilos adaptables (responsive).
+/* =========================================================
+1. GOOGLE FONTS
+========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap');
+
+/* =========================================================
+2. VARIABLES GLOBALES Y ESTILOS BASE
+========================================================= */
+
+:root {
+font-family: 'DM Sans', system-ui, sans-serif; 
+color: #172b27; 
+background: #f5f7f5; 
+font-synthesis: none; 
+text-rendering: optimizeLegibility;
+}
+
+* {
+box-sizing: border-box;
+}
+
+body {
+margin: 0;
+}
+
+/* =========================================================
+3. ESTRUCTURA PRINCIPAL (LAYOUT)
+========================================================= */
+
+.shell {
+max-width: 1120px; 
+margin: 0 auto; 
+padding: 0 24px 40px;
+}
+
+/* =========================================================
+4. BARRA DE NAVEGACIÓN SUPERIOR
+========================================================= */
+
+.topbar {
+height: 76px; 
+display: flex; 
+align-items: center; 
+justify-content: space-between; 
+border-bottom: 1px solid #e1e8e4; 
+color: #6a7772; 
+font-size: 14px;
+}
+
+/* =========================================================
+5. MARCA Y LOGOTIPO
+========================================================= */
+
+.brand {
+font: 800 24px Manrope, sans-serif; 
+color: #163c35; 
+text-decoration: none; 
+display: flex; 
+align-items: center; 
+gap: 9px;
+}
+
+.brand-mark {
+display: grid; 
+place-items: center; 
+background: #dcebe4; 
+border-radius: 10px; 
+width: 34px; 
+height: 34px; 
+color: #1d6553;
+}
+
+/* =========================================================
+6. SECCIÓN PRINCIPAL (HERO)
+========================================================= */
+
+.hero {
+padding: 50px 0 25px;
+}
+
+.eyebrow {
+font-size: 11px; 
+font-weight: 700; 
+letter-spacing: .12em; 
+color: #42806c;
+}
+
+.hero h1 {
+font: 800 clamp(30px, 5vw, 48px) / 1.12 Manrope, sans-serif; 
+letter-spacing: -.04em; 
+margin: 12px 0;
+}
+
+.hero > p:last-child {
+color: #65736d; 
+max-width: 600px;
+}
+
+/* =========================================================
+7. PANELES Y FORMULARIO DE CONSULTA
+========================================================= */
+
+.panel,
+.query-form {
+background: white; 
+border: 1px solid #e3eae6; 
+border-radius: 16px; 
+padding: 24px; 
+box-shadow: 0 8px 28px #183d2e08; }
+
+.query-form {
+max-width: 680px; 
+display: grid; 
+gap: 10px;
+}
+
+.query-form label {
+font-weight: 700; 
+font-size: 14px; 
+margin-top: 4px;
+}
+
+/* =========================================================
+8. CAMPOS DE ENTRADA
+========================================================= */
+
+.input,
+input {
+font: inherit;
+}
+
+.query-form input,
+.follow-form input {
+width: 100%; 
+border: 1px solid #d7e1dc; 
+border-radius: 9px; 
+padding: 13px 14px; 
+background: #fff; 
+color: #172b27; 
+outline-color: #6eaa91;
+}
+
+/* =========================================================
+9. BOTONES
+========================================================= */
+
+.primary,
+.secondary {
+border: 0; 
+border-radius: 9px; 
+padding: 13px 18px; 
+font: 700 14px 'DM Sans'; 
+cursor: pointer;
+}
+
+.primary {
+background: #17634e; 
+color: white; 
+margin-top: 8px;
+}
+
+.secondary {
+background: #e3f0e9; 
+color: #195b47;
+}
+
+.primary:disabled,
+.secondary:disabled {
+opacity: .6; 
+cursor: wait;
+}
+
+/* =========================================================
+10. TEXTO DE AYUDA Y AVISOS
+========================================================= */
+
+.hint {
+font-size: 12px; 
+color: #7b8882; 
+line-height: 1.5;
+}
+
+.limitation {
+font-size: 13px; 
+color: #805c25; 
+background: #fff8e9; 
+border-radius: 8px; 
+padding: 9px;
+}
+
+.alert {
+margin-top: 16px; 
+background: #fff0ee; 
+color: #a13e34; 
+padding: 12px; 
+border-radius: 9px;
+}
+
+/* =========================================================
+11. SECCIÓN DE RESULTADOS
+========================================================= */
+
+.results {
+display: grid; 
+gap: 18px; 
+margin-top: 24px;
+}
+
+.results h2,
+.panel h2 {
+font: 700 20px Manrope, sans-serif; 
+margin: 0 0 12px;
+}
+
+.address-line {
+color: #527568; 
+font-weight: 600;
+}
+
+/* =========================================================
+12. CUadrícula DE RESULTADOS
+========================================================= */
+
+.results-grid {
+display: grid; 
+grid-template-columns: 1fr 1.05fr; 
+gap: 18px;
+}
+
+/* =========================================================
+13. PASOS DEL PROCEDIMIENTO
+========================================================= */
+
+.steps {
+padding: 0; 
+list-style: none; 
+display: grid; 
+gap: 19px;
+}
+
+.steps li {
+display: flex; 
+gap: 12px;
+}
+
+.step-number {
+flex: none; 
+background: #e4f1e9; 
+color: #22634e; 
+font-weight: 800; 
+border-radius: 50%; 
+width: 30px; 
+height: 30px; 
+display: grid; 
+place-items: center;
+}
+
+.steps h3 {
+margin: 2px 0 5px; 
+font-size: 15px;
+}
+
+.steps p {
+font-size: 14px; 
+line-height: 1.5; 
+margin: 0 0 6px; 
+color: #596a63;
+}
+
+/* =========================================================
+14. ENCABEZADOS DE SECCIÓN Y ETIQUETAS
+========================================================= */
+
+.section-heading {
+display: flex; 
+justify-content: space-between; 
+gap: 10px; 
+align-items: start;
+}
+
+.section-heading p {
+font-size: 13px; 
+color: #6c7a73; 
+margin: 0 0 12px;
+}
+
+.badge {
+font-size: 11px; 
+background: #fff4d9; 
+color: #806326; 
+padding: 5px 8px; 
+border-radius: 20px;
+}
+
+/* =========================================================
+15. MAPA INTERACTIVO
+========================================================= */
+
+.map {
+height: 330px; 
+border-radius: 10px; 
+overflow: hidden;
+}
+
+/* =========================================================
+16. LISTA DE FUENTES OFICIALES
+========================================================= */
+
+.source-list {
+padding: 0; 
+list-style: none; 
+display: grid; 
+gap: 12px;
+}
+
+.source-list li {
+border-top: 1px solid #edf1ee; 
+padding-top: 12px; 
+display: grid; 
+gap: 4px; 
+font-size: 13px;
+}
+
+.source-list span,
+.source-list p {
+color: #718079; 
+margin: 0;
+}
+
+.source-list a {
+color: #216c54; 
+font-weight: 700; 
+text-decoration: none;
+}
+
+/* =========================================================
+17. FORMULARIO DE SEGUIMIENTO Y RESPUESTA
+========================================================= */
+
+.follow-form {
+display: flex; 
+gap: 8px;
+}
+
+.follow-answer {
+white-space: pre-wrap; 
+background: #f3f8f5; 
+border-radius: 8px; 
+padding: 14px; 
+line-height: 1.5;
+}
+
+/* =========================================================
+18. PIE DE PÁGINA
+========================================================= */
+
+footer {
+padding: 30px 0 0; 
+color: #8a9690; 
+font-size: 12px;
+}
+
+/* =========================================================
+19. DISEÑO ADAPTABLE (RESPONSIVE) — MÓVIL Y TABLETA
+========================================================= */
+
+@media (max-width: 760px) {
+.shell {
+padding: 0 16px 30px; 
+}
+
+.hero {
+padding-top: 35px; 
+}
+
+.results-grid {
+grid-template-columns: 1fr; 
+}
+
+.panel,
+.query-form {
+padding: 18px; 
+}
+
+.map {
+height: 280px; 
+}
+
+.follow-form {
+flex-direction: column; 
+}
+
+.topbar > span {
+font-size: 12px; 
+}
+}
+
