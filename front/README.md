@@ -9,4 +9,4 @@ Tecnologías:
 - React
 - TypeScript
 - Vite
-- Leaflet
+- Leaflet.
