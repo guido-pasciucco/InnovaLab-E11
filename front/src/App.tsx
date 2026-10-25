@@ -1,5 +1,3 @@
-Interfaz principal y formulario de consulta - TypeScript//
-
 import { useState, type FormEvent } from 'react';
 import QueryForm from './components/QueryForm';
 import MapPanel from './components/MapPanel';
