@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import type { GeoPoint, TerritorialFeature } from '../types';
+import type { GeoPoint, TerritorialFeature } from './types';
 import { useEffect } from 'react';
 
 // Corregir las rutas de los recursos de los marcadores predeterminados de Leaflet al realizar el empaquetado con Vite.
@@ -26,5 +26,9 @@ export default function MapPanel({ point, address, features }: { point: GeoPoint
       <Marker position={[point.lat, point.lng]}><Popup>{address}</Popup></Marker>
       {features.map(feature => <GeoJSON key={feature.id} data={feature.geometry} />)}
     </MapContainer>
-    <p className="hint">La ubicación del marcador en la demo es fija. En producción, el backend debe geocodificar y devolver coordenadas verificadas y capas con procedencia.</p>
+    <p className="hint">
+      La ubicación del marcador en la demo es fija. En producción, el backend
+      debe geocodificar y devolver coordenadas verificadas y capas con procedencia.
+    </p>
   </section>;
+}
