@@ -9,19 +9,19 @@
 ========================================================= */
 
 :root {
-font-family: 'DM Sans', system-ui, sans-serif; 
-color: #172b27; 
-background: #f5f7f5; 
-font-synthesis: none; 
-text-rendering: optimizeLegibility;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  color: #172b27;
+  background: #f5f7f5;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
 }
 
 * {
-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body {
-margin: 0;
+  margin: 0;
 }
 
 /* =========================================================
@@ -29,9 +29,9 @@ margin: 0;
 ========================================================= */
 
 .shell {
-max-width: 1120px; 
-margin: 0 auto; 
-padding: 0 24px 40px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px 40px;
 }
 
 /* =========================================================
@@ -39,36 +39,49 @@ padding: 0 24px 40px;
 ========================================================= */
 
 .topbar {
-height: 76px; 
-display: flex; 
-align-items: center; 
-justify-content: space-between; 
-border-bottom: 1px solid #e1e8e4; 
-color: #6a7772; 
-font-size: 14px;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid #e1e8e4;
+  color: #6a7772;
+  font-size: 14px;
 }
 
 /* =========================================================
-5. MARCA Y LOGOTIPO
+5. MARCA Y NUEVO LOGOTIPO DE CONCO
 ========================================================= */
 
 .brand {
-font: 800 24px Manrope, sans-serif; 
-color: #163c35; 
-text-decoration: none; 
-display: flex; 
-align-items: center; 
-gap: 9px;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  text-decoration: none;
+  min-width: 0;
 }
 
-.brand-mark {
-display: grid; 
-place-items: center; 
-background: #dcebe4; 
-border-radius: 10px; 
-width: 34px; 
-height: 34px; 
-color: #1d6553;
+.brand-logo {
+  display: block;
+  width: 190px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.brand-tagline {
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+  text-align: right;
+  color: #6a7772;
+}
+
+.brand:focus-visible {
+  outline: 2px solid #17634e;
+  outline-offset: 5px;
+  border-radius: 4px;
 }
 
 /* =========================================================
@@ -76,25 +89,25 @@ color: #1d6553;
 ========================================================= */
 
 .hero {
-padding: 50px 0 25px;
+  padding: 50px 0 25px;
 }
 
 .eyebrow {
-font-size: 11px; 
-font-weight: 700; 
-letter-spacing: .12em; 
-color: #42806c;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  color: #42806c;
 }
 
 .hero h1 {
-font: 800 clamp(30px, 5vw, 48px) / 1.12 Manrope, sans-serif; 
-letter-spacing: -.04em; 
-margin: 12px 0;
+  font: 800 clamp(30px, 5vw, 48px) / 1.12 Manrope, sans-serif;
+  letter-spacing: -.04em;
+  margin: 12px 0;
 }
 
 .hero > p:last-child {
-color: #65736d; 
-max-width: 600px;
+  color: #65736d;
+  max-width: 600px;
 }
 
 /* =========================================================
@@ -103,22 +116,23 @@ max-width: 600px;
 
 .panel,
 .query-form {
-background: white; 
-border: 1px solid #e3eae6; 
-border-radius: 16px; 
-padding: 24px; 
-box-shadow: 0 8px 28px #183d2e08; }
+  background: white;
+  border: 1px solid #e3eae6;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 28px #183d2e08;
+}
 
 .query-form {
-max-width: 680px; 
-display: grid; 
-gap: 10px;
+  max-width: 680px;
+  display: grid;
+  gap: 10px;
 }
 
 .query-form label {
-font-weight: 700; 
-font-size: 14px; 
-margin-top: 4px;
+  font-weight: 700;
+  font-size: 14px;
+  margin-top: 4px;
 }
 
 /* =========================================================
@@ -127,18 +141,24 @@ margin-top: 4px;
 
 .input,
 input {
-font: inherit;
+  font: inherit;
 }
 
 .query-form input,
 .follow-form input {
-width: 100%; 
-border: 1px solid #d7e1dc; 
-border-radius: 9px; 
-padding: 13px 14px; 
-background: #fff; 
-color: #172b27; 
-outline-color: #6eaa91;
+  width: 100%;
+  border: 1px solid #d7e1dc;
+  border-radius: 9px;
+  padding: 13px 14px;
+  background: #fff;
+  color: #172b27;
+  outline-color: #6eaa91;
+}
+
+.query-form input:focus-visible,
+.follow-form input:focus-visible {
+  outline: 2px solid #6eaa91;
+  outline-offset: 2px;
 }
 
 /* =========================================================
@@ -147,28 +167,37 @@ outline-color: #6eaa91;
 
 .primary,
 .secondary {
-border: 0; 
-border-radius: 9px; 
-padding: 13px 18px; 
-font: 700 14px 'DM Sans'; 
-cursor: pointer;
+  border: 0;
+  border-radius: 9px;
+  padding: 13px 18px;
+  font: 700 14px 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background-color .18s ease, opacity .18s ease;
 }
 
 .primary {
-background: #17634e; 
-color: white; 
-margin-top: 8px;
+  background: #17634e;
+  color: white;
+  margin-top: 8px;
+}
+
+.primary:hover:not(:disabled) {
+  background: #12513f;
 }
 
 .secondary {
-background: #e3f0e9; 
-color: #195b47;
+  background: #e3f0e9;
+  color: #195b47;
+}
+
+.secondary:hover:not(:disabled) {
+  background: #d2e8dc;
 }
 
 .primary:disabled,
 .secondary:disabled {
-opacity: .6; 
-cursor: wait;
+  opacity: .6;
+  cursor: wait;
 }
 
 /* =========================================================
@@ -176,25 +205,25 @@ cursor: wait;
 ========================================================= */
 
 .hint {
-font-size: 12px; 
-color: #7b8882; 
-line-height: 1.5;
+  font-size: 12px;
+  color: #7b8882;
+  line-height: 1.5;
 }
 
 .limitation {
-font-size: 13px; 
-color: #805c25; 
-background: #fff8e9; 
-border-radius: 8px; 
-padding: 9px;
+  font-size: 13px;
+  color: #805c25;
+  background: #fff8e9;
+  border-radius: 8px;
+  padding: 9px;
 }
 
 .alert {
-margin-top: 16px; 
-background: #fff0ee; 
-color: #a13e34; 
-padding: 12px; 
-border-radius: 9px;
+  margin-top: 16px;
+  background: #fff0ee;
+  color: #a13e34;
+  padding: 12px;
+  border-radius: 9px;
 }
 
 /* =========================================================
@@ -202,30 +231,30 @@ border-radius: 9px;
 ========================================================= */
 
 .results {
-display: grid; 
-gap: 18px; 
-margin-top: 24px;
+  display: grid;
+  gap: 18px;
+  margin-top: 24px;
 }
 
 .results h2,
 .panel h2 {
-font: 700 20px Manrope, sans-serif; 
-margin: 0 0 12px;
+  font: 700 20px Manrope, sans-serif;
+  margin: 0 0 12px;
 }
 
 .address-line {
-color: #527568; 
-font-weight: 600;
+  color: #527568;
+  font-weight: 600;
 }
 
 /* =========================================================
-12. CUadrícula DE RESULTADOS
+12. CUADRÍCULA DE RESULTADOS
 ========================================================= */
 
 .results-grid {
-display: grid; 
-grid-template-columns: 1fr 1.05fr; 
-gap: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: 18px;
 }
 
 /* =========================================================
@@ -233,39 +262,39 @@ gap: 18px;
 ========================================================= */
 
 .steps {
-padding: 0; 
-list-style: none; 
-display: grid; 
-gap: 19px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 19px;
 }
 
 .steps li {
-display: flex; 
-gap: 12px;
+  display: flex;
+  gap: 12px;
 }
 
 .step-number {
-flex: none; 
-background: #e4f1e9; 
-color: #22634e; 
-font-weight: 800; 
-border-radius: 50%; 
-width: 30px; 
-height: 30px; 
-display: grid; 
-place-items: center;
+  flex: none;
+  background: #e4f1e9;
+  color: #22634e;
+  font-weight: 800;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
 }
 
 .steps h3 {
-margin: 2px 0 5px; 
-font-size: 15px;
+  margin: 2px 0 5px;
+  font-size: 15px;
 }
 
 .steps p {
-font-size: 14px; 
-line-height: 1.5; 
-margin: 0 0 6px; 
-color: #596a63;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 6px;
+  color: #596a63;
 }
 
 /* =========================================================
@@ -273,24 +302,24 @@ color: #596a63;
 ========================================================= */
 
 .section-heading {
-display: flex; 
-justify-content: space-between; 
-gap: 10px; 
-align-items: start;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: start;
 }
 
 .section-heading p {
-font-size: 13px; 
-color: #6c7a73; 
-margin: 0 0 12px;
+  font-size: 13px;
+  color: #6c7a73;
+  margin: 0 0 12px;
 }
 
 .badge {
-font-size: 11px; 
-background: #fff4d9; 
-color: #806326; 
-padding: 5px 8px; 
-border-radius: 20px;
+  font-size: 11px;
+  background: #fff4d9;
+  color: #806326;
+  padding: 5px 8px;
+  border-radius: 20px;
 }
 
 /* =========================================================
@@ -298,9 +327,9 @@ border-radius: 20px;
 ========================================================= */
 
 .map {
-height: 330px; 
-border-radius: 10px; 
-overflow: hidden;
+  height: 330px;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 /* =========================================================
@@ -308,30 +337,34 @@ overflow: hidden;
 ========================================================= */
 
 .source-list {
-padding: 0; 
-list-style: none; 
-display: grid; 
-gap: 12px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 12px;
 }
 
 .source-list li {
-border-top: 1px solid #edf1ee; 
-padding-top: 12px; 
-display: grid; 
-gap: 4px; 
-font-size: 13px;
+  border-top: 1px solid #edf1ee;
+  padding-top: 12px;
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
 }
 
 .source-list span,
 .source-list p {
-color: #718079; 
-margin: 0;
+  color: #718079;
+  margin: 0;
 }
 
 .source-list a {
-color: #216c54; 
-font-weight: 700; 
-text-decoration: none;
+  color: #216c54;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.source-list a:hover {
+  text-decoration: underline;
 }
 
 /* =========================================================
@@ -339,16 +372,20 @@ text-decoration: none;
 ========================================================= */
 
 .follow-form {
-display: flex; 
-gap: 8px;
+  display: flex;
+  gap: 8px;
+}
+
+.follow-form input {
+  min-width: 0;
 }
 
 .follow-answer {
-white-space: pre-wrap; 
-background: #f3f8f5; 
-border-radius: 8px; 
-padding: 14px; 
-line-height: 1.5;
+  white-space: pre-wrap;
+  background: #f3f8f5;
+  border-radius: 8px;
+  padding: 14px;
+  line-height: 1.5;
 }
 
 /* =========================================================
@@ -356,43 +393,93 @@ line-height: 1.5;
 ========================================================= */
 
 footer {
-padding: 30px 0 0; 
-color: #8a9690; 
-font-size: 12px;
+  padding: 30px 0 0;
+  color: #8a9690;
+  font-size: 12px;
 }
 
 /* =========================================================
-19. DISEÑO ADAPTABLE (RESPONSIVE) — MÓVIL Y TABLETA
+19. DISEÑO ADAPTABLE: TABLETAS Y MÓVILES
 ========================================================= */
 
 @media (max-width: 760px) {
-.shell {
-padding: 0 16px 30px; 
+  .shell {
+    padding: 0 16px 30px;
+  }
+
+  .hero {
+    padding-top: 35px;
+  }
+
+  .results-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel,
+  .query-form {
+    padding: 18px;
+  }
+
+  .map {
+    height: 280px;
+  }
+
+  .follow-form {
+    flex-direction: column;
+  }
+
+  .topbar {
+    gap: 12px;
+  }
+
+  .brand-tagline {
+    font-size: 12px;
+  }
 }
 
-.hero {
-padding-top: 35px; 
+/* =========================================================
+20. AJUSTES DEL LOGOTIPO PARA PANTALLAS PEQUEÑAS
+========================================================= */
+
+@media (max-width: 600px) {
+  .brand-logo {
+    width: 145px;
+  }
+
+  .brand-tagline {
+    font-size: 11px;
+  }
 }
 
-.results-grid {
-grid-template-columns: 1fr; 
+/* =========================================================
+21. AJUSTES PARA TELÉFONOS MUY ESTRECHOS
+========================================================= */
+
+@media (max-width: 380px) {
+  .topbar {
+    gap: 8px;
+  }
+
+  .brand-logo {
+    width: 125px;
+  }
+
+  .brand-tagline {
+    font-size: 10px;
+  }
 }
 
-.panel,
-.query-form {
-padding: 18px; 
-}
+/* =========================================================
+22. RESPETO POR LA PREFERENCIA DE MOVIMIENTO REDUCIDO
+========================================================= */
 
-.map {
-height: 280px; 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
 }
-
-.follow-form {
-flex-direction: column; 
-}
-
-.topbar > span {
-font-size: 12px; 
-}
-}
-

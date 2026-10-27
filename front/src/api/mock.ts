@@ -12,7 +12,7 @@ export async function mockConsultation(payload: ConsultationRequest): Promise<Co
     consultationId: `demo-${Date.now()}`,
     interpretedActivity: payload.activity.trim() || 'actividad comercial',
     normalizedAddress: payload.address.trim() || 'Av. Corrientes 2500, CABA',
-    point: { lat: -34.6042, lng: -58. omitting },
+    point: { lat: -34.6042, lng: -58.3816 },
     summary: 'Esta respuesta es una maqueta funcional. Antes de tomar decisiones, verificá los requisitos vigentes en las fuentes oficiales vinculadas.',
     steps: [
       { id:'step-1', title:'Confirmá la clasificación de la actividad', description:'Verificá cómo se encuadra la actividad declarada y qué régimen de habilitación corresponde.', documents:['Descripción precisa de la actividad'], sourceIds:['src-procedures'] },
