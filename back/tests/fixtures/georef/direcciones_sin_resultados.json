@@ -1,0 +1,21 @@
+{
+    "cantidad": 0,
+    "direcciones": [],
+    "inicio": 0,
+    "parametros": {
+        "direccion": {
+            "altura": {
+                "unidad": null,
+                "valor": "9999"
+            },
+            "calles": [
+                "Calle Inventada Xyz"
+            ],
+            "piso": null,
+            "tipo": "simple"
+        },
+        "max": 5,
+        "provincia": "caba"
+    },
+    "total": 0
+}

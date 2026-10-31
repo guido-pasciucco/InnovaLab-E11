@@ -27,9 +27,19 @@ Son las que pedimos explícitamente en `back/pyproject.toml`.
 | `fastapi` | `>=0.115,<1.0` | Framework web. Define los endpoints (qué responde la API) y genera la documentación interactiva en `/docs`. |
 | `uvicorn[standard]` | `>=0.30,<1.0` | Servidor ASGI. Escucha en un puerto, recibe las peticiones HTTP y se las pasa a FastAPI. |
 | `pydantic` | `>=2.8,<3.0` | Validación de datos. Define la forma de lo que entra y sale de la API y rechaza los datos inválidos. |
+| `httpx` | `>=0.28,<1.0` | Cliente HTTP asíncrono para consumir APIs externas (`src/conco/integrations/`). |
 | `pydantic-settings` | `>=2.16,<3.0` | Lee la configuración desde variables de entorno y el archivo `.env`, validando sus tipos (`src/conco/config.py`). |
 
 **Rangos de versión:** `>=2.8,<3.0` acepta correcciones y mejoras, pero nunca un salto de versión mayor, que suele traer cambios incompatibles.
+
+## Dependencias de desarrollo
+
+Solo se usan para trabajar en el proyecto (no las necesita la API en producción). Se declaran en el grupo `dev` de `pyproject.toml` con `uv add --dev <paquete>`, y `uv sync` las instala por defecto.
+
+| Paquete | Versión permitida | Para qué sirve |
+|---------|-------------------|----------------|
+| `pytest` | `>=8,<10` | Ejecuta los tests (`uv run pytest`). |
+| `respx` | `>=0.22,<1.0` | Simula las respuestas HTTP de httpx en los tests, para no depender de internet. |
 
 ## Dependencias transitivas
 

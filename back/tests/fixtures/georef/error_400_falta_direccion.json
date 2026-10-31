@@ -1,0 +1,10 @@
+{
+    "errores": [
+        {
+            "codigo_interno": 1003,
+            "mensaje": "El parámetro 'direccion' es obligatorio.",
+            "nombre_parametro": "direccion",
+            "ubicacion": "querystring"
+        }
+    ]
+}
