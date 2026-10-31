@@ -8,6 +8,8 @@ from conco.geolocation.domain import (
     AddressContextError,
     AddressSearchError,
     Coordinates,
+    LocationCheck,
+    LocationCheckError,
     NearbyOffice,
     NearbyOfficeError,
     Source,
@@ -19,7 +21,7 @@ from conco.integrations.epok.client import (
 )
 from conco.integrations.epok.client import find_nearby as find_nearby_places
 from conco.integrations.epok.models import EpokObjectContent, EpokPlace
-from conco.integrations.georef.client import GeorefError, search_addresses
+from conco.integrations.georef.client import GeorefError, locate, search_addresses
 from conco.integrations.georef.models import GeorefAddress
 from conco.integrations.usig.client import (
     UsigError,
@@ -58,6 +60,37 @@ def _to_domain(georef_address: GeorefAddress) -> Address:
             else None
         ),
     )
+
+
+CABA_PROVINCE_ID = "02"
+"""Id de la Ciudad Autónoma de Buenos Aires en Georef (código INDEC de provincia)."""
+
+
+class GeorefLocationChecker:
+    """Adaptador: ubica un punto con el endpoint /ubicacion de Georef y verifica si es CABA.
+
+    La verificación usa el id de provincia, no el nombre, para no depender de cómo se escribe.
+    """
+
+    @property
+    def source(self) -> Source:
+        return Source(
+            name="Georef - Servicio de Normalización de Datos Geográficos de Argentina",
+            url=settings.georef_base_url,
+            license="Creative Commons Atribución 4.0 Internacional (CC BY 4.0)",
+        )
+
+    async def check(self, latitude: float, longitude: float) -> LocationCheck:
+        try:
+            response = await locate(latitude=latitude, longitude=longitude)
+        except GeorefError as exc:
+            raise LocationCheckError(str(exc)) from exc
+        location = response.location
+        return LocationCheck(
+            in_caba=location.province.id == CABA_PROVINCE_ID,
+            province=location.province.name,
+            department=location.department.name,
+        )
 
 
 class UsigAddressContextProvider:
