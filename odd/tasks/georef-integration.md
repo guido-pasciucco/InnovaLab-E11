@@ -41,8 +41,9 @@ Out of scope: FastAPI endpoint, caching, retries (later PRs).
 ## Tasks
 
 - [x] T1 · Config settings, client skeleton, probe script, httpx dependency (route: inline; small, already designed)
-- [ ] T2 · Models + typed client + `GeorefError` + unit/integration tests (route: delegated writer; trigger: 2+ non-trivial files)
-- [ ] T3 · Docs: DEPENDENCIAS dev deps + testing, README checklist (route: inline; mechanical)
+- [x] T2 · Models + typed client + `GeorefError` + unit/integration tests (route: delegated writer; trigger: 2+ non-trivial files)
+- [x] T3 · Docs: DEPENDENCIAS dev deps + testing, README checklist (route: inline; mechanical)
+- [ ] T4 · User adds `GEOREF_*` variables to `back/.env.example` and commits it (agent is permission-denied on `.env*`)
 
 ## Acceptance criteria
 
@@ -59,8 +60,10 @@ Out of scope: FastAPI endpoint, caching, retries (later PRs).
 
 ## Progress / evidence
 
-- 2026-10-31: T1 written and verified in a scratch copy (base_url path merge, normalization, probe, ConnectTimeout, HTTP 404). Real fixtures captured.
+- 2026-10-31: T1 written and verified in a scratch copy (base_url path merge, normalization, probe, ConnectTimeout, HTTP 404). Real fixtures captured. Commit `f65dbf5`.
+- 2026-10-31: T2 by delegated writer. RED: `ImportError: cannot import name 'GeorefError'`. GREEN: `9 passed, 1 deselected`. Parent re-ran: `uv run pytest -q` → 9 passed, 1 deselected; `uv run pytest -m integration -q` → 1 passed (live Georef); probe with `"  corrientes   2500 "` → typed result, Comuna 3. Writer deviation accepted: parse with `model_validate_json(response.content)` so non-JSON bodies become `GeorefError`.
+- 2026-10-31: T3 docs updated (README checklist ticked + Tests section; DEPENDENCIAS dev dependencies).
 
 ## Next step
 
-T2 via delegated writer.
+T4 (user), then open the Georef PR with base `feature/backend-setup` (retarget to `main` after PR #50 merges).

@@ -32,6 +32,15 @@ Son las que pedimos explícitamente en `back/pyproject.toml`.
 
 **Rangos de versión:** `>=2.8,<3.0` acepta correcciones y mejoras, pero nunca un salto de versión mayor, que suele traer cambios incompatibles.
 
+## Dependencias de desarrollo
+
+Solo se usan para trabajar en el proyecto (no las necesita la API en producción). Se declaran en el grupo `dev` de `pyproject.toml` con `uv add --dev <paquete>`, y `uv sync` las instala por defecto.
+
+| Paquete | Versión permitida | Para qué sirve |
+|---------|-------------------|----------------|
+| `pytest` | `>=8,<10` | Ejecuta los tests (`uv run pytest`). |
+| `respx` | `>=0.22,<1.0` | Simula las respuestas HTTP de httpx en los tests, para no depender de internet. |
+
 ## Dependencias transitivas
 
 uv también instala las dependencias de nuestras dependencias. No hace falta declararlas: sus versiones exactas quedan fijadas en `uv.lock`.

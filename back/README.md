@@ -110,8 +110,17 @@ Cuando una API se conecte a un endpoint real, se agregará una carpeta por funci
 
 ## Checklist de la primera integración
 
-- [ ] `pyproject.toml` creado con FastAPI, Pydantic y httpx
-- [ ] `src/conco/main.py` y `config.py` creados
-- [ ] `integrations/georef/client.py` realiza la consulta de direcciones
-- [ ] `scripts/probe_georef.py` imprime la respuesta de Georef
-- [ ] `integrations/georef/models.py` refleja la respuesta observada
+- [x] `pyproject.toml` creado con FastAPI, Pydantic y httpx
+- [x] `src/conco/main.py` y `config.py` creados
+- [x] `integrations/georef/client.py` realiza la consulta de direcciones
+- [x] `scripts/probe_georef.py` imprime la respuesta de Georef
+- [x] `integrations/georef/models.py` refleja la respuesta observada
+
+## Tests
+
+Desde la carpeta `back/`:
+
+| Comando | Qué ejecuta |
+|---|---|
+| `uv run pytest` | Tests unitarios. No usan internet: simulan las APIs externas con `respx` y respuestas reales guardadas en `tests/fixtures/`. |
+| `uv run pytest -m integration` | Tests de integración. Llaman a las APIs reales, por lo que necesitan internet y que el servicio esté disponible. |

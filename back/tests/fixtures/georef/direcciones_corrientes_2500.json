@@ -1,0 +1,61 @@
+{
+    "cantidad": 1,
+    "direcciones": [
+        {
+            "altura": {
+                "unidad": null,
+                "valor": 2500
+            },
+            "calle": {
+                "categoria": "AV",
+                "id": "0202101001185",
+                "nombre": "AV CORRIENTES"
+            },
+            "calle_cruce_1": {
+                "categoria": null,
+                "id": null,
+                "nombre": null
+            },
+            "calle_cruce_2": {
+                "categoria": null,
+                "id": null,
+                "nombre": null
+            },
+            "departamento": {
+                "id": "02021",
+                "nombre": "Comuna 3"
+            },
+            "localidad_censal": {
+                "id": "02000010",
+                "nombre": "Ciudad Autónoma de Buenos Aires"
+            },
+            "nomenclatura": "AV CORRIENTES 2500, Comuna 3, Ciudad Autónoma de Buenos Aires",
+            "piso": null,
+            "provincia": {
+                "id": "02",
+                "nombre": "Ciudad Autónoma de Buenos Aires"
+            },
+            "ubicacion": {
+                "lat": -34.6047137500375,
+                "lon": -58.402137170712
+            }
+        }
+    ],
+    "inicio": 0,
+    "parametros": {
+        "direccion": {
+            "altura": {
+                "unidad": null,
+                "valor": "2500"
+            },
+            "calles": [
+                "Corrientes"
+            ],
+            "piso": null,
+            "tipo": "simple"
+        },
+        "max": 5,
+        "provincia": "caba"
+    },
+    "total": 1
+}
