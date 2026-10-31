@@ -1,8 +1,15 @@
+from typing import TypeVar
+
 import httpx
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from conco.config import settings
-from conco.integrations.georef.models import GeorefAddressesResponse
+from conco.integrations.georef.models import (
+    GeorefAddressesResponse,
+    GeorefLocationResponse,
+)
+
+ResponseModel = TypeVar("ResponseModel", bound=BaseModel)
 
 
 class GeorefError(Exception):
@@ -25,14 +32,30 @@ async def search_addresses(
         "provincia": province,
         "max": max_results,
     }
+    return await _get("/direcciones", params, GeorefAddressesResponse)
+
+
+async def locate(latitude: float, longitude: float) -> GeorefLocationResponse:
+    """Consulta el endpoint /ubicacion de Georef (geocodificación inversa de un punto).
+
+    Fuera de la Argentina Georef responde 200 con provincia, departamento y municipio en null.
+    """
+    params = {"lat": latitude, "lon": longitude}
+    return await _get("/ubicacion", params, GeorefLocationResponse)
+
+
+async def _get(
+    path: str, params: dict[str, str | int | float], model: type[ResponseModel]
+) -> ResponseModel:
+    """Hace un GET a Georef y valida la respuesta; cualquier falla se informa como GeorefError."""
     try:
         async with httpx.AsyncClient(
             base_url=settings.georef_base_url,
             timeout=settings.georef_timeout_seconds,
         ) as client:
-            response = await client.get("/direcciones", params=params)
+            response = await client.get(path, params=params)
             response.raise_for_status()
-            return GeorefAddressesResponse.model_validate_json(response.content)
+            return model.model_validate_json(response.content)
     except httpx.HTTPError as exc:
         raise GeorefError(f"No se pudo consultar Georef: {exc}") from exc
     except ValidationError as exc:
