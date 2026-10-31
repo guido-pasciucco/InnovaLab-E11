@@ -38,27 +38,45 @@ back/
 │       │   ├── domain.py       # Address, el puerto AddressFinder y AddressSearchError
 │       │   ├── infrastructure.py # adaptador que usa Georef y lo traduce al dominio
 │       │   └── api.py          # endpoint GET /geolocation/addresses
+│       ├── guidance/           # funcionalidad: orientación sobre trámites oficiales
+│       │   ├── domain.py       # Procedure, ProcedureDetail, Source, el puerto ProcedureCatalog y ProcedureSearchError
+│       │   ├── infrastructure.py # adaptador que usa la API de trámites de la Ciudad y pasa el HTML a texto
+│       │   └── api.py          # endpoints GET /guidance/procedures y /guidance/procedures/{procedure_id}
 │       └── integrations/       # un paquete por cada API externa
-│           └── georef/
-│               ├── client.py   # única ubicación de las llamadas HTTP a Georef
-│               └── models.py   # forma de la respuesta JSON de Georef
+│           ├── georef/
+│           │   ├── client.py   # única ubicación de las llamadas HTTP a Georef
+│           │   └── models.py   # forma de la respuesta JSON de Georef
+│           └── caba_tramites/
+│               ├── client.py   # única ubicación de las llamadas HTTP a la API de trámites de la Ciudad
+│               └── models.py   # forma de la respuesta JSON:API de trámites
 ├── scripts/
 │   └── probes/                 # un script por API para explorarla en forma aislada
-│       └── georef.py           # ejecuta el cliente e imprime lo que devuelve
+│       ├── georef.py           # ejecuta el cliente e imprime lo que devuelve
+│       └── caba_tramites.py
 └── tests/
     ├── conftest.py             # configuración compartida de pytest
     ├── fixtures/               # respuestas reales guardadas, una carpeta por API
-    │   └── georef/
+    │   ├── georef/
+    │   └── caba_tramites/
     ├── unit/                   # sin internet: las APIs externas se simulan
     │   ├── georef/
     │   │   └── test_client.py
-    │   └── geolocation/
-    │       ├── test_georef_finder.py
+    │   ├── caba_tramites/
+    │   │   └── test_client.py
+    │   ├── geolocation/
+    │   │   ├── test_georef_finder.py
+    │   │   └── test_api.py
+    │   └── guidance/
+    │       ├── test_caba_catalog.py
     │       └── test_api.py
     └── integration/            # con internet: llaman a las APIs reales
         ├── georef/
         │   └── test_client.py
-        └── geolocation/
+        ├── caba_tramites/
+        │   └── test_client.py
+        ├── geolocation/
+        │   └── test_api.py
+        └── guidance/
             └── test_api.py
 ```
 
@@ -134,6 +152,80 @@ Para probarlo a mano, levantar la API y abrir `http://127.0.0.1:8000/docs`:
 uv run uvicorn conco.main:app --reload
 ```
 
+## Segunda API: trámites de la Ciudad de Buenos Aires
+
+| Dato | Valor |
+|---|---|
+| Proveedor | Gobierno de la Ciudad de Buenos Aires (buenosaires.gob.ar) |
+| Endpoint | `GET https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco` (búsqueda) y `.../tramites_obelisco/{uuid}` (detalle) |
+| Formato | JSON:API de Drupal, sin clave de acceso |
+| Licencia | Creative Commons Reconocimiento 2.5 Argentina (CC BY 2.5 AR) |
+| Uso en CONCO | Buscar trámites oficiales y mostrar requisitos, pasos, organismo y enlace para iniciarlos |
+| Parámetros principales | `filter[status]=1`, `filter[title][operator]=CONTAINS`, `filter[title][value]`, `sort=title`, `page[limit]`, `include` y `fields[...]` |
+
+**Limitaciones:**
+
+- La API no tiene documentación pública: es el JSON:API que Drupal expone por defecto. Su forma puede cambiar sin aviso; el test de integración es la alerta temprana.
+- La búsqueda es solo por texto en el título (no distingue mayúsculas ni acentos). No hay búsqueda por actividad ni por relevancia.
+- El contenido de cada trámite está armado con párrafos anidados (requisitos, pasos, organismo, botón para iniciar). El cliente pide solo esos párrafos y descarta el resto (costos, normativa, textos de ayuda).
+- Un id inexistente o no publicado no devuelve 404: redirige (301) a una página HTML. El cliente lo informa como "no encontrado".
+- Sin `filter[status]=1`, las páginas vienen incompletas porque la API omite los trámites no publicados.
+
+Ejemplo de respuesta de la búsqueda (abreviado), obtenido con `filter[title][value]=habilitaci`:
+
+```json
+{
+  "data": [
+    {
+      "type": "node--tramites_obelisco",
+      "id": "338718b4-a2a0-44af-baa4-083f5d834b12",
+      "attributes": {
+        "title": "Habilitación de actividad económica",
+        "changed": "2026-08-07T18:57:01+00:00",
+        "path": { "alias": "/tramites/habilitacion-de-actividad-economica" },
+        "body": { "value": "Con este trámite podés solicitar la habilitación...", "format": "plain_text" }
+      }
+    }
+  ],
+  "meta": { "count": 11 }
+}
+```
+
+## Endpoints de orientación sobre trámites
+
+Toda respuesta incluye `source` (nombre, URL y licencia de la fuente oficial) y cada trámite incluye `official_url`, el enlace a su página oficial (RN-05). La información es orientación general: la persona debe verificarla con el organismo responsable (RN-04, RN-07).
+
+### `GET /guidance/procedures`
+
+Busca trámites oficiales por su nombre.
+
+| Parámetro | Obligatorio | Valor por defecto | Validación |
+|---|---|---|---|
+| `query` | Sí | — | Entre 3 y 100 caracteres, no solo espacios |
+| `limit` | No | `10` | Entre 1 y 20 |
+
+Respuesta (`200`): `{"procedures": [...], "source": {...}}`. Cada trámite tiene `id`, `title`, `official_url`, `summary` (texto plano) y `last_updated`. La lista puede venir vacía.
+
+### `GET /guidance/procedures/{procedure_id}`
+
+Devuelve el detalle de un trámite a partir del `id` que entrega la búsqueda.
+
+Respuesta (`200`): `{"procedure": {...}, "source": {...}}`. Además de los datos del resumen, el trámite incluye `requirements` y `steps` (listas de textos planos, en el orden de la página oficial), `responsible_office` y `start_url` (enlace oficial para iniciar el trámite). Estos dos últimos pueden venir en `null`.
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` | La consulta funcionó |
+| `404` | El trámite no existe o no está publicado (solo el detalle) |
+| `422` | Los parámetros no cumplen la validación (en el detalle, si el id no es un UUID) |
+| `502` | La API de la Ciudad no respondió o devolvió algo inesperado |
+
+Para explorar la API en forma aislada:
+
+```bash
+uv run python scripts/probes/caba_tramites.py habilitaci
+uv run python scripts/probes/caba_tramites.py --id 338718b4-a2a0-44af-baa4-083f5d834b12
+```
+
 ## Cómo incorporar una API nueva
 
 Cada API se integra y se prueba por separado, en este orden:
@@ -158,7 +250,7 @@ Primero se observa la respuesta y después se modela. No se escriben modelos a p
 
 ## Crecimiento previsto
 
-Cada funcionalidad que expone un endpoint tiene su carpeta (`geolocation/` ya existe; `guidance/` para orientación por actividad vendrá después), con capas de dominio, infraestructura y API. La capa de aplicación (casos de uso) se agregará cuando haya lógica que coordinar, por ejemplo caché o combinar varias APIs; mientras tanto, el endpoint usa el puerto directamente.
+Cada funcionalidad que expone un endpoint tiene su carpeta (`geolocation/` y `guidance/` ya existen), con capas de dominio, infraestructura y API. La capa de aplicación (casos de uso) se agregará cuando haya lógica que coordinar, por ejemplo caché o combinar varias APIs; mientras tanto, el endpoint usa el puerto directamente.
 
 ## Checklist de la primera integración
 
