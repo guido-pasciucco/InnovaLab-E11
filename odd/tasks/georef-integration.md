@@ -62,7 +62,8 @@ Out of scope: FastAPI endpoint, caching, retries (later PRs).
 
 - 2026-10-31: T1 written and verified in a scratch copy (base_url path merge, normalization, probe, ConnectTimeout, HTTP 404). Real fixtures captured. Commit `f65dbf5`.
 - 2026-10-31: T2 by delegated writer. RED: `ImportError: cannot import name 'GeorefError'`. GREEN: `9 passed, 1 deselected`. Parent re-ran: `uv run pytest -q` → 9 passed, 1 deselected; `uv run pytest -m integration -q` → 1 passed (live Georef); probe with `"  corrientes   2500 "` → typed result, Comuna 3. Writer deviation accepted: parse with `model_validate_json(response.content)` so non-JSON bodies become `GeorefError`.
-- 2026-10-31: T3 docs updated (README checklist ticked + Tests section; DEPENDENCIAS dev dependencies).
+- 2026-10-31: T3 docs updated (README checklist ticked + Tests section; DEPENDENCIAS dev dependencies). Commit `03046bf`.
+- 2026-10-31: Review assessment over `1760b19..03046bf` (untracked `docs/REGLAS_DE_NEGOCIO.md` excluded, unrelated): risk medium (`configuration_change` in `back/pyproject.toml`), `review_due: false`, reason `under_budget`.
 
 ## Next step
 
