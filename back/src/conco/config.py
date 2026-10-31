@@ -22,5 +22,9 @@ class Settings(BaseSettings):
     usig_docs_url: str = "http://usig.buenosaires.gob.ar/apis/"
     usig_timeout_seconds: float = 10.0
 
+    boletin_oficial_base_url: str = "https://api-restboletinoficial.buenosaires.gob.ar"
+    boletin_oficial_site_url: str = "https://boletinoficial.buenosaires.gob.ar"
+    boletin_oficial_timeout_seconds: float = 10.0
+
 
 settings = Settings()

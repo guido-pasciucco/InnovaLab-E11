@@ -14,6 +14,7 @@ El backend es el único punto que consume APIs externas. El frontend se comunica
 4. Ofrecer enlaces de referencia oficiales.
 5. Geocodificar una dirección para mostrar una ubicación aproximada en el mapa.
 6. Informar barrio, comuna y código postal de una dirección o un punto de CABA.
+7. Mostrar leyes y decretos de la Ciudad publicados en el Boletín Oficial, como referencia de la normativa que respalda un trámite.
 
 ## Tecnologías
 
@@ -40,9 +41,9 @@ back/
 │       │   ├── infrastructure.py # adaptadores que usan Georef y USIG y los traducen al dominio
 │       │   └── api.py          # endpoints GET /geolocation/addresses y /geolocation/address-context
 │       ├── guidance/           # funcionalidad: orientación sobre trámites oficiales
-│       │   ├── domain.py       # Procedure, ProcedureDetail, Source, el puerto ProcedureCatalog y ProcedureSearchError
-│       │   ├── infrastructure.py # adaptador que usa la API de trámites de la Ciudad y pasa el HTML a texto
-│       │   └── api.py          # endpoints GET /guidance/procedures y /guidance/procedures/{procedure_id}
+│       │   ├── domain.py       # Procedure, ProcedureDetail, Regulation, Source, los puertos ProcedureCatalog y RegulationRegistry y sus errores
+│       │   ├── infrastructure.py # adaptadores que usan la API de trámites y el Boletín Oficial de la Ciudad
+│       │   └── api.py          # endpoints GET /guidance/procedures, /guidance/procedures/{procedure_id} y /guidance/regulations/...
 │       └── integrations/       # un paquete por cada API externa
 │           ├── georef/
 │           │   ├── client.py   # única ubicación de las llamadas HTTP a Georef
@@ -50,26 +51,33 @@ back/
 │           ├── caba_tramites/
 │           │   ├── client.py   # única ubicación de las llamadas HTTP a la API de trámites de la Ciudad
 │           │   └── models.py   # forma de la respuesta JSON:API de trámites
-│           └── usig/
-│               ├── client.py   # única ubicación de las llamadas HTTP a USIG (datos útiles)
-│               └── models.py   # forma de la respuesta de datos útiles (solo los campos usados)
+│           ├── usig/
+│           │   ├── client.py   # única ubicación de las llamadas HTTP a USIG (datos útiles)
+│           │   └── models.py   # forma de la respuesta de datos útiles (solo los campos usados)
+│           └── boletin_oficial/
+│               ├── client.py   # única ubicación de las llamadas HTTP al Boletín Oficial de la Ciudad
+│               └── models.py   # forma de la respuesta de búsqueda de normas
 ├── scripts/
 │   └── probes/                 # un script por API para explorarla en forma aislada
 │       ├── georef.py           # ejecuta el cliente e imprime lo que devuelve
 │       ├── caba_tramites.py
-│       └── usig.py
+│       ├── usig.py
+│       └── boletin_oficial.py
 └── tests/
     ├── conftest.py             # configuración compartida de pytest
     ├── fixtures/               # respuestas reales guardadas, una carpeta por API
     │   ├── georef/
     │   ├── caba_tramites/
-    │   └── usig/
+    │   ├── usig/
+    │   └── boletin_oficial/
     ├── unit/                   # sin internet: las APIs externas se simulan
     │   ├── georef/
     │   │   └── test_client.py
     │   ├── caba_tramites/
     │   │   └── test_client.py
     │   ├── usig/
+    │   │   └── test_client.py
+    │   ├── boletin_oficial/
     │   │   └── test_client.py
     │   ├── geolocation/
     │   │   ├── test_georef_finder.py
@@ -78,7 +86,9 @@ back/
     │   │   └── test_address_context_api.py
     │   └── guidance/
     │       ├── test_caba_catalog.py
-    │       └── test_api.py
+    │       ├── test_boletin_oficial_registry.py
+    │       ├── test_api.py
+    │       └── test_regulations_api.py
     └── integration/            # con internet: llaman a las APIs reales
         ├── georef/
         │   └── test_client.py
@@ -86,11 +96,14 @@ back/
         │   └── test_client.py
         ├── usig/
         │   └── test_client.py
+        ├── boletin_oficial/
+        │   └── test_client.py
         ├── geolocation/
         │   ├── test_api.py
         │   └── test_address_context_api.py
         └── guidance/
-            └── test_api.py
+            ├── test_api.py
+            └── test_regulations_api.py
 ```
 
 Cada carpeta con código Python dentro de `src/` incluye un archivo `__init__.py`, que la convierte en un paquete importable. Las carpetas de `tests/` no lo necesitan.
@@ -323,6 +336,102 @@ Para explorar la API en forma aislada:
 ```bash
 uv run python scripts/probes/usig.py Corrientes 2500
 uv run python scripts/probes/usig.py --coords -34.604792 -58.401981   # latitud longitud
+```
+
+## Cuarta API: Boletín Oficial de la Ciudad de Buenos Aires
+
+| Dato | Valor |
+|---|---|
+| Proveedor | Boletín Oficial de la Ciudad de Buenos Aires, Gobierno de la Ciudad de Buenos Aires |
+| Endpoint | `GET https://api-restboletinoficial.buenosaires.gob.ar/obtenerResultado/tipoNorma=<id>&nNorma=<número>&anio=<año>` |
+| Documentación | `https://api-restboletinoficial.buenosaires.gob.ar/api/doc/` |
+| Sitio que se cita | `https://boletinoficial.buenosaires.gob.ar` |
+| Acceso | Sin clave de acceso |
+| Licencia | Sin licencia explícita. Las normas son actos oficiales de publicación obligatoria y acceso público; se cita la fuente |
+| Uso en CONCO | Mostrar una ley o un decreto de la Ciudad (resumen, organismo, fecha, edición del Boletín y PDF) como respaldo de un trámite |
+| Tipos de norma | `tipoNorma=1` (Ley) y `tipoNorma=2` (Decreto), según `GET /obtenerFiltrosDeBusqueda` |
+
+**Limitaciones:**
+
+- Los filtros van **dentro de la ruta**, separados por `&`, no en la query string. httpx los envía tal cual.
+- El año del filtro debe tener cuatro dígitos (`anio=18` no encuentra nada), pero la respuesta lo devuelve con dos (`"anio_norma": 18`).
+- Se envían siempre tipo, número y año: sin tipo se mezclan tipos de norma y sin año se mezclan años (el Decreto 40 sin año devuelve 17 normas). El cliente vuelve a filtrar la respuesta por tipo, número y año, y descarta normas repetidas (el Decreto 40/2025 llega dos veces).
+- Un mismo tipo, número y año puede corresponder a **más de una norma**: el Poder Ejecutivo y la Legislatura numeran sus decretos por separado (Decreto 40/2022 devuelve dos). Por eso el endpoint devuelve una lista.
+- Solo se admiten leyes y decretos. Las resoluciones y disposiciones se numeran por organismo: la Resolución 100/2019 devuelve 41 normas de organismos distintos.
+- Sin resultados, la API responde `200` con `"normas": 0` (un número, no una lista). Con un filtro inválido responde `200` con el texto HTML `No hay criterio de búsqueda válido seleccionado`; el cliente lo trata como error (`502`).
+- Los enlaces de descarga llegan como `http://.../download/<id>` y redirigen a `https://`; el cliente los expone con `https://`. En normas antiguas el enlace al documento llega vacío y el organismo (`nombre_reparticion`) en `null`.
+- La búsqueda por palabras (`palabras`) busca la frase exacta y da resultados pobres: no se usa.
+- `GET /getUrlDocument/...` responde con un cuerpo vacío: no se usa.
+
+Ejemplo de respuesta (abreviado), obtenido con `tipoNorma=1&nNorma=6101&anio=2018`:
+
+```json
+{
+  "normas": [
+    {
+      "id": 435567,
+      "nombre_tipo": "Ley",
+      "numero_norma": 6101,
+      "anio_norma": 18,
+      "sumario": "Ley Marco de Regulación de actividades económicas de la Ciudad Autónoma de Buenos Aires",
+      "nombre_reparticion": "Legislatura de la Ciudad de Buenos Aires",
+      "boletines": [["5526", "27/12/2018", "http://api-restboletinoficial.buenosaires.gob.ar/download/1255814"]],
+      "link_documento_normas": [["27/12/2018", "http://api-restboletinoficial.buenosaires.gob.ar/download/1255476"]]
+    }
+  ]
+}
+```
+
+## Endpoint de normas de la Ciudad
+
+### `GET /guidance/regulations/{regulation_type}/{number}/{year}`
+
+Busca una ley o un decreto de la Ciudad en el Boletín Oficial. La norma se muestra como **referencia de la fuente oficial**: CONCO no interpreta su alcance ni determina si se aplica a un caso concreto (RN-04). La respuesta incluye `source` con nombre, URL y licencia de la fuente (RN-05).
+
+| Parámetro | Validación |
+|---|---|
+| `regulation_type` | `ley` o `decreto` |
+| `number` | Entero mayor o igual a 1 |
+| `year` | Año con cuatro dígitos, entre 1900 y 2100 |
+
+Respuesta (`200`) de `GET /guidance/regulations/ley/6101/2018`:
+
+```json
+{
+  "regulations": [
+    {
+      "type": "ley",
+      "number": 6101,
+      "year": 2018,
+      "summary": "Ley Marco de Regulación de actividades económicas de la Ciudad Autónoma de Buenos Aires",
+      "issuing_body": "Legislatura de la Ciudad de Buenos Aires",
+      "publication_date": "2018-12-27",
+      "bulletin_number": 5526,
+      "document_url": "https://api-restboletinoficial.buenosaires.gob.ar/download/1255476"
+    }
+  ],
+  "source": {
+    "name": "Boletín Oficial de la Ciudad de Buenos Aires",
+    "url": "https://boletinoficial.buenosaires.gob.ar",
+    "license": "Sin licencia explícita: normas oficiales de publicación obligatoria y acceso público"
+  }
+}
+```
+
+`regulations` puede tener más de un elemento (por ejemplo, `decreto/40/2022`). `issuing_body` y `document_url` pueden venir en `null` en normas antiguas.
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` | Se encontró al menos una norma |
+| `404` | No hay normas con ese tipo, número y año |
+| `422` | Los parámetros no cumplen la validación |
+| `502` | El Boletín Oficial no respondió o devolvió algo inesperado |
+
+Para explorar la API en forma aislada:
+
+```bash
+uv run python scripts/probes/boletin_oficial.py ley 6101 2018
+uv run python scripts/probes/boletin_oficial.py decreto 40 2019
 ```
 
 ## Cómo incorporar una API nueva

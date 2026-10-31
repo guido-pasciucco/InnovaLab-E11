@@ -2,7 +2,21 @@ from html.parser import HTMLParser
 from uuid import UUID
 
 from conco.config import settings
-from conco.guidance.domain import Procedure, ProcedureDetail, ProcedureSearchError, Source
+from conco.guidance.domain import (
+    Procedure,
+    ProcedureDetail,
+    ProcedureSearchError,
+    Regulation,
+    RegulationLookupError,
+    RegulationType,
+    Source,
+)
+from conco.integrations.boletin_oficial.client import (
+    BoletinOficialError,
+    BoletinOficialNormType,
+    find_norms,
+)
+from conco.integrations.boletin_oficial.models import BoletinOficialNorm
 from conco.integrations.caba_tramites.client import (
     CabaTramitesError,
     get_procedure,
@@ -129,4 +143,54 @@ def _to_detail(detail: CabaProcedureDetail) -> ProcedureDetail:
             detail.responsible_office.name.strip() if detail.responsible_office else None
         ),
         start_url=detail.start_button.link.uri if detail.start_button else None,
+    )
+
+
+_NORM_TYPES: dict[RegulationType, BoletinOficialNormType] = {
+    RegulationType.LEY: BoletinOficialNormType.LEY,
+    RegulationType.DECRETO: BoletinOficialNormType.DECRETO,
+}
+
+
+class BoletinOficialRegulationRegistry:
+    """Adaptador: busca normas en el Boletín Oficial de la Ciudad y las traduce al dominio."""
+
+    @property
+    def source(self) -> Source:
+        return Source(
+            name="Boletín Oficial de la Ciudad de Buenos Aires",
+            url=settings.boletin_oficial_site_url,
+            license=(
+                "Sin licencia explícita: normas oficiales de publicación obligatoria y "
+                "acceso público"
+            ),
+        )
+
+    async def find(
+        self, regulation_type: RegulationType, number: int, year: int
+    ) -> list[Regulation]:
+        try:
+            norms = await find_norms(_NORM_TYPES[regulation_type], number, year)
+        except BoletinOficialError as exc:
+            raise RegulationLookupError(str(exc)) from exc
+        return [_to_regulation(norm, regulation_type, year) for norm in norms]
+
+
+def _to_regulation(
+    norm: BoletinOficialNorm, regulation_type: RegulationType, year: int
+) -> Regulation:
+    """Usa la primera edición y el primer documento publicados.
+
+    El año es el pedido, con cuatro dígitos: la API lo devuelve con dos (2018 → 18).
+    """
+    bulletin = norm.bulletins[0]
+    return Regulation(
+        type=regulation_type,
+        number=norm.number,
+        year=year,
+        summary=" ".join(norm.summary.split()),
+        issuing_body=norm.issuing_body.strip() if norm.issuing_body else None,
+        publication_date=bulletin.publication_date,
+        bulletin_number=bulletin.bulletin_number,
+        document_url=norm.documents[0].url,
     )
