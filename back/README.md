@@ -38,16 +38,16 @@ back/
 │       ├── main.py             # crea la app de FastAPI y configura CORS
 │       ├── config.py           # lee las variables de entorno con tipos
 │       ├── geolocation/        # funcionalidad: buscar direcciones para el mapa, ubicarlas en CABA y encontrar oficinas cercanas
-│       │   ├── domain.py       # Address, AddressContext, NearbyOffice, Source, los puertos AddressFinder, AddressContextProvider y NearbyOfficeFinder y sus errores
+│       │   ├── domain.py       # Address, AddressContext, NearbyOffice, LocationCheck, Source, los puertos AddressFinder, AddressContextProvider, NearbyOfficeFinder y LocationChecker y sus errores
 │       │   ├── infrastructure.py # adaptadores que usan Georef, USIG y EPOK y los traducen al dominio
-│       │   └── api.py          # endpoints GET /geolocation/addresses, /geolocation/address-context y /geolocation/nearby-offices
+│       │   └── api.py          # endpoints GET /geolocation/addresses, /geolocation/address-context, /geolocation/nearby-offices y /geolocation/location-check
 │       ├── guidance/           # funcionalidad: orientación sobre trámites oficiales
 │       │   ├── domain.py       # Procedure, ProcedureDetail, Regulation, Source, los puertos ProcedureCatalog y RegulationRegistry y sus errores
 │       │   ├── infrastructure.py # adaptadores que usan la API de trámites y el Boletín Oficial de la Ciudad
 │       │   └── api.py          # endpoints GET /guidance/procedures, /guidance/procedures/{procedure_id} y /guidance/regulations/...
 │       └── integrations/       # un paquete por cada API externa
 │           ├── georef/
-│           │   ├── client.py   # única ubicación de las llamadas HTTP a Georef
+│           │   ├── client.py   # única ubicación de las llamadas HTTP a Georef (/direcciones y /ubicacion)
 │           │   └── models.py   # forma de la respuesta JSON de Georef
 │           ├── caba_tramites/
 │           │   ├── client.py   # única ubicación de las llamadas HTTP a la API de trámites de la Ciudad
@@ -533,6 +533,80 @@ Para explorar la API en forma aislada:
 ```bash
 uv run python scripts/probes/epok.py -34.6047137 -58.4021372         # latitud longitud
 uv run python scripts/probes/epok.py -34.6047137 -58.4021372 1000    # radio en metros
+```
+
+## Georef `/ubicacion` (geocodificación inversa)
+
+| Dato | Valor |
+|---|---|
+| Proveedor | Gobierno Nacional (datos.gob.ar), la misma API Georef de la primera integración |
+| Endpoint | `GET https://apis.datos.gob.ar/georef/api/ubicacion?lat=<latitud>&lon=<longitud>` |
+| Acceso | Sin clave de acceso; usa la misma configuración (`GEOREF_BASE_URL`, `GEOREF_TIMEOUT_SECONDS`) |
+| Licencia | Creative Commons Atribución 4.0 Internacional (CC BY 4.0) |
+| Uso en CONCO | Verificar que un punto esté dentro de CABA (RN-02) |
+| Criterio | `provincia.id == "02"` (constante `CABA_PROVINCE_ID` en `geolocation/infrastructure.py`); se usa el id y no el nombre |
+
+Comportamiento observado (2026-10-31, respuestas entre 0,02 y 0,12 s):
+
+- Un punto en CABA devuelve provincia `{"id": "02", "nombre": "Ciudad Autónoma de Buenos Aires"}` y la comuna como departamento y municipio. Un punto en La Plata devuelve provincia `{"id": "06", "nombre": "Buenos Aires"}`.
+- Un punto fuera de la Argentina (en el mar o en otro país) responde `200` con `provincia`, `departamento` y `municipio` presentes pero con `id` y `nombre` en `null`.
+- Parámetros inválidos (`lat=abc` o sin `lat`) responden `400` con `{"errores": [...]}`. Una latitud fuera de rango (`lat=-95`) responde `500`; el endpoint de CONCO lo evita validando los rangos antes de consultar (`422`).
+
+Ejemplo de respuesta con `lat=-34.6047137&lon=-58.4021372`:
+
+```json
+{
+  "parametros": {"lat": -34.6047137, "lon": -58.4021372},
+  "ubicacion": {
+    "departamento": {"id": "02021", "nombre": "Comuna 3"},
+    "lat": -34.6047137,
+    "lon": -58.4021372,
+    "municipio": {"id": "022021", "nombre": "Comuna 3"},
+    "provincia": {"id": "02", "nombre": "Ciudad Autónoma de Buenos Aires"}
+  }
+}
+```
+
+## Endpoint de verificación de CABA
+
+### `GET /geolocation/location-check`
+
+Indica si un punto está dentro de la Ciudad Autónoma de Buenos Aires. Es la verificación de la regla **RN-02** (solo se aceptan ubicaciones en CABA). Toda respuesta incluye `source` (RN-05).
+
+| Parámetro | Obligatorio | Validación |
+|---|---|---|
+| `latitude` | Sí | Entre -90 y 90 |
+| `longitude` | Sí | Entre -180 y 180 |
+
+Respuesta (`200`) de `GET /geolocation/location-check?latitude=-34.6047137&longitude=-58.4021372`:
+
+```json
+{
+  "location": {
+    "in_caba": true,
+    "province": "Ciudad Autónoma de Buenos Aires",
+    "department": "Comuna 3"
+  },
+  "source": {
+    "name": "Georef - Servicio de Normalización de Datos Geográficos de Argentina",
+    "url": "https://apis.datos.gob.ar/georef/api",
+    "license": "Creative Commons Atribución 4.0 Internacional (CC BY 4.0)"
+  }
+}
+```
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` | Siempre que Georef responda. Un punto de otra provincia o fuera de la Argentina **no** es un error: `in_caba: false` (fuera de la Argentina, `province` y `department` vienen en `null`) |
+| `422` | Los parámetros no cumplen la validación |
+| `502` | Georef no respondió o devolvió algo inesperado |
+
+Por ahora la verificación es un endpoint aparte que el frontend consulta antes de seguir. Aplicarla dentro de los otros endpoints (`/geolocation/address-context*`, `/geolocation/nearby-offices`) queda como trabajo futuro: hoy esos endpoints mantienen su comportamiento.
+
+Para explorar la API en forma aislada:
+
+```bash
+uv run python scripts/probes/georef.py --locate -34.6047137 -58.4021372   # latitud longitud
 ```
 
 ## Cómo incorporar una API nueva
