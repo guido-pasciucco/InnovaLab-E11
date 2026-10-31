@@ -66,7 +66,9 @@ async def find_norms(
         # seleccionado" en HTML: no es JSON y termina acá.
         results = BoletinOficialResults.model_validate_json(response.content)
     except ValidationError as exc:
-        raise BoletinOficialError("El Boletín Oficial devolvió una respuesta inesperada.") from exc
+        raise BoletinOficialError(
+            "El Boletín Oficial devolvió una respuesta inesperada."
+        ) from exc
     if results.norms == 0:
         return []
     return _matching(results.norms, norm_type, number, year)
