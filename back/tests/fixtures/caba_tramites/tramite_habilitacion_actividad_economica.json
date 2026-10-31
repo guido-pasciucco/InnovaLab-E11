@@ -1,0 +1,790 @@
+{
+  "jsonapi": {
+    "version": "1.1",
+    "meta": {
+      "links": {
+        "self": {
+          "href": "https://jsonapi.org/format/1.1/"
+        }
+      }
+    }
+  },
+  "data": {
+    "type": "node--tramites_obelisco",
+    "id": "338718b4-a2a0-44af-baa4-083f5d834b12",
+    "links": {
+      "self": {
+        "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/338718b4-a2a0-44af-baa4-083f5d834b12?resourceVersion=id%3A5007"
+      },
+      "working-copy": {
+        "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/338718b4-a2a0-44af-baa4-083f5d834b12?resourceVersion=rel%3Aworking-copy"
+      }
+    },
+    "attributes": {
+      "title": "Habilitación de actividad económica",
+      "changed": "2026-08-07T18:57:01+00:00",
+      "path": {
+        "alias": "/tramites/habilitacion-de-actividad-economica",
+        "pid": 1866,
+        "langcode": "es"
+      },
+      "body": {
+        "value": "Con este trámite podés solicitar la habilitación para realizar actividades comerciales en la Ciudad. Para obtenerla, tu local debe aprobar una evaluación técnica profesional.",
+        "format": "plain_text",
+        "processed": "<p>Con este trámite podés solicitar la habilitación para realizar actividades comerciales en la Ciudad. Para obtenerla, tu local debe aprobar una evaluación técnica profesional.</p>\n",
+        "summary": ""
+      }
+    },
+    "relationships": {
+      "field_contenido": {
+        "data": [
+          {
+            "type": "paragraph--seccion",
+            "id": "581f1332-341f-412a-92b9-bebf7002a32c",
+            "meta": {
+              "target_revision_id": 51361,
+              "drupal_internal__target_id": 12888
+            }
+          }
+        ],
+        "links": {
+          "related": {
+            "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/338718b4-a2a0-44af-baa4-083f5d834b12/field_contenido?resourceVersion=id%3A5007"
+          },
+          "self": {
+            "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/338718b4-a2a0-44af-baa4-083f5d834b12/relationships/field_contenido?resourceVersion=id%3A5007"
+          }
+        }
+      }
+    }
+  },
+  "included": [
+    {
+      "type": "paragraph--seccion",
+      "id": "581f1332-341f-412a-92b9-bebf7002a32c",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion/581f1332-341f-412a-92b9-bebf7002a32c?resourceVersion=id%3A51361"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion/581f1332-341f-412a-92b9-bebf7002a32c?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "relationships": {
+        "field_seccion": {
+          "data": [
+            {
+              "type": "paragraph--seccion_2_columnas",
+              "id": "2aa6d1fa-1f68-4bc1-9dd9-3227121160b2",
+              "meta": {
+                "target_revision_id": 51357,
+                "drupal_internal__target_id": 12884
+              }
+            },
+            {
+              "type": "paragraph--seccion_1_columna",
+              "id": "318e26fb-3625-4445-8475-679fd433d7ce",
+              "meta": {
+                "target_revision_id": 51360,
+                "drupal_internal__target_id": 12887
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion/581f1332-341f-412a-92b9-bebf7002a32c/field_seccion?resourceVersion=id%3A51361"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion/581f1332-341f-412a-92b9-bebf7002a32c/relationships/field_seccion?resourceVersion=id%3A51361"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "paragraph--seccion_2_columnas",
+      "id": "2aa6d1fa-1f68-4bc1-9dd9-3227121160b2",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_2_columnas/2aa6d1fa-1f68-4bc1-9dd9-3227121160b2?resourceVersion=id%3A51357"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_2_columnas/2aa6d1fa-1f68-4bc1-9dd9-3227121160b2?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "relationships": {
+        "field_columna_derecha": {
+          "data": [
+            {
+              "type": "paragraph--componentes",
+              "id": "f9483088-47dd-46d7-bd33-7d0ee8bdc496",
+              "meta": {
+                "target_revision_id": 51333,
+                "drupal_internal__target_id": 12860
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_2_columnas/2aa6d1fa-1f68-4bc1-9dd9-3227121160b2/field_columna_derecha?resourceVersion=id%3A51357"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_2_columnas/2aa6d1fa-1f68-4bc1-9dd9-3227121160b2/relationships/field_columna_derecha?resourceVersion=id%3A51357"
+            }
+          }
+        },
+        "field_columna_izquierda": {
+          "data": [
+            {
+              "type": "paragraph--componentes",
+              "id": "a8d5f81d-b214-4ac9-80e4-443b7bc857bd",
+              "meta": {
+                "target_revision_id": 51356,
+                "drupal_internal__target_id": 12883
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_2_columnas/2aa6d1fa-1f68-4bc1-9dd9-3227121160b2/field_columna_izquierda?resourceVersion=id%3A51357"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_2_columnas/2aa6d1fa-1f68-4bc1-9dd9-3227121160b2/relationships/field_columna_izquierda?resourceVersion=id%3A51357"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "paragraph--seccion_1_columna",
+      "id": "318e26fb-3625-4445-8475-679fd433d7ce",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_1_columna/318e26fb-3625-4445-8475-679fd433d7ce?resourceVersion=id%3A51360"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_1_columna/318e26fb-3625-4445-8475-679fd433d7ce?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "relationships": {
+        "field_columna_central": {
+          "data": [
+            {
+              "type": "paragraph--componentes",
+              "id": "0232c2fe-a6c1-455f-9474-b258e17280ea",
+              "meta": {
+                "target_revision_id": 51359,
+                "drupal_internal__target_id": 12886
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_1_columna/318e26fb-3625-4445-8475-679fd433d7ce/field_columna_central?resourceVersion=id%3A51360"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_1_columna/318e26fb-3625-4445-8475-679fd433d7ce/relationships/field_columna_central?resourceVersion=id%3A51360"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "paragraph--componentes",
+      "id": "0232c2fe-a6c1-455f-9474-b258e17280ea",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/0232c2fe-a6c1-455f-9474-b258e17280ea?resourceVersion=id%3A51359"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/0232c2fe-a6c1-455f-9474-b258e17280ea?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "relationships": {
+        "field_componente": {
+          "data": [
+            {
+              "type": "paragraph--organismo_responsable",
+              "id": "87a94dd9-690b-4291-8ddd-28207e6d60a6",
+              "meta": {
+                "target_revision_id": 51358,
+                "drupal_internal__target_id": 12885
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/0232c2fe-a6c1-455f-9474-b258e17280ea/field_componente?resourceVersion=id%3A51359"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/0232c2fe-a6c1-455f-9474-b258e17280ea/relationships/field_componente?resourceVersion=id%3A51359"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "paragraph--organismo_responsable",
+      "id": "87a94dd9-690b-4291-8ddd-28207e6d60a6",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/organismo_responsable/87a94dd9-690b-4291-8ddd-28207e6d60a6?resourceVersion=id%3A51358"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/organismo_responsable/87a94dd9-690b-4291-8ddd-28207e6d60a6?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_titulo": "Agencia Gubernamental de Control - Dirección General de Habilitaciones y Permisos "
+      }
+    },
+    {
+      "type": "paragraph--componentes",
+      "id": "a8d5f81d-b214-4ac9-80e4-443b7bc857bd",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/a8d5f81d-b214-4ac9-80e4-443b7bc857bd?resourceVersion=id%3A51356"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/a8d5f81d-b214-4ac9-80e4-443b7bc857bd?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "relationships": {
+        "field_componente": {
+          "data": [
+            {
+              "type": "paragraph--requisito_tramite",
+              "id": "4953778d-063e-411b-82b1-ef72aad70540",
+              "meta": {
+                "target_revision_id": 51338,
+                "drupal_internal__target_id": 12865
+              }
+            },
+            {
+              "type": "paragraph--pasos_del_tramite",
+              "id": "f52b1960-b0c2-4a53-a59b-299a91fe36ff",
+              "meta": {
+                "target_revision_id": 51344,
+                "drupal_internal__target_id": 12871
+              }
+            },
+            {
+              "type": "paragraph--costo_del_tramite",
+              "id": "9f2fa4ff-9f75-4781-bbe5-2c2ddb16e8e8",
+              "meta": {
+                "target_revision_id": 51346,
+                "drupal_internal__target_id": 12873
+              }
+            },
+            {
+              "type": "paragraph--collapse_base",
+              "id": "47449e12-a62f-4cfc-acb4-45b381174360",
+              "meta": {
+                "target_revision_id": 51350,
+                "drupal_internal__target_id": 12877
+              }
+            },
+            {
+              "type": "paragraph--collapse_base",
+              "id": "2691f8ed-cfec-417e-956e-4af917ce723b",
+              "meta": {
+                "target_revision_id": 51353,
+                "drupal_internal__target_id": 12880
+              }
+            },
+            {
+              "type": "paragraph--parrafo",
+              "id": "5241e817-8310-45b6-8adf-33c40baa9dfc",
+              "meta": {
+                "target_revision_id": 51354,
+                "drupal_internal__target_id": 12881
+              }
+            },
+            {
+              "type": "paragraph--parrafo",
+              "id": "13d36db7-8101-420a-8422-3c35cc7358f0",
+              "meta": {
+                "target_revision_id": 51355,
+                "drupal_internal__target_id": 12882
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/a8d5f81d-b214-4ac9-80e4-443b7bc857bd/field_componente?resourceVersion=id%3A51356"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/a8d5f81d-b214-4ac9-80e4-443b7bc857bd/relationships/field_componente?resourceVersion=id%3A51356"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "paragraph--requisito_tramite",
+      "id": "4953778d-063e-411b-82b1-ef72aad70540",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/requisito_tramite/4953778d-063e-411b-82b1-ef72aad70540?resourceVersion=id%3A51338"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/requisito_tramite/4953778d-063e-411b-82b1-ef72aad70540?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "relationships": {
+        "field_item_requisito_tramite": {
+          "data": [
+            {
+              "type": "paragraph--item_requisito_tramite",
+              "id": "71dcfbe2-ab53-4711-9c10-2c580e19763d",
+              "meta": {
+                "target_revision_id": 51334,
+                "drupal_internal__target_id": 12861
+              }
+            },
+            {
+              "type": "paragraph--item_requisito_tramite",
+              "id": "4f1cd4a2-4652-4d76-bd16-f164dc20b75a",
+              "meta": {
+                "target_revision_id": 51335,
+                "drupal_internal__target_id": 12862
+              }
+            },
+            {
+              "type": "paragraph--item_requisito_tramite",
+              "id": "724e8042-564b-428c-a992-91f858a3ee71",
+              "meta": {
+                "target_revision_id": 51336,
+                "drupal_internal__target_id": 12863
+              }
+            },
+            {
+              "type": "paragraph--item_requisito_tramite",
+              "id": "19093c48-e725-4d4e-b309-93fcd9e97121",
+              "meta": {
+                "target_revision_id": 51337,
+                "drupal_internal__target_id": 12864
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/requisito_tramite/4953778d-063e-411b-82b1-ef72aad70540/field_item_requisito_tramite?resourceVersion=id%3A51338"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/requisito_tramite/4953778d-063e-411b-82b1-ef72aad70540/relationships/field_item_requisito_tramite?resourceVersion=id%3A51338"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "paragraph--pasos_del_tramite",
+      "id": "f52b1960-b0c2-4a53-a59b-299a91fe36ff",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/pasos_del_tramite/f52b1960-b0c2-4a53-a59b-299a91fe36ff?resourceVersion=id%3A51344"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/pasos_del_tramite/f52b1960-b0c2-4a53-a59b-299a91fe36ff?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "relationships": {
+        "field_item_paso_del_tramite": {
+          "data": [
+            {
+              "type": "paragraph--item_titulo_del_paso",
+              "id": "7816cde5-c29c-4622-91f8-cf73615d0eb0",
+              "meta": {
+                "target_revision_id": 51339,
+                "drupal_internal__target_id": 12866
+              }
+            },
+            {
+              "type": "paragraph--item_titulo_del_paso",
+              "id": "f76fae20-d507-4fa5-879e-a44de52e6351",
+              "meta": {
+                "target_revision_id": 51340,
+                "drupal_internal__target_id": 12867
+              }
+            },
+            {
+              "type": "paragraph--item_titulo_del_paso",
+              "id": "17b5514b-4177-4b03-bf4e-91f3e0bb438b",
+              "meta": {
+                "target_revision_id": 51341,
+                "drupal_internal__target_id": 12868
+              }
+            },
+            {
+              "type": "paragraph--item_titulo_del_paso",
+              "id": "6956605d-519d-4d10-879b-86bdecd90d56",
+              "meta": {
+                "target_revision_id": 51342,
+                "drupal_internal__target_id": 12869
+              }
+            },
+            {
+              "type": "paragraph--item_titulo_del_paso",
+              "id": "e8883b11-853f-4b09-a1fb-452beddd2f46",
+              "meta": {
+                "target_revision_id": 51343,
+                "drupal_internal__target_id": 12870
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/pasos_del_tramite/f52b1960-b0c2-4a53-a59b-299a91fe36ff/field_item_paso_del_tramite?resourceVersion=id%3A51344"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/pasos_del_tramite/f52b1960-b0c2-4a53-a59b-299a91fe36ff/relationships/field_item_paso_del_tramite?resourceVersion=id%3A51344"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "paragraph--costo_del_tramite",
+      "id": "9f2fa4ff-9f75-4781-bbe5-2c2ddb16e8e8",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/costo_del_tramite/9f2fa4ff-9f75-4781-bbe5-2c2ddb16e8e8?resourceVersion=id%3A51346"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/costo_del_tramite/9f2fa4ff-9f75-4781-bbe5-2c2ddb16e8e8?resourceVersion=rel%3Aworking-copy"
+        }
+      }
+    },
+    {
+      "type": "paragraph--collapse_base",
+      "id": "47449e12-a62f-4cfc-acb4-45b381174360",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/collapse_base/47449e12-a62f-4cfc-acb4-45b381174360?resourceVersion=id%3A51350"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/collapse_base/47449e12-a62f-4cfc-acb4-45b381174360?resourceVersion=rel%3Aworking-copy"
+        }
+      }
+    },
+    {
+      "type": "paragraph--collapse_base",
+      "id": "2691f8ed-cfec-417e-956e-4af917ce723b",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/collapse_base/2691f8ed-cfec-417e-956e-4af917ce723b?resourceVersion=id%3A51353"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/collapse_base/2691f8ed-cfec-417e-956e-4af917ce723b?resourceVersion=rel%3Aworking-copy"
+        }
+      }
+    },
+    {
+      "type": "paragraph--parrafo",
+      "id": "5241e817-8310-45b6-8adf-33c40baa9dfc",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/parrafo/5241e817-8310-45b6-8adf-33c40baa9dfc?resourceVersion=id%3A51354"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/parrafo/5241e817-8310-45b6-8adf-33c40baa9dfc?resourceVersion=rel%3Aworking-copy"
+        }
+      }
+    },
+    {
+      "type": "paragraph--parrafo",
+      "id": "13d36db7-8101-420a-8422-3c35cc7358f0",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/parrafo/13d36db7-8101-420a-8422-3c35cc7358f0?resourceVersion=id%3A51355"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/parrafo/13d36db7-8101-420a-8422-3c35cc7358f0?resourceVersion=rel%3Aworking-copy"
+        }
+      }
+    },
+    {
+      "type": "paragraph--item_requisito_tramite",
+      "id": "71dcfbe2-ab53-4711-9c10-2c580e19763d",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_requisito_tramite/71dcfbe2-ab53-4711-9c10-2c580e19763d?resourceVersion=id%3A51334"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_requisito_tramite/71dcfbe2-ab53-4711-9c10-2c580e19763d?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_cuerpo": [
+          {
+            "value": "<p><meta charset=\"utf-8\"></p><p>Contar con&nbsp;<strong>usuario y clave miBA nivel 3</strong>.&nbsp;</p><p>- Si tenés alguna duda sobre cómo crear tu cuenta miBA, ingresá a&nbsp;<a href=\"http://buenosaires.gob.ar/innovacionytransformaciondigital/login-miba\">miBA</a>.</p><p>- Si tenés dudas sobre cómo validar tu identidad, ingresá a&nbsp;<a href=\"https://buenosaires.gob.ar/gcaba_historico/bax\">BAX</a>.</p>",
+            "format": "full_html",
+            "processed": "<p><meta charset=\"utf-8\"></p><p>Contar con&nbsp;<strong>usuario y clave miBA nivel 3</strong>.&nbsp;</p><p>- Si tenés alguna duda sobre cómo crear tu cuenta miBA, ingresá a&nbsp;<a href=\"http://buenosaires.gob.ar/innovacionytransformaciondigital/login-miba\">miBA</a>.</p><p>- Si tenés dudas sobre cómo validar tu identidad, ingresá a&nbsp;<a href=\"https://buenosaires.gob.ar/gcaba_historico/bax\">BAX</a>.</p>"
+          },
+          {
+            "value": "<p><strong>Formulario de conformación de la unidad de uso</strong>: es una Declaración Jurada donde informás qué actividad comercial vas a desarrollar.</p>",
+            "format": "full_html",
+            "processed": "<p><strong>Formulario de conformación de la unidad de uso</strong>: es una Declaración Jurada donde informás qué actividad comercial vas a desarrollar.</p>"
+          },
+          {
+            "value": "<p><strong>Anexo Técnico</strong> firmado por un profesional responsable, <strong>que incluya</strong>:<br>- Encomienda profesional con tus datos.<br>- Datos del profesional que firma.<br>- Información sobre la unidad de uso.<br>- Mixtura o área especial donde está ubicado el local.<br>- Un croquis con la ubicación.<br>- Declaración Jurada donde se verifica el local.</p>",
+            "format": "full_html",
+            "processed": "<p><strong>Anexo Técnico</strong> firmado por un profesional responsable, <strong>que incluya</strong>:<br>- Encomienda profesional con tus datos.<br>- Datos del profesional que firma.<br>- Información sobre la unidad de uso.<br>- Mixtura o área especial donde está ubicado el local.<br>- Un croquis con la ubicación.<br>- Declaración Jurada donde se verifica el local.</p>"
+          }
+        ],
+        "field_texto": null
+      }
+    },
+    {
+      "type": "paragraph--item_requisito_tramite",
+      "id": "4f1cd4a2-4652-4d76-bd16-f164dc20b75a",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_requisito_tramite/4f1cd4a2-4652-4d76-bd16-f164dc20b75a?resourceVersion=id%3A51335"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_requisito_tramite/4f1cd4a2-4652-4d76-bd16-f164dc20b75a?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_cuerpo": [
+          {
+            "value": "<p><strong>Si se está en</strong>: galerías, centros comerciales, paseos de compras, mercados o patios gastronómicos, estación de subte, tren, aeropuerto o en otros complejos comerciales.</p>",
+            "format": "full_html",
+            "processed": "<p><strong>Si se está en</strong>: galerías, centros comerciales, paseos de compras, mercados o patios gastronómicos, estación de subte, tren, aeropuerto o en otros complejos comerciales.</p>"
+          },
+          {
+            "value": "<p><strong>Si se está en áreas especiales</strong> por ser históricas, culturales, ambientales, o tener usos específicos establecidos en el Código Urbanístico, como áreas protegidas, patrimoniales o con restricciones particulares según ubicación.</p>",
+            "format": "full_html",
+            "processed": "<p><strong>Si se está en áreas especiales</strong> por ser históricas, culturales, ambientales, o tener usos específicos establecidos en el Código Urbanístico, como áreas protegidas, patrimoniales o con restricciones particulares según ubicación.</p>"
+          },
+          {
+            "value": "<p><strong>Si se ubica en edificios catalogados</strong> por su valor histórico, arquitectónico o cultural o que no se encuentre en edificios que tienen restricciones para su uso o modificación (Consultá el catálogo preventivo).</p>",
+            "format": "full_html",
+            "processed": "<p><strong>Si se ubica en edificios catalogados</strong> por su valor histórico, arquitectónico o cultural o que no se encuentre en edificios que tienen restricciones para su uso o modificación (Consultá el catálogo preventivo).</p>"
+          },
+          {
+            "value": "<p>O <strong>pretende eximirse de las condiciones de accesibilidad</strong> establecidas en la normativa vigente.</p>",
+            "format": "full_html",
+            "processed": "<p>O <strong>pretende eximirse de las condiciones de accesibilidad</strong> establecidas en la normativa vigente.</p>"
+          }
+        ],
+        "field_texto": "El profesional tendrá consideraciones especiales"
+      }
+    },
+    {
+      "type": "paragraph--item_requisito_tramite",
+      "id": "724e8042-564b-428c-a992-91f858a3ee71",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_requisito_tramite/724e8042-564b-428c-a992-91f858a3ee71?resourceVersion=id%3A51336"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_requisito_tramite/724e8042-564b-428c-a992-91f858a3ee71?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_cuerpo": [
+          {
+            "value": "<p>Certificado de sobrecarga.</p>",
+            "format": "full_html",
+            "processed": "<p>Certificado de sobrecarga.</p>"
+          },
+          {
+            "value": "<p>Plano de Uso de Actividad Económica.</p>",
+            "format": "full_html",
+            "processed": "<p>Plano de Uso de Actividad Económica.</p>"
+          },
+          {
+            "value": "<p>Autorización de Emplazamiento.</p>",
+            "format": "full_html",
+            "processed": "<p>Autorización de Emplazamiento.</p>"
+          }
+        ],
+        "field_texto": "En caso de corresponder la persona solicitante deberá presentar"
+      }
+    },
+    {
+      "type": "paragraph--item_requisito_tramite",
+      "id": "19093c48-e725-4d4e-b309-93fcd9e97121",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_requisito_tramite/19093c48-e725-4d4e-b309-93fcd9e97121?resourceVersion=id%3A51337"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_requisito_tramite/19093c48-e725-4d4e-b309-93fcd9e97121?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_cuerpo": [
+          {
+            "value": "<p>Recordá que, según la normativa vigente de la actividad económica que querés habilitar, se te <strong>podrá solicitar documentación específica</strong>.</p>",
+            "format": "full_html",
+            "processed": "<p>Recordá que, según la normativa vigente de la actividad económica que querés habilitar, se te <strong>podrá solicitar documentación específica</strong>.</p>"
+          }
+        ],
+        "field_texto": "Importante"
+      }
+    },
+    {
+      "type": "paragraph--item_titulo_del_paso",
+      "id": "7816cde5-c29c-4622-91f8-cf73615d0eb0",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_titulo_del_paso/7816cde5-c29c-4622-91f8-cf73615d0eb0?resourceVersion=id%3A51339"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_titulo_del_paso/7816cde5-c29c-4622-91f8-cf73615d0eb0?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_parrafo": {
+          "value": "<p>Hacé clic en “Iniciar trámite” para acceder a la <a href=\"https://tad.buenosaires.gob.ar/tramitesadistancia/nuevo-tramite\">Plataforma SSIT de la Agencia de Control Gubernamental</a>, con tu usuario y contraseña miBA.<br>Seleccioná \"<strong>Nueva Autorización de Actividad Económica</strong>\".</p>",
+          "format": "full_html",
+          "processed": "<p>Hacé clic en “Iniciar trámite” para acceder a la <a href=\"https://tad.buenosaires.gob.ar/tramitesadistancia/nuevo-tramite\">Plataforma SSIT de la Agencia de Control Gubernamental</a>, con tu usuario y contraseña miBA.<br>Seleccioná \"<strong>Nueva Autorización de Actividad Económica</strong>\".</p>"
+        },
+        "field_titulo": "Iniciá tu solicitud"
+      }
+    },
+    {
+      "type": "paragraph--item_titulo_del_paso",
+      "id": "f76fae20-d507-4fa5-879e-a44de52e6351",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_titulo_del_paso/f76fae20-d507-4fa5-879e-a44de52e6351?resourceVersion=id%3A51340"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_titulo_del_paso/f76fae20-d507-4fa5-879e-a44de52e6351?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_parrafo": {
+          "value": "<p><strong>Ingresá el CUIT de la persona solicitante</strong> o firmante. Estas personas pueden ser tanto físicas como jurídicas.</p>",
+          "format": "full_html",
+          "processed": "<p><strong>Ingresá el CUIT de la persona solicitante</strong> o firmante. Estas personas pueden ser tanto físicas como jurídicas.</p>"
+        },
+        "field_titulo": "Agregá los datos de la persona titular o firmante"
+      }
+    },
+    {
+      "type": "paragraph--item_titulo_del_paso",
+      "id": "17b5514b-4177-4b03-bf4e-91f3e0bb438b",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_titulo_del_paso/17b5514b-4177-4b03-bf4e-91f3e0bb438b?resourceVersion=id%3A51341"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_titulo_del_paso/17b5514b-4177-4b03-bf4e-91f3e0bb438b?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_parrafo": {
+          "value": "<p><strong>Ingresá la dirección</strong>: tipo de ubicación, número de partida o matriz, datos catastrales, ubicación especial, y completá los datos de contacto.</p><p>&nbsp;</p><p><strong>Importante</strong>: al \"<strong>Guardar</strong>\" la solicitud <strong>se generará el Número de Trámite y el Código de Seguridad</strong>. Estos datos son indispensables para que el profesional pueda realizar el Anexo Técnico y certificarlo en su Consejo Profesional.</p>",
+          "format": "full_html",
+          "processed": "<p><strong>Ingresá la dirección</strong>: tipo de ubicación, número de partida o matriz, datos catastrales, ubicación especial, y completá los datos de contacto.</p><p>&nbsp;</p><p><strong>Importante</strong>: al \"<strong>Guardar</strong>\" la solicitud <strong>se generará el Número de Trámite y el Código de Seguridad</strong>. Estos datos son indispensables para que el profesional pueda realizar el Anexo Técnico y certificarlo en su Consejo Profesional.</p>"
+        },
+        "field_titulo": "Declará la ubicación de tu establecimiento"
+      }
+    },
+    {
+      "type": "paragraph--item_titulo_del_paso",
+      "id": "6956605d-519d-4d10-879b-86bdecd90d56",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_titulo_del_paso/6956605d-519d-4d10-879b-86bdecd90d56?resourceVersion=id%3A51342"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_titulo_del_paso/6956605d-519d-4d10-879b-86bdecd90d56?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_parrafo": {
+          "value": "<p>Para obtener esta certificación ingresá a <a href=\"https://buenosaires.gob.ar/tramites/impacto-ambiental-certificado-de-aptitud-ambiental-caa\">Impacto Ambiental: Certificado de Aptitud Ambiental (CAA)</a> para hacerlo.</p>",
+          "format": "full_html",
+          "processed": "<p>Para obtener esta certificación ingresá a <a href=\"https://buenosaires.gob.ar/tramites/impacto-ambiental-certificado-de-aptitud-ambiental-caa\">Impacto Ambiental: Certificado de Aptitud Ambiental (CAA)</a> para hacerlo.</p>"
+        },
+        "field_titulo": "Solicitá el certificado de Aptitud Ambiental"
+      }
+    },
+    {
+      "type": "paragraph--item_titulo_del_paso",
+      "id": "e8883b11-853f-4b09-a1fb-452beddd2f46",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_titulo_del_paso/e8883b11-853f-4b09-a1fb-452beddd2f46?resourceVersion=id%3A51343"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_titulo_del_paso/e8883b11-853f-4b09-a1fb-452beddd2f46?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_parrafo": {
+          "value": "<p>La <a href=\"https://buenosaires.gob.ar/gcaba_historico/agc/direcciongeneralhabilitacionesypermisos\">Dirección General de Habilitaciones y Permisos</a> <strong>evaluará si tu comercio cumple con los requisitos y la documentación</strong> necesaria para obtener la habilitación comercial. La Dirección podrá librar al uso, aprobar, observar o rechazar la solicitud.</p><p>En caso de ser <strong>librado al uso</strong>, podrás operar en tu comercio y se te enviará una Oblea con un código QR para pegar en tu local. A partir de que la lectura del código QR indique que se encuentra librado el uso, tendrás acceso al <strong>Libro de Registro de Inspecciones Digital</strong>, ingresando al <a href=\"https://librodigital.agcontrol.gob.ar/#nbb\">portal del Libro Digital</a> con cuit y clave miBA.</p><p><strong>Importante</strong>: aunque tu comercio esté librado al uso, no quiere decir que cuente con la habilitación de actividad comercial.</p>",
+          "format": "full_html",
+          "processed": "<p>La <a href=\"https://buenosaires.gob.ar/gcaba_historico/agc/direcciongeneralhabilitacionesypermisos\">Dirección General de Habilitaciones y Permisos</a> <strong>evaluará si tu comercio cumple con los requisitos y la documentación</strong> necesaria para obtener la habilitación comercial. La Dirección podrá librar al uso, aprobar, observar o rechazar la solicitud.</p><p>En caso de ser <strong>librado al uso</strong>, podrás operar en tu comercio y se te enviará una Oblea con un código QR para pegar en tu local. A partir de que la lectura del código QR indique que se encuentra librado el uso, tendrás acceso al <strong>Libro de Registro de Inspecciones Digital</strong>, ingresando al <a href=\"https://librodigital.agcontrol.gob.ar/#nbb\">portal del Libro Digital</a> con cuit y clave miBA.</p><p><strong>Importante</strong>: aunque tu comercio esté librado al uso, no quiere decir que cuente con la habilitación de actividad comercial.</p>"
+        },
+        "field_titulo": "Al finalizar el trámite"
+      }
+    },
+    {
+      "type": "paragraph--componentes",
+      "id": "f9483088-47dd-46d7-bd33-7d0ee8bdc496",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/f9483088-47dd-46d7-bd33-7d0ee8bdc496?resourceVersion=id%3A51333"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/f9483088-47dd-46d7-bd33-7d0ee8bdc496?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "relationships": {
+        "field_componente": {
+          "data": [
+            {
+              "type": "paragraph--boton_iniciar_tramite",
+              "id": "948e9666-0b52-4e1d-bde1-5edd5fc198f3",
+              "meta": {
+                "target_revision_id": 51332,
+                "drupal_internal__target_id": 12859
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/f9483088-47dd-46d7-bd33-7d0ee8bdc496/field_componente?resourceVersion=id%3A51333"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/f9483088-47dd-46d7-bd33-7d0ee8bdc496/relationships/field_componente?resourceVersion=id%3A51333"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "paragraph--boton_iniciar_tramite",
+      "id": "948e9666-0b52-4e1d-bde1-5edd5fc198f3",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/boton_iniciar_tramite/948e9666-0b52-4e1d-bde1-5edd5fc198f3?resourceVersion=id%3A51332"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/boton_iniciar_tramite/948e9666-0b52-4e1d-bde1-5edd5fc198f3?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_link_iniciar_tramite": {
+          "uri": "https://login.buenosaires.gob.ar/auth/realms/miba/protocol/openid-connect/auth?client_id=tad&response_type=code&scope=profile&redirect_uri=https%3A//tad.buenosaires.gob.ar/tad2-rest/miba/ServletLogin%3FiniciarNuevoTramiteExterno%3D2227",
+          "resolvable_uri": "https://login.buenosaires.gob.ar/auth/realms/miba/protocol/openid-connect/auth?client_id=tad&response_type=code&scope=profile&redirect_uri=https%3A//tad.buenosaires.gob.ar/tad2-rest/miba/ServletLogin%3FiniciarNuevoTramiteExterno%3D2227",
+          "title": "Iniciar Trámite",
+          "options": []
+        }
+      }
+    }
+  ],
+  "links": {
+    "self": {
+      "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/338718b4-a2a0-44af-baa4-083f5d834b12?fields%5Bnode--tramites_obelisco%5D=title%2Cpath%2Cchanged%2Cbody%2Cfield_contenido&fields%5Bparagraph--seccion%5D=field_seccion&fields%5Bparagraph--seccion_1_columna%5D=field_columna_central&fields%5Bparagraph--seccion_2_columnas%5D=field_columna_izquierda%2Cfield_columna_derecha&fields%5Bparagraph--componentes%5D=field_componente&fields%5Bparagraph--requisito_tramite%5D=field_item_requisito_tramite&fields%5Bparagraph--item_requisito_tramite%5D=field_texto%2Cfield_cuerpo&fields%5Bparagraph--pasos_del_tramite%5D=field_item_paso_del_tramite&fields%5Bparagraph--item_titulo_del_paso%5D=field_titulo%2Cfield_parrafo&fields%5Bparagraph--organismo_responsable%5D=field_titulo&fields%5Bparagraph--boton_iniciar_tramite%5D=field_link_iniciar_tramite&fields%5Bparagraph--parrafo%5D=&fields%5Bparagraph--costo_del_tramite%5D=&fields%5Bparagraph--collapse_base%5D=&fields%5Bparagraph--descargables%5D=&fields%5Bparagraph--sedes%5D=&include=field_contenido.field_seccion.field_columna_central.field_componente%2Cfield_contenido.field_seccion.field_columna_central.field_componente.field_item_requisito_tramite%2Cfield_contenido.field_seccion.field_columna_central.field_componente.field_item_paso_del_tramite%2Cfield_contenido.field_seccion.field_columna_izquierda.field_componente%2Cfield_contenido.field_seccion.field_columna_izquierda.field_componente.field_item_requisito_tramite%2Cfield_contenido.field_seccion.field_columna_izquierda.field_componente.field_item_paso_del_tramite%2Cfield_contenido.field_seccion.field_columna_derecha.field_componente%2Cfield_contenido.field_seccion.field_columna_derecha.field_componente.field_item_requisito_tramite%2Cfield_contenido.field_seccion.field_columna_derecha.field_componente.field_item_paso_del_tramite"
+    }
+  }
+}

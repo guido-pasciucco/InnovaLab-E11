@@ -1,0 +1,690 @@
+{
+  "jsonapi": {
+    "version": "1.1",
+    "meta": {
+      "links": {
+        "self": {
+          "href": "https://jsonapi.org/format/1.1/"
+        }
+      }
+    }
+  },
+  "data": {
+    "type": "node--tramites_obelisco",
+    "id": "1640325c-304b-4684-97e4-781b9831a591",
+    "links": {
+      "self": {
+        "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/1640325c-304b-4684-97e4-781b9831a591?resourceVersion=id%3A4974"
+      },
+      "working-copy": {
+        "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/1640325c-304b-4684-97e4-781b9831a591?resourceVersion=rel%3Aworking-copy"
+      }
+    },
+    "attributes": {
+      "title": "Eventos, diversiones o actos organizados por áreas de Gobierno de la Ciudad de Buenos Aires",
+      "changed": "2026-07-03T18:32:35+00:00",
+      "path": {
+        "alias": "/tramites/eventos-diversiones-o-actos-organizados-por-areas-de-gobierno-de-la-ciudad-de-buenos-aires",
+        "pid": 1833,
+        "langcode": "es"
+      },
+      "body": {
+        "value": "Todas las áreas del Gobierno de la Ciudad de Buenos Aires deben realizar el siguiente trámite para solicitar permiso para la realización de un evento, diversión o acto en el espacio público.",
+        "format": "plain_text",
+        "processed": "<p>Todas las áreas del Gobierno de la Ciudad de Buenos Aires deben realizar el siguiente trámite para solicitar permiso para la realización de un evento, diversión o acto en el espacio público.</p>\n",
+        "summary": ""
+      }
+    },
+    "relationships": {
+      "field_contenido": {
+        "data": [
+          {
+            "type": "paragraph--seccion",
+            "id": "ee8249ea-a0c6-431d-8a59-8c7ad0ec0a29",
+            "meta": {
+              "target_revision_id": 50866,
+              "drupal_internal__target_id": 12636
+            }
+          }
+        ],
+        "links": {
+          "related": {
+            "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/1640325c-304b-4684-97e4-781b9831a591/field_contenido?resourceVersion=id%3A4974"
+          },
+          "self": {
+            "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/1640325c-304b-4684-97e4-781b9831a591/relationships/field_contenido?resourceVersion=id%3A4974"
+          }
+        }
+      }
+    }
+  },
+  "included": [
+    {
+      "type": "paragraph--seccion",
+      "id": "ee8249ea-a0c6-431d-8a59-8c7ad0ec0a29",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion/ee8249ea-a0c6-431d-8a59-8c7ad0ec0a29?resourceVersion=id%3A50866"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion/ee8249ea-a0c6-431d-8a59-8c7ad0ec0a29?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "relationships": {
+        "field_seccion": {
+          "data": [
+            {
+              "type": "paragraph--seccion_2_columnas",
+              "id": "b34232c6-44f3-4b39-b6de-1a2b5c0530d5",
+              "meta": {
+                "target_revision_id": 50862,
+                "drupal_internal__target_id": 12632
+              }
+            },
+            {
+              "type": "paragraph--seccion_1_columna",
+              "id": "9ac6f405-d0d3-4081-a971-428053957a95",
+              "meta": {
+                "target_revision_id": 50865,
+                "drupal_internal__target_id": 12635
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion/ee8249ea-a0c6-431d-8a59-8c7ad0ec0a29/field_seccion?resourceVersion=id%3A50866"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion/ee8249ea-a0c6-431d-8a59-8c7ad0ec0a29/relationships/field_seccion?resourceVersion=id%3A50866"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "paragraph--seccion_2_columnas",
+      "id": "b34232c6-44f3-4b39-b6de-1a2b5c0530d5",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_2_columnas/b34232c6-44f3-4b39-b6de-1a2b5c0530d5?resourceVersion=id%3A50862"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_2_columnas/b34232c6-44f3-4b39-b6de-1a2b5c0530d5?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "relationships": {
+        "field_columna_derecha": {
+          "data": [
+            {
+              "type": "paragraph--componentes",
+              "id": "6081852c-8c1f-408b-b00b-7c1c4b87e432",
+              "meta": {
+                "target_revision_id": 50849,
+                "drupal_internal__target_id": 12619
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_2_columnas/b34232c6-44f3-4b39-b6de-1a2b5c0530d5/field_columna_derecha?resourceVersion=id%3A50862"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_2_columnas/b34232c6-44f3-4b39-b6de-1a2b5c0530d5/relationships/field_columna_derecha?resourceVersion=id%3A50862"
+            }
+          }
+        },
+        "field_columna_izquierda": {
+          "data": [
+            {
+              "type": "paragraph--componentes",
+              "id": "1fd758fe-7a32-498f-9242-0316c5435277",
+              "meta": {
+                "target_revision_id": 50861,
+                "drupal_internal__target_id": 12631
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_2_columnas/b34232c6-44f3-4b39-b6de-1a2b5c0530d5/field_columna_izquierda?resourceVersion=id%3A50862"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_2_columnas/b34232c6-44f3-4b39-b6de-1a2b5c0530d5/relationships/field_columna_izquierda?resourceVersion=id%3A50862"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "paragraph--seccion_1_columna",
+      "id": "9ac6f405-d0d3-4081-a971-428053957a95",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_1_columna/9ac6f405-d0d3-4081-a971-428053957a95?resourceVersion=id%3A50865"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_1_columna/9ac6f405-d0d3-4081-a971-428053957a95?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "relationships": {
+        "field_columna_central": {
+          "data": [
+            {
+              "type": "paragraph--componentes",
+              "id": "b8763cd3-466c-403f-a2c6-1ddcc54d9890",
+              "meta": {
+                "target_revision_id": 50864,
+                "drupal_internal__target_id": 12634
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_1_columna/9ac6f405-d0d3-4081-a971-428053957a95/field_columna_central?resourceVersion=id%3A50865"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/seccion_1_columna/9ac6f405-d0d3-4081-a971-428053957a95/relationships/field_columna_central?resourceVersion=id%3A50865"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "paragraph--componentes",
+      "id": "b8763cd3-466c-403f-a2c6-1ddcc54d9890",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/b8763cd3-466c-403f-a2c6-1ddcc54d9890?resourceVersion=id%3A50864"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/b8763cd3-466c-403f-a2c6-1ddcc54d9890?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "relationships": {
+        "field_componente": {
+          "data": [
+            {
+              "type": "paragraph--organismo_responsable",
+              "id": "4bca8ff8-51e2-4b0a-b9b1-2e3d43326752",
+              "meta": {
+                "target_revision_id": 50863,
+                "drupal_internal__target_id": 12633
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/b8763cd3-466c-403f-a2c6-1ddcc54d9890/field_componente?resourceVersion=id%3A50864"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/b8763cd3-466c-403f-a2c6-1ddcc54d9890/relationships/field_componente?resourceVersion=id%3A50864"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "paragraph--organismo_responsable",
+      "id": "4bca8ff8-51e2-4b0a-b9b1-2e3d43326752",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/organismo_responsable/4bca8ff8-51e2-4b0a-b9b1-2e3d43326752?resourceVersion=id%3A50863"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/organismo_responsable/4bca8ff8-51e2-4b0a-b9b1-2e3d43326752?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_titulo": "Ministerio de Espacio Público e Higiene Urbana - Secretaría de Orden e Higiene Subsecretaría de Ordenamiento Urbano - Dirección General de Permisos y Ferias"
+      }
+    },
+    {
+      "type": "paragraph--componentes",
+      "id": "1fd758fe-7a32-498f-9242-0316c5435277",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/1fd758fe-7a32-498f-9242-0316c5435277?resourceVersion=id%3A50861"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/1fd758fe-7a32-498f-9242-0316c5435277?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "relationships": {
+        "field_componente": {
+          "data": [
+            {
+              "type": "paragraph--requisito_tramite",
+              "id": "0129d14b-c754-4f88-b2dc-b61b08f1ded8",
+              "meta": {
+                "target_revision_id": 50852,
+                "drupal_internal__target_id": 12622
+              }
+            },
+            {
+              "type": "paragraph--pasos_del_tramite",
+              "id": "5ee50911-381d-417f-97e5-d572365ac8cf",
+              "meta": {
+                "target_revision_id": 50856,
+                "drupal_internal__target_id": 12626
+              }
+            },
+            {
+              "type": "paragraph--costo_del_tramite",
+              "id": "edbf33fa-b35e-4631-a7c1-24a7d69222b6",
+              "meta": {
+                "target_revision_id": 50858,
+                "drupal_internal__target_id": 12628
+              }
+            },
+            {
+              "type": "paragraph--parrafo",
+              "id": "4817f1f9-5a45-4bd6-8a7e-241db4b9623f",
+              "meta": {
+                "target_revision_id": 50859,
+                "drupal_internal__target_id": 12629
+              }
+            },
+            {
+              "type": "paragraph--parrafo",
+              "id": "915dfc1f-c02f-4a8c-b96f-0b717334aec6",
+              "meta": {
+                "target_revision_id": 50860,
+                "drupal_internal__target_id": 12630
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/1fd758fe-7a32-498f-9242-0316c5435277/field_componente?resourceVersion=id%3A50861"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/1fd758fe-7a32-498f-9242-0316c5435277/relationships/field_componente?resourceVersion=id%3A50861"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "paragraph--requisito_tramite",
+      "id": "0129d14b-c754-4f88-b2dc-b61b08f1ded8",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/requisito_tramite/0129d14b-c754-4f88-b2dc-b61b08f1ded8?resourceVersion=id%3A50852"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/requisito_tramite/0129d14b-c754-4f88-b2dc-b61b08f1ded8?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "relationships": {
+        "field_item_requisito_tramite": {
+          "data": [
+            {
+              "type": "paragraph--item_requisito_tramite",
+              "id": "4da6a50a-41e4-4cc4-aa70-5cb9f914bb3b",
+              "meta": {
+                "target_revision_id": 50850,
+                "drupal_internal__target_id": 12620
+              }
+            },
+            {
+              "type": "paragraph--item_requisito_tramite",
+              "id": "c8c5179c-41c0-4f8d-aa6d-9eeb686ea38e",
+              "meta": {
+                "target_revision_id": 50851,
+                "drupal_internal__target_id": 12621
+              }
+            },
+            {
+              "type": "paragraph--item_requisito_tramite",
+              "id": "5576c8b7-682a-45fd-8c09-6809829e9984",
+              "meta": {
+                "target_revision_id": 108127,
+                "drupal_internal__target_id": 32070
+              }
+            },
+            {
+              "type": "paragraph--item_requisito_tramite",
+              "id": "25672495-6c3f-4b95-bf4a-e972c4deaf94",
+              "meta": {
+                "target_revision_id": 108128,
+                "drupal_internal__target_id": 32071
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/requisito_tramite/0129d14b-c754-4f88-b2dc-b61b08f1ded8/field_item_requisito_tramite?resourceVersion=id%3A50852"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/requisito_tramite/0129d14b-c754-4f88-b2dc-b61b08f1ded8/relationships/field_item_requisito_tramite?resourceVersion=id%3A50852"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "paragraph--pasos_del_tramite",
+      "id": "5ee50911-381d-417f-97e5-d572365ac8cf",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/pasos_del_tramite/5ee50911-381d-417f-97e5-d572365ac8cf?resourceVersion=id%3A50856"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/pasos_del_tramite/5ee50911-381d-417f-97e5-d572365ac8cf?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "relationships": {
+        "field_item_paso_del_tramite": {
+          "data": [
+            {
+              "type": "paragraph--item_titulo_del_paso",
+              "id": "a87e070a-b9d6-487a-8a01-6004e93b529c",
+              "meta": {
+                "target_revision_id": 50853,
+                "drupal_internal__target_id": 12623
+              }
+            },
+            {
+              "type": "paragraph--item_titulo_del_paso",
+              "id": "8dd99c3d-cc52-4151-bc78-1338f4abd0bd",
+              "meta": {
+                "target_revision_id": 50854,
+                "drupal_internal__target_id": 12624
+              }
+            },
+            {
+              "type": "paragraph--item_titulo_del_paso",
+              "id": "74b9aebb-6187-4e76-a70b-4972d9eda76f",
+              "meta": {
+                "target_revision_id": 50855,
+                "drupal_internal__target_id": 12625
+              }
+            }
+          ],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/pasos_del_tramite/5ee50911-381d-417f-97e5-d572365ac8cf/field_item_paso_del_tramite?resourceVersion=id%3A50856"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/pasos_del_tramite/5ee50911-381d-417f-97e5-d572365ac8cf/relationships/field_item_paso_del_tramite?resourceVersion=id%3A50856"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "paragraph--costo_del_tramite",
+      "id": "edbf33fa-b35e-4631-a7c1-24a7d69222b6",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/costo_del_tramite/edbf33fa-b35e-4631-a7c1-24a7d69222b6?resourceVersion=id%3A50858"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/costo_del_tramite/edbf33fa-b35e-4631-a7c1-24a7d69222b6?resourceVersion=rel%3Aworking-copy"
+        }
+      }
+    },
+    {
+      "type": "paragraph--parrafo",
+      "id": "4817f1f9-5a45-4bd6-8a7e-241db4b9623f",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/parrafo/4817f1f9-5a45-4bd6-8a7e-241db4b9623f?resourceVersion=id%3A50859"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/parrafo/4817f1f9-5a45-4bd6-8a7e-241db4b9623f?resourceVersion=rel%3Aworking-copy"
+        }
+      }
+    },
+    {
+      "type": "paragraph--parrafo",
+      "id": "915dfc1f-c02f-4a8c-b96f-0b717334aec6",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/parrafo/915dfc1f-c02f-4a8c-b96f-0b717334aec6?resourceVersion=id%3A50860"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/parrafo/915dfc1f-c02f-4a8c-b96f-0b717334aec6?resourceVersion=rel%3Aworking-copy"
+        }
+      }
+    },
+    {
+      "type": "paragraph--item_requisito_tramite",
+      "id": "4da6a50a-41e4-4cc4-aa70-5cb9f914bb3b",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_requisito_tramite/4da6a50a-41e4-4cc4-aa70-5cb9f914bb3b?resourceVersion=id%3A50850"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_requisito_tramite/4da6a50a-41e4-4cc4-aa70-5cb9f914bb3b?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_cuerpo": [
+          {
+            "value": "<p><strong>Acta modelo</strong> suscripta por titular de Dirección General o superior,<strong> conteniendo</strong>:</p><p>- Locación del evento.</p><p>- Fecha y horario del mismo.</p><p>- Fechas y horarios de armado y desarme (<strong>en caso de corresponder</strong>).</p><p>-<strong> Actividades a llevar a cabo</strong>: expendio de alimentos y bebidas, presencia de artistas, funcionarios públicos, actividades infantiles, actividades culturales, entre otros.</p><p>- Estructuras a colocar&nbsp;<strong>con sus medidas correspondientes</strong>.</p><p>- Grupo electrógeno.</p><p>- Sonido.</p><p>-<strong> Fecha por cobertura climática</strong>&nbsp;(en caso de corresponder).</p><p>- Estimación de la convocatoria prevista de personas.</p><p>-<strong> Número de expediente</strong>&nbsp;por el cual se tramitó el&nbsp;<strong>seguro de responsabilidad civil</strong>, solicitado a la Dirección General de Compras y Contrataciones, dependiente del Ministerio de Economía y Finanzas.</p><p>- Responsable/s designado/s.</p><p>- Correo/s electrónico/s de responsable/s designado/s.</p><p>- Teléfono/s de responsable/s designado/s.</p><p>-<strong> Corte de calle</strong>: deberá declararse en el presete informe,&nbsp;<strong>detallando las calles previstas</strong>, los días y horarios correspondientes.</p><p>-<strong> Informe gráfico con el croquis</strong>&nbsp;del lugar donde se llevará a cabo el evento y,<strong>&nbsp;en el caso de corresponder</strong>, el lugar donde se ubicarán las estructuras a colocar.</p>",
+            "format": "full_html",
+            "processed": "<p><strong>Acta modelo</strong> suscripta por titular de Dirección General o superior,<strong> conteniendo</strong>:</p><p>- Locación del evento.</p><p>- Fecha y horario del mismo.</p><p>- Fechas y horarios de armado y desarme (<strong>en caso de corresponder</strong>).</p><p>-<strong> Actividades a llevar a cabo</strong>: expendio de alimentos y bebidas, presencia de artistas, funcionarios públicos, actividades infantiles, actividades culturales, entre otros.</p><p>- Estructuras a colocar&nbsp;<strong>con sus medidas correspondientes</strong>.</p><p>- Grupo electrógeno.</p><p>- Sonido.</p><p>-<strong> Fecha por cobertura climática</strong>&nbsp;(en caso de corresponder).</p><p>- Estimación de la convocatoria prevista de personas.</p><p>-<strong> Número de expediente</strong>&nbsp;por el cual se tramitó el&nbsp;<strong>seguro de responsabilidad civil</strong>, solicitado a la Dirección General de Compras y Contrataciones, dependiente del Ministerio de Economía y Finanzas.</p><p>- Responsable/s designado/s.</p><p>- Correo/s electrónico/s de responsable/s designado/s.</p><p>- Teléfono/s de responsable/s designado/s.</p><p>-<strong> Corte de calle</strong>: deberá declararse en el presete informe,&nbsp;<strong>detallando las calles previstas</strong>, los días y horarios correspondientes.</p><p>-<strong> Informe gráfico con el croquis</strong>&nbsp;del lugar donde se llevará a cabo el evento y,<strong>&nbsp;en el caso de corresponder</strong>, el lugar donde se ubicarán las estructuras a colocar.</p>"
+          },
+          {
+            "value": "<p>Comunicación Oficial dirigida&nbsp;a la&nbsp;<a href=\"https://buenosaires.gob.ar/salud/informacion-para-los-ciudadanos/same\">Dirección General de Sistema de Atención Médica de Emergencia (SAME)</a>.</p>",
+            "format": "full_html",
+            "processed": "<p>Comunicación Oficial dirigida&nbsp;a la&nbsp;<a href=\"https://buenosaires.gob.ar/salud/informacion-para-los-ciudadanos/same\">Dirección General de Sistema de Atención Médica de Emergencia (SAME)</a>.</p>"
+          },
+          {
+            "value": "<p><strong>Acta compromiso firmada</strong>&nbsp;por la máxima autoridad de la repartición solicitante.</p>",
+            "format": "full_html",
+            "processed": "<p><strong>Acta compromiso firmada</strong>&nbsp;por la máxima autoridad de la repartición solicitante.</p>"
+          }
+        ],
+        "field_texto": "Requisitos obligatorios"
+      }
+    },
+    {
+      "type": "paragraph--item_requisito_tramite",
+      "id": "c8c5179c-41c0-4f8d-aa6d-9eeb686ea38e",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_requisito_tramite/c8c5179c-41c0-4f8d-aa6d-9eeb686ea38e?resourceVersion=id%3A50851"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_requisito_tramite/c8c5179c-41c0-4f8d-aa6d-9eeb686ea38e?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_cuerpo": [
+          {
+            "value": "<p><strong>Constancia de contratación</strong> de servicio de baños químicos.</p>",
+            "format": "full_html",
+            "processed": "<p><strong>Constancia de contratación</strong> de servicio de baños químicos.</p>"
+          },
+          {
+            "value": "<p><strong>Comunicación Oficial</strong>&nbsp;a la&nbsp;<a href=\"https://buenosaires.gob.ar/agc/direcciongeneralhigieneyseguridadalimentaria\">Dirección General de Higiene y Seguridad Alimenticia</a>.</p>",
+            "format": "full_html",
+            "processed": "<p><strong>Comunicación Oficial</strong>&nbsp;a la&nbsp;<a href=\"https://buenosaires.gob.ar/agc/direcciongeneralhigieneyseguridadalimentaria\">Dirección General de Higiene y Seguridad Alimenticia</a>.</p>"
+          },
+          {
+            "value": "<p><strong>Constancia de solicitud</strong> de servicio de bomberos.</p>",
+            "format": "full_html",
+            "processed": "<p><strong>Constancia de solicitud</strong> de servicio de bomberos.</p>"
+          },
+          {
+            "value": "<p><strong>Plan de autoprotección.</strong></p>",
+            "format": "full_html",
+            "processed": "<p><strong>Plan de autoprotección.</strong></p>"
+          },
+          {
+            "value": "<p><strong>Informe de impacto acústico.</strong></p>",
+            "format": "full_html",
+            "processed": "<p><strong>Informe de impacto acústico.</strong></p>"
+          },
+          {
+            "value": "<p><strong>Contratación de servicio de limpieza.</strong></p>",
+            "format": "full_html",
+            "processed": "<p><strong>Contratación de servicio de limpieza.</strong></p>"
+          },
+          {
+            "value": "<p><strong>Contratación de servicio</strong>&nbsp;de seguridad privada, con su respectiva<strong>&nbsp;nómina de las personas</strong>&nbsp;que cumplirán dicha tarea con&nbsp;<strong>nombre, apellido y DNI</strong>, la cuál será homologada por la&nbsp;<a href=\"https://buenosaires.gob.ar/justiciayseguridad/seguridad-privada\">Dirección General de Seguridad Privada</a>&nbsp;del&nbsp;<a href=\"https://buenosaires.gob.ar/justiciayseguridad\">Ministerio de Justicia y Seguridad</a>, conforme al&nbsp;<a href=\"https://buenosaires.gob.ar/sites/default/files/2026-07/aa3b558c8431046a46be782857a6fd32a6b72b46.pdf\">Decreto N° 109-GCBA/2008</a>.</p>",
+            "format": "full_html",
+            "processed": "<p><strong>Contratación de servicio</strong>&nbsp;de seguridad privada, con su respectiva<strong>&nbsp;nómina de las personas</strong>&nbsp;que cumplirán dicha tarea con&nbsp;<strong>nombre, apellido y DNI</strong>, la cuál será homologada por la&nbsp;<a href=\"https://buenosaires.gob.ar/justiciayseguridad/seguridad-privada\">Dirección General de Seguridad Privada</a>&nbsp;del&nbsp;<a href=\"https://buenosaires.gob.ar/justiciayseguridad\">Ministerio de Justicia y Seguridad</a>, conforme al&nbsp;<a href=\"https://buenosaires.gob.ar/sites/default/files/2026-07/aa3b558c8431046a46be782857a6fd32a6b72b46.pdf\">Decreto N° 109-GCBA/2008</a>.</p>"
+          },
+          {
+            "value": "<p><strong>Disposición de espacio</strong> para estacionamiento y/o <strong>guardería de bicicletas</strong>.</p>",
+            "format": "full_html",
+            "processed": "<p><strong>Disposición de espacio</strong> para estacionamiento y/o <strong>guardería de bicicletas</strong>.</p>"
+          }
+        ],
+        "field_texto": "Requisitos opcionales"
+      }
+    },
+    {
+      "type": "paragraph--item_requisito_tramite",
+      "id": "5576c8b7-682a-45fd-8c09-6809829e9984",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_requisito_tramite/5576c8b7-682a-45fd-8c09-6809829e9984?resourceVersion=id%3A108127"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_requisito_tramite/5576c8b7-682a-45fd-8c09-6809829e9984?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_cuerpo": [
+          {
+            "value": "<p><strong>Informe ténico profesional</strong>, firmado por el profesional idóneo y matriculado, arquitecto, ingeniero o maestro mayor de obras, en el cual se garantice que <strong>la totalidad de las estructuras móviles y fijas presentan condiciones de seguridad para su uso</strong>, tendiendo en cuenta que toda estructura debe contar con el detalle de sujeción, anclaje, y cálculo de soporte de peso y resistente al viente.&nbsp;</p>",
+            "format": "basic_html",
+            "processed": "<p><strong>Informe ténico profesional</strong>, firmado por el profesional idóneo y matriculado, arquitecto, ingeniero o maestro mayor de obras, en el cual se garantice que <strong>la totalidad de las estructuras móviles y fijas presentan condiciones de seguridad para su uso</strong>, tendiendo en cuenta que toda estructura debe contar con el detalle de sujeción, anclaje, y cálculo de soporte de peso y resistente al viente.&nbsp;</p>"
+          },
+          {
+            "value": "<p><strong>Encomienda profesional</strong> ante el Consejo o Colegio Profesional respectivo del profesional matriculado firmante.</p>",
+            "format": "basic_html",
+            "processed": "<p><strong>Encomienda profesional</strong> ante el Consejo o Colegio Profesional respectivo del profesional matriculado firmante.</p>"
+          }
+        ],
+        "field_texto": "Documentación adicional para estructuras fijas y móviles"
+      }
+    },
+    {
+      "type": "paragraph--item_requisito_tramite",
+      "id": "25672495-6c3f-4b95-bf4a-e972c4deaf94",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_requisito_tramite/25672495-6c3f-4b95-bf4a-e972c4deaf94?resourceVersion=id%3A108128"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_requisito_tramite/25672495-6c3f-4b95-bf4a-e972c4deaf94?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_cuerpo": [
+          {
+            "value": "<p><strong>Informe firmado por profesional responsable</strong> matriculado-técnico electricista, en donde establezca que <strong>la totalidad de las instalaciones eléctrica fijas y móviles están emplazadas en forma reglamentaria </strong>conforme a lo establecido en el código de edificación, garantizando el correcto y seguro funcionamiento sin causar perjuicios en las instalaciones del GCBA.</p>",
+            "format": "basic_html",
+            "processed": "<p><strong>Informe firmado por profesional responsable</strong> matriculado-técnico electricista, en donde establezca que <strong>la totalidad de las instalaciones eléctrica fijas y móviles están emplazadas en forma reglamentaria </strong>conforme a lo establecido en el código de edificación, garantizando el correcto y seguro funcionamiento sin causar perjuicios en las instalaciones del GCBA.</p>"
+          },
+          {
+            "value": "<p><strong>Contrato de alquiler de grupos electrógenos y de sonido</strong> (en caso de haberlos), así como sus correspondientes pólizas de seguo.</p>",
+            "format": "basic_html",
+            "processed": "<p><strong>Contrato de alquiler de grupos electrógenos y de sonido</strong> (en caso de haberlos), así como sus correspondientes pólizas de seguo.</p>"
+          },
+          {
+            "value": "<p><strong>Encomienda profesional</strong> ante el Consejo o Colegio profesional matriculado firmante.</p>",
+            "format": "basic_html",
+            "processed": "<p><strong>Encomienda profesional</strong> ante el Consejo o Colegio profesional matriculado firmante.</p>"
+          }
+        ],
+        "field_texto": "Documentación adicional para instalaciones fijas y móviles"
+      }
+    },
+    {
+      "type": "paragraph--item_titulo_del_paso",
+      "id": "a87e070a-b9d6-487a-8a01-6004e93b529c",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_titulo_del_paso/a87e070a-b9d6-487a-8a01-6004e93b529c?resourceVersion=id%3A50853"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_titulo_del_paso/a87e070a-b9d6-487a-8a01-6004e93b529c?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_parrafo": {
+          "value": "<p>La repartición solicitante deberá caratular internamente en el <strong>Sistema de Administración de Documentos Electrónicos (SADE)</strong> un Expediente Electrónico bajo la trata <strong>MAYE0206A</strong>.</p>",
+          "format": "full_html",
+          "processed": "<p>La repartición solicitante deberá caratular internamente en el <strong>Sistema de Administración de Documentos Electrónicos (SADE)</strong> un Expediente Electrónico bajo la trata <strong>MAYE0206A</strong>.</p>"
+        },
+        "field_titulo": "Generar expediente"
+      }
+    },
+    {
+      "type": "paragraph--item_titulo_del_paso",
+      "id": "8dd99c3d-cc52-4151-bc78-1338f4abd0bd",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_titulo_del_paso/8dd99c3d-cc52-4151-bc78-1338f4abd0bd?resourceVersion=id%3A50854"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_titulo_del_paso/8dd99c3d-cc52-4151-bc78-1338f4abd0bd?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_parrafo": {
+          "value": "<p>Luego se deberá completar el <strong>modelo Acta Compromiso</strong>, el cual deberá ser firmado a través del Sistema de Administración de Documentos Electrónicos (SADE), en el módulo <strong>Generador Electrónico de Documentos Oficiales (GEDO),</strong> bajo el tipo de documento <strong>ACPEE (Permiso de uso para la realización de eventos, diversiones o actos)</strong>.</p><p>Además del Acta Compromiso, el área solicitante deberá subir al expediente <strong>toda la documentación requerida</strong> para la tramitación del permiso.</p>",
+          "format": "full_html",
+          "processed": "<p>Luego se deberá completar el <strong>modelo Acta Compromiso</strong>, el cual deberá ser firmado a través del Sistema de Administración de Documentos Electrónicos (SADE), en el módulo <strong>Generador Electrónico de Documentos Oficiales (GEDO),</strong> bajo el tipo de documento <strong>ACPEE (Permiso de uso para la realización de eventos, diversiones o actos)</strong>.</p><p>Además del Acta Compromiso, el área solicitante deberá subir al expediente <strong>toda la documentación requerida</strong> para la tramitación del permiso.</p>"
+        },
+        "field_titulo": "Cargar la documentación"
+      }
+    },
+    {
+      "type": "paragraph--item_titulo_del_paso",
+      "id": "74b9aebb-6187-4e76-a70b-4972d9eda76f",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_titulo_del_paso/74b9aebb-6187-4e76-a70b-4972d9eda76f?resourceVersion=id%3A50855"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/item_titulo_del_paso/74b9aebb-6187-4e76-a70b-4972d9eda76f?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "field_parrafo": {
+          "value": "<p><strong>Una vez incorporados</strong> los requisitos y el acta de compromiso al <strong>expediente caratulado</strong>, se redirigirá al sector <strong>DGPF EVENTOS</strong>, seleccionando la opción “<strong>realizar pase</strong>”</p>",
+          "format": "full_html",
+          "processed": "<p><strong>Una vez incorporados</strong> los requisitos y el acta de compromiso al <strong>expediente caratulado</strong>, se redirigirá al sector <strong>DGPF EVENTOS</strong>, seleccionando la opción “<strong>realizar pase</strong>”</p>"
+        },
+        "field_titulo": "Finalizar el trámite"
+      }
+    },
+    {
+      "type": "paragraph--componentes",
+      "id": "6081852c-8c1f-408b-b00b-7c1c4b87e432",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/6081852c-8c1f-408b-b00b-7c1c4b87e432?resourceVersion=id%3A50849"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/6081852c-8c1f-408b-b00b-7c1c4b87e432?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "relationships": {
+        "field_componente": {
+          "data": [],
+          "links": {
+            "related": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/6081852c-8c1f-408b-b00b-7c1c4b87e432/field_componente?resourceVersion=id%3A50849"
+            },
+            "self": {
+              "href": "https://buenosaires.gob.ar/jsonapi/paragraph/componentes/6081852c-8c1f-408b-b00b-7c1c4b87e432/relationships/field_componente?resourceVersion=id%3A50849"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "links": {
+    "self": {
+      "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/1640325c-304b-4684-97e4-781b9831a591?fields%5Bnode--tramites_obelisco%5D=title%2Cpath%2Cchanged%2Cbody%2Cfield_contenido&fields%5Bparagraph--seccion%5D=field_seccion&fields%5Bparagraph--seccion_1_columna%5D=field_columna_central&fields%5Bparagraph--seccion_2_columnas%5D=field_columna_izquierda%2Cfield_columna_derecha&fields%5Bparagraph--componentes%5D=field_componente&fields%5Bparagraph--requisito_tramite%5D=field_item_requisito_tramite&fields%5Bparagraph--item_requisito_tramite%5D=field_texto%2Cfield_cuerpo&fields%5Bparagraph--pasos_del_tramite%5D=field_item_paso_del_tramite&fields%5Bparagraph--item_titulo_del_paso%5D=field_titulo%2Cfield_parrafo&fields%5Bparagraph--organismo_responsable%5D=field_titulo&fields%5Bparagraph--boton_iniciar_tramite%5D=field_link_iniciar_tramite&fields%5Bparagraph--parrafo%5D=&fields%5Bparagraph--costo_del_tramite%5D=&fields%5Bparagraph--collapse_base%5D=&fields%5Bparagraph--descargables%5D=&fields%5Bparagraph--sedes%5D=&include=field_contenido.field_seccion.field_columna_central.field_componente%2Cfield_contenido.field_seccion.field_columna_central.field_componente.field_item_requisito_tramite%2Cfield_contenido.field_seccion.field_columna_central.field_componente.field_item_paso_del_tramite%2Cfield_contenido.field_seccion.field_columna_izquierda.field_componente%2Cfield_contenido.field_seccion.field_columna_izquierda.field_componente.field_item_requisito_tramite%2Cfield_contenido.field_seccion.field_columna_izquierda.field_componente.field_item_paso_del_tramite%2Cfield_contenido.field_seccion.field_columna_derecha.field_componente%2Cfield_contenido.field_seccion.field_columna_derecha.field_componente.field_item_requisito_tramite%2Cfield_contenido.field_seccion.field_columna_derecha.field_componente.field_item_paso_del_tramite"
+    }
+  }
+}
