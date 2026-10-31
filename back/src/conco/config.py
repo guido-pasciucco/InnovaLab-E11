@@ -26,5 +26,11 @@ class Settings(BaseSettings):
     boletin_oficial_site_url: str = "https://boletinoficial.buenosaires.gob.ar"
     boletin_oficial_timeout_seconds: float = 10.0
 
+    epok_base_url: str = "https://epok.buenosaires.gob.ar"
+    # EPOK corta la conexión con algunos User-Agent (por ejemplo, el de curl): se envía uno propio.
+    epok_user_agent: str = "CONCO/0.1"
+    epok_timeout_seconds: float = 10.0
+    epok_radius_meters: int = 3000
+
 
 settings = Settings()
