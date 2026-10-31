@@ -1,0 +1,22 @@
+{
+    "parametros": {
+        "lat": -40.0,
+        "lon": -30.0
+    },
+    "ubicacion": {
+        "departamento": {
+            "id": null,
+            "nombre": null
+        },
+        "lat": -40.0,
+        "lon": -30.0,
+        "municipio": {
+            "id": null,
+            "nombre": null
+        },
+        "provincia": {
+            "id": null,
+            "nombre": null
+        }
+    }
+}

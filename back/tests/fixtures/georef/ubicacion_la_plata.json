@@ -1,0 +1,22 @@
+{
+    "parametros": {
+        "lat": -34.9214,
+        "lon": -57.9545
+    },
+    "ubicacion": {
+        "departamento": {
+            "id": "06441",
+            "nombre": "La Plata"
+        },
+        "lat": -34.9214,
+        "lon": -57.9545,
+        "municipio": {
+            "id": "060441",
+            "nombre": "La Plata"
+        },
+        "provincia": {
+            "id": "06",
+            "nombre": "Buenos Aires"
+        }
+    }
+}
