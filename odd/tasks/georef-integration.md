@@ -16,7 +16,7 @@ The MVP needs a map pin for the address the entrepreneur types. Georef (datos.go
 - `src/conco/config.py`: Georef base URL and timeout settings.
 - `src/conco/integrations/georef/client.py`: the only place that calls Georef over HTTP.
 - `src/conco/integrations/georef/models.py`: Pydantic models of the observed Georef response.
-- `scripts/probe_georef.py`: runs the client in isolation.
+- `scripts/probes/georef.py`: runs the client in isolation.
 - Unit tests with mocked HTTP (respx) using real captured responses, plus an opt-in integration test against the live API.
 - Docs: `docs/DEPENDENCIAS.md`, `back/README.md` checklist.
 
@@ -49,14 +49,14 @@ Out of scope: FastAPI endpoint, caching, retries (later PRs).
 
 - `uv run pytest` passes offline (integration tests deselected by default).
 - `uv run pytest -m integration` passes against live Georef.
-- `uv run python scripts/probe_georef.py "Corrientes 2500"` prints a typed result.
+- `uv run python scripts/probes/georef.py "Corrientes 2500"` prints a typed result.
 - HTTP errors, timeouts and unexpected payloads surface as `GeorefError`.
 
 ## Checks
 
 - `uv run pytest`
 - `uv run pytest -m integration`
-- `uv run python scripts/probe_georef.py "Corrientes 2500"`
+- `uv run python scripts/probes/georef.py "Corrientes 2500"`
 
 ## Progress / evidence
 

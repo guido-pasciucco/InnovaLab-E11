@@ -24,7 +24,7 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-m 'not integration'"
+addopts = "--import-mode=importlib -m 'not integration'"
 markers = [
-    "integration: calls the real Georef API (needs internet)",
+    "integration: calls real external APIs (needs internet)",
 ]

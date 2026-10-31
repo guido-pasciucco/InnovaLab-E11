@@ -1,6 +1,6 @@
 """Ejecuta el cliente de Georef e imprime la respuesta para observar su forma.
 
-Uso: uv run python scripts/probe_georef.py "Corrientes 2500"
+Uso: uv run python scripts/probes/georef.py "Corrientes 2500"
 """
 
 import asyncio
