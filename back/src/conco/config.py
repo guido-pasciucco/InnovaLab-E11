@@ -14,5 +14,9 @@ class Settings(BaseSettings):
     georef_base_url: str = "https://apis.datos.gob.ar/georef/api"
     georef_timeout_seconds: float = 10.0
 
+    caba_tramites_base_url: str = "https://buenosaires.gob.ar/jsonapi"
+    caba_tramites_site_url: str = "https://buenosaires.gob.ar"
+    caba_tramites_timeout_seconds: float = 10.0
+
 
 settings = Settings()

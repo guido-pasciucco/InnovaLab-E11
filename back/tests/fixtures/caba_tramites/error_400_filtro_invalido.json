@@ -1,0 +1,27 @@
+{
+  "jsonapi": {
+    "version": "1.1",
+    "meta": {
+      "links": {
+        "self": {
+          "href": "https://jsonapi.org/format/1.1/"
+        }
+      }
+    }
+  },
+  "errors": [
+    {
+      "title": "Bad Request",
+      "status": "400",
+      "detail": "Invalid nested filtering. The field `campo_inexistente`, given in the path `campo_inexistente`, does not exist.",
+      "links": {
+        "via": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco?filter%5Bcampo_inexistente%5D=x"
+        },
+        "info": {
+          "href": "https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.1"
+        }
+      }
+    }
+  ]
+}

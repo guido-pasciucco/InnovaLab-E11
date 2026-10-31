@@ -1,0 +1,298 @@
+{
+  "jsonapi": {
+    "version": "1.1",
+    "meta": {
+      "links": {
+        "self": {
+          "href": "https://jsonapi.org/format/1.1/"
+        }
+      }
+    }
+  },
+  "data": [
+    {
+      "type": "node--tramites_obelisco",
+      "id": "154953b2-1774-4db3-bd2e-f4a5ffc1d335",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/154953b2-1774-4db3-bd2e-f4a5ffc1d335?resourceVersion=id%3A6486"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/154953b2-1774-4db3-bd2e-f4a5ffc1d335?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "title": "Alta de habilitación de remises",
+        "changed": "2026-06-30T12:12:38+00:00",
+        "path": {
+          "alias": "/tramites/alta-de-habilitacion-de-remises",
+          "pid": 2691,
+          "langcode": "es"
+        },
+        "body": {
+          "value": "Para realizar este trámite es necesario que el vehículo sea Sedán o Rural de 4 o 5 puertas (no furgón), de más de 900 kg y cilindrada de 1500 en adelante.",
+          "format": "plain_text",
+          "processed": "<p>Para realizar este trámite es necesario que el vehículo sea Sedán o Rural de 4 o 5 puertas (no furgón), de más de 900 kg y cilindrada de 1500 en adelante.</p>\n",
+          "summary": ""
+        }
+      }
+    },
+    {
+      "type": "node--tramites_obelisco",
+      "id": "338718b4-a2a0-44af-baa4-083f5d834b12",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/338718b4-a2a0-44af-baa4-083f5d834b12?resourceVersion=id%3A5007"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/338718b4-a2a0-44af-baa4-083f5d834b12?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "title": "Habilitación de actividad económica",
+        "changed": "2026-08-07T18:57:01+00:00",
+        "path": {
+          "alias": "/tramites/habilitacion-de-actividad-economica",
+          "pid": 1866,
+          "langcode": "es"
+        },
+        "body": {
+          "value": "Con este trámite podés solicitar la habilitación para realizar actividades comerciales en la Ciudad. Para obtenerla, tu local debe aprobar una evaluación técnica profesional.",
+          "format": "plain_text",
+          "processed": "<p>Con este trámite podés solicitar la habilitación para realizar actividades comerciales en la Ciudad. Para obtenerla, tu local debe aprobar una evaluación técnica profesional.</p>\n",
+          "summary": ""
+        }
+      }
+    },
+    {
+      "type": "node--tramites_obelisco",
+      "id": "15e0394b-c7b5-4f93-bc25-ee012d695aec",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/15e0394b-c7b5-4f93-bc25-ee012d695aec?resourceVersion=id%3A5021"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/15e0394b-c7b5-4f93-bc25-ee012d695aec?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "title": "Habilitación de actividad económica exprés",
+        "changed": "2026-08-25T17:35:32+00:00",
+        "path": {
+          "alias": "/tramites/habilitacion-de-actividad-economica-expres",
+          "pid": 1874,
+          "langcode": "es"
+        },
+        "body": {
+          "value": "Si tu local tiene menos de 200 m² y cumple con los requisitos de ubicación y uso, podés solicitar la autorización económica exprés sin evaluación técnica profesional.",
+          "format": "plain_text",
+          "processed": "<p>Si tu local tiene menos de 200 m² y cumple con los requisitos de ubicación y uso, podés solicitar la autorización económica exprés sin evaluación técnica profesional.</p>\n",
+          "summary": ""
+        }
+      }
+    },
+    {
+      "type": "node--tramites_obelisco",
+      "id": "6d5f2cd9-0489-421f-bb4d-c744ddcd1d3c",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/6d5f2cd9-0489-421f-bb4d-c744ddcd1d3c?resourceVersion=id%3A9011"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/6d5f2cd9-0489-421f-bb4d-c744ddcd1d3c?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "title": "Habilitación de agencia de remises",
+        "changed": "2026-07-01T02:22:30+00:00",
+        "path": {
+          "alias": "/tramites/habilitacion-de-agencia-de-remises",
+          "pid": 3554,
+          "langcode": "es"
+        },
+        "body": {
+          "value": "Este trámite permite habilitar un establecimiento que organiza y ofrece servicios de transporte particular de personas con chofer, operando mediante reservas previas o demanda espontánea.",
+          "format": "plain_text",
+          "processed": "<p>Este trámite permite habilitar un establecimiento que organiza y ofrece servicios de transporte particular de personas con chofer, operando mediante reservas previas o demanda espontánea.</p>\n",
+          "summary": ""
+        }
+      }
+    },
+    {
+      "type": "node--tramites_obelisco",
+      "id": "47ea4e24-dc8c-42e7-be37-0ab13d421534",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/47ea4e24-dc8c-42e7-be37-0ab13d421534?resourceVersion=id%3A5251"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/47ea4e24-dc8c-42e7-be37-0ab13d421534?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "title": "Habilitación de foodtrucks",
+        "changed": "2026-07-07T18:44:23+00:00",
+        "path": {
+          "alias": "/tramites/habilitacion-de-foodtrucks",
+          "pid": 2068,
+          "langcode": "es"
+        },
+        "body": {
+          "value": "Autorización para vehículos con motor o acarreados con motor gastronómicos para elaborar y vender alimentos y bebidas en eventos públicos o privados de iniciativa privada. ",
+          "format": "plain_text",
+          "processed": "<p>Autorización para vehículos con motor o acarreados con motor gastronómicos para elaborar y vender alimentos y bebidas en eventos públicos o privados de iniciativa privada.</p>\n",
+          "summary": ""
+        }
+      }
+    },
+    {
+      "type": "node--tramites_obelisco",
+      "id": "9f46c874-2afc-40cc-90b8-93d875ce5066",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/9f46c874-2afc-40cc-90b8-93d875ce5066?resourceVersion=id%3A6104"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/9f46c874-2afc-40cc-90b8-93d875ce5066?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "title": "Permiso de uso del espacio público: habilitación para filmación y fotografías",
+        "changed": "2026-07-21T14:25:32+00:00",
+        "path": {
+          "alias": "/tramites/permiso-de-uso-del-espacio-publico-habilitacion-para-filmacion-y-fotografias",
+          "pid": 2522,
+          "langcode": "es"
+        },
+        "body": {
+          "value": "Este trámite te permite solicitar la habilitación para filmar o fotografial en el espacio público.",
+          "format": "plain_text",
+          "processed": "<p>Este trámite te permite solicitar la habilitación para filmar o fotografial en el espacio público.</p>\n",
+          "summary": ""
+        }
+      }
+    },
+    {
+      "type": "node--tramites_obelisco",
+      "id": "83c39697-9ba6-427b-90d8-a368a176fd27",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/83c39697-9ba6-427b-90d8-a368a176fd27?resourceVersion=id%3A12092"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/83c39697-9ba6-427b-90d8-a368a176fd27?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "title": "Solicitud de antecedentes de habilitaciones en locales comerciales",
+        "changed": "2026-09-16T17:39:21+00:00",
+        "path": {
+          "alias": "/tramites/solicitud-de-antecedentes-de-habilitaciones-en-locales-comerciales",
+          "pid": 4155,
+          "langcode": "es"
+        },
+        "body": {
+          "value": "Las constancias de antecedentes de habilitaciones son generalmente requeridas para acreditar el cumplimiento de las condiciones de accesibilidad en los locales comerciales. ",
+          "format": "plain_text",
+          "processed": "<p>Las constancias de antecedentes de habilitaciones son generalmente requeridas para acreditar el cumplimiento de las condiciones de accesibilidad en los locales comerciales.</p>\n",
+          "summary": ""
+        }
+      }
+    },
+    {
+      "type": "node--tramites_obelisco",
+      "id": "c2af0c57-8fd7-4922-aa51-9cfcdf5a4170",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/c2af0c57-8fd7-4922-aa51-9cfcdf5a4170?resourceVersion=id%3A5260"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/c2af0c57-8fd7-4922-aa51-9cfcdf5a4170?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "title": "Solicitud de baja de habilitación comercial",
+        "changed": "2026-08-05T14:12:09+00:00",
+        "path": {
+          "alias": "/tramites/solicitud-de-baja-de-habilitacion-comercial",
+          "pid": 2077,
+          "langcode": "es"
+        },
+        "body": {
+          "value": "Con este trámite vas a poder gestionar la baja de la Habilitación Comercial cuando se desea el cese de la actividad comercial autorizada.",
+          "format": "plain_text",
+          "processed": "<p>Con este trámite vas a poder gestionar la baja de la Habilitación Comercial cuando se desea el cese de la actividad comercial autorizada.</p>\n",
+          "summary": ""
+        }
+      }
+    },
+    {
+      "type": "node--tramites_obelisco",
+      "id": "f45a3e1a-78da-4b55-91a0-231471a8194b",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/f45a3e1a-78da-4b55-91a0-231471a8194b?resourceVersion=id%3A5262"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/f45a3e1a-78da-4b55-91a0-231471a8194b?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "title": "Solicitud de constancia de habilitación otorgada o en trámite",
+        "changed": "2026-08-07T19:02:25+00:00",
+        "path": {
+          "alias": "/tramites/solicitud-de-constancia-de-habilitacion-otorgada-o-en-tramite",
+          "pid": 2079,
+          "langcode": "es"
+        },
+        "body": {
+          "value": "Mediante este trámite podrás obtener la constancia de habilitación emitida desde el Sistema de Solicitudes de Inicio de Trámite (SSIT) ",
+          "format": "plain_text",
+          "processed": "<p>Mediante este trámite podrás obtener la constancia de habilitación emitida desde el Sistema de Solicitudes de Inicio de Trámite (SSIT)</p>\n",
+          "summary": ""
+        }
+      }
+    },
+    {
+      "type": "node--tramites_obelisco",
+      "id": "fbbbf477-6dc5-4c2f-9daa-bb79276e676f",
+      "links": {
+        "self": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/fbbbf477-6dc5-4c2f-9daa-bb79276e676f?resourceVersion=id%3A5264"
+        },
+        "working-copy": {
+          "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco/fbbbf477-6dc5-4c2f-9daa-bb79276e676f?resourceVersion=rel%3Aworking-copy"
+        }
+      },
+      "attributes": {
+        "title": "Solicitud de rúbrica - Habilitación de libros especiales",
+        "changed": "2026-07-08T13:21:44+00:00",
+        "path": {
+          "alias": "/tramites/solicitud-de-rubrica-habilitacion-de-libros-especiales",
+          "pid": 2081,
+          "langcode": "es"
+        },
+        "body": {
+          "value": "Con este trámite podrás solicitar la rúbrica de aquellos libros que debés tener en un local comercial, además del libro de la habilitación.",
+          "format": "plain_text",
+          "processed": "<p>Con este trámite podrás solicitar la rúbrica de aquellos libros que debés tener en un local comercial, además del libro de la habilitación.</p>\n",
+          "summary": ""
+        }
+      }
+    }
+  ],
+  "meta": {
+    "count": 11
+  },
+  "links": {
+    "last": {
+      "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco?filter%5Bstatus%5D=1&filter%5Btitle%5D%5Boperator%5D=CONTAINS&filter%5Btitle%5D%5Bvalue%5D=habilitaci&sort=title&page%5Boffset%5D=10&page%5Blimit%5D=10&fields%5Bnode--tramites_obelisco%5D=title%2Cpath%2Cchanged%2Cbody"
+    },
+    "next": {
+      "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco?filter%5Bstatus%5D=1&filter%5Btitle%5D%5Boperator%5D=CONTAINS&filter%5Btitle%5D%5Bvalue%5D=habilitaci&sort=title&page%5Boffset%5D=10&page%5Blimit%5D=10&fields%5Bnode--tramites_obelisco%5D=title%2Cpath%2Cchanged%2Cbody"
+    },
+    "self": {
+      "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco?fields%5Bnode--tramites_obelisco%5D=title%2Cpath%2Cchanged%2Cbody&filter%5Bstatus%5D=1&filter%5Btitle%5D%5Boperator%5D=CONTAINS&filter%5Btitle%5D%5Bvalue%5D=habilitaci&page%5Blimit%5D=10&sort=title"
+    }
+  }
+}
