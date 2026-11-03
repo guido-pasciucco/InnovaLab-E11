@@ -1,4 +1,5 @@
 import type { SourceReference } from '../types';
+
 export default function SourceList({ sources }: { sources: SourceReference[] }) {
   return <section className="panel"><h2>Fuentes consultadas</h2>
     <ul className="source-list">{sources.map(source => <li key={source.id}>
