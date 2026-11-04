@@ -1,4 +1,7 @@
-import type { ConsultationRequest, ConsultationResponse } from "../types";
+import type {
+  ConsultationRequest,
+  ConsultationResponse,
+} from "../types";
 
 interface Vista2Props {
   actividad: string;
@@ -24,40 +27,56 @@ export default function Vista2({
     });
   };
 
-  const handleCancelar = () => {
-    onCancelar();
-  };
-
   return (
-    <section>
-      <h1>Consulta inteligente</h1>
+    <main className="vista-consulta">
+      <h1>Revisá tu consulta</h1>
 
       <p>
-        <strong>Actividad:</strong> {actividad}
+        Identificamos la actividad y la ubicación para preparar una
+        orientación basada en los datos disponibles.
       </p>
 
-      <p>
-        <strong>Dirección:</strong> {direccion}
-      </p>
+      <div className="consulta-resumen">
+        <h2>Lo que entendimos</h2>
 
-      <button
-        type="button"
-        onClick={handleVerResultados}
-        disabled={busy}
-      >
-        {busy ? "Procesando..." : "Ver resultados"}
-      </button>
+        <section>
+          <strong>Actividad</strong>
+          <p>{actividad}</p>
+        </section>
 
-      <button type="button" onClick={handleCancelar}>
-        Cancelar
-      </button>
+        <section>
+          <strong>Ubicación</strong>
+          <p>{direccion}</p>
+        </section>
+      </div>
+
+      <div className="consulta-acciones">
+        <button
+          type="button"
+          onClick={onCancelar}
+          disabled={busy}
+        >
+          Volver
+        </button>
+
+        <button
+          type="button"
+          onClick={handleVerResultados}
+          disabled={busy}
+        >
+          {busy ? "Procesando..." : "Ver resultados →"}
+        </button>
+      </div>
 
       {result && (
-        <section aria-live="polite">
-          <h2>Resultados de la consulta</h2>
-          <pre>{JSON.stringify(result, null, 2)}</pre>
+        <section className="resultado-resumen" aria-live="polite">
+          <h2>Consulta recibida correctamente</h2>
+          <p>
+            Los datos fueron recibidos por la aplicación. La consulta
+            a fuentes externas depende de las integraciones disponibles.
+          </p>
         </section>
       )}
-    </section>
+    </main>
   );
 }
