@@ -29,3 +29,4 @@ export default function MapPanel({ point, address, features }: { point: GeoPoint
     <p className="hint">La ubicación del marcador en la demo es fija. En producción, el backend debe geocodificar y devolver coordenadas verificadas y capas con procedencia.</p>
   </section>;
 }
+

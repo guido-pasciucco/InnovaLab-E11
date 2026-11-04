@@ -1,216 +1,80 @@
-import { useState, type FormEvent } from 'react';
-import QueryForm from './Componentes/QueryForm';
-import MapPanel from './Componentes/MapPanel';
-import SourceList from './Componentes/SourceList';
-import {
-  submitConsultation,
-  submitFollowUp,
-} from './api/client';
+import { useState } from "react";
+import Vista2 from "./Componentes/Vista2";
 import type {
   ConsultationRequest,
   ConsultationResponse,
-} from './types';
+} from "./types";
 
 export default function App() {
-  const [result, setResult] = useState<ConsultationResponse | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const [question, setQuestion] = useState('');
-  const [followUp, setFollowUp] = useState('');
-  const [followBusy, setFollowBusy] = useState(false);
+  const actividad = "Casa de comidas";
+  const direccion = "Av. Rivadavia 1234, CABA";
 
-  async function consult(payload: ConsultationRequest) {
-    setBusy(true);
-    setError('');
-    setFollowUp('');
-    setResult(null);
+  const [consultaEnviada, setConsultaEnviada] = useState(false);
 
-    try {
-      setResult(await submitConsultation(payload));
-    } catch (e) {
-      setError(
-        e instanceof Error
-          ? e.message
-          : 'No se pudo completar la consulta.'
-      );
-    } finally {
-      setBusy(false);
-    }
-  }
+  const [datosConsulta, setDatosConsulta] =
+    useState<ConsultationRequest | null>(null);
 
-  async function askFollowUp(event: FormEvent) {
-    event.preventDefault();
+  const [resultado, setResultado] =
+    useState<ConsultationResponse | null>(null);
 
-    if (!result || !question.trim()) return;
+  const handleVerResultados = (datos: ConsultationRequest) => {
+    console.log("Consulta recibida:", datos);
 
-    setFollowBusy(true);
-    setFollowUp('');
-    setError('');
+    setDatosConsulta(datos);
+    setConsultaEnviada(true);
 
-    try {
-      const answer = await submitFollowUp(
-        result.consultationId,
-        { question: question.trim() }
-      );
+    // La consulta a fuentes externas todavía no está implementada.
+    setResultado(null);
+  };
 
-      setFollowUp(
-        answer.answer +
-          (answer.limitations?.length
-            ? `\n\nLimitación: ${answer.limitations.join(' ')}`
-            : '')
-      );
+  const handleCancelar = () => {
+    console.log("Consulta cancelada");
 
-      setQuestion('');
-    } catch (e) {
-      setError(
-        e instanceof Error
-          ? e.message
-          : 'Falló la pregunta adicional.'
-      );
-    } finally {
-      setFollowBusy(false);
-    }
-  }
+    setConsultaEnviada(false);
+    setDatosConsulta(null);
+    setResultado(null);
+  };
 
   return (
-    <main className="shell">
-      {/* Encabezado con el nuevo logotipo de Conco */}
-      <header className="topbar">
-  <a className="brand" href="/" aria-label="Conco, inicio">
-    <img
-      className="brand-logo"
-      src="/conco-logo.png"
-      alt="Conco"
-    />
-  </a>
+    <>
+      <Vista2
+        actividad={actividad}
+        direccion={direccion}
+        onVerResultados={handleVerResultados}
+        onCancelar={handleCancelar}
+        busy={false}
+        result={resultado}
+      />
 
-  <span className="brand-tagline">
-    Orientación para emprender
-  </span>
-</header>
+      {consultaEnviada && datosConsulta && (
+        <section
+          role="status"
+          style={{
+            maxWidth: "800px",
+            margin: "24px auto",
+            padding: "20px",
+            border: "1px solid #0b6485",
+            borderRadius: "8px",
+            background: "#f0f9ff",
+            color: "#17324d",
+          }}
+        >
+          <h2>Consulta recibida correctamente</h2>
 
-      {/* Presentación principal */}
-      <section className="hero">
-        <p className="eyebrow">
-          TU ACTIVIDAD · TU DIRECCIÓN · TU PRÓXIMO PASO
-        </p>
+          <p>
+            <strong>Actividad:</strong> {datosConsulta.activity}
+          </p>
 
-        <h1>
-          Entendé qué necesitás
-          <br />
-          para poner en marcha tu negocio.
-        </h1>
+          <p>
+            <strong>Dirección:</strong> {datosConsulta.address}
+          </p>
 
-        <p>
-          Consultá procedimientos y contexto territorial desde un solo lugar.
-        </p>
-      </section>
-
-      {/* Formulario de consulta */}
-      <QueryForm onSubmit={consult} busy={busy} />
-
-      {error && (
-        <div className="alert" role="alert">
-          {error}
-        </div>
+          <p>
+            Los datos fueron recibidos por la aplicación. La consulta a
+            fuentes externas todavía no está implementada.
+          </p>
+        </section>
       )}
-
-      {/* Resultados de la consulta */}
-      {result && (
-        <div className="results">
-          <section className="panel">
-            <p className="eyebrow">
-              ORIENTACIÓN PARA TU CONSULTA
-            </p>
-
-            <h2>{result.interpretedActivity}</h2>
-
-            <p className="address-line">
-              {result.normalizedAddress}
-            </p>
-
-            <p>{result.summary}</p>
-
-            {result.limitations.map((item) => (
-              <p className="limitation" key={item}>
-                ⓘ {item}
-              </p>
-            ))}
-          </section>
-
-          <div className="results-grid">
-            <section className="panel">
-              <h2>Pasos sugeridos</h2>
-
-              <ol className="steps">
-                {result.steps.map((step, i) => (
-                  <li key={step.id}>
-                    <span className="step-number">
-                      {i + 1}
-                    </span>
-
-                    <div>
-                      <h3>{step.title}</h3>
-                      <p>{step.description}</p>
-
-                      {step.documents?.length ? (
-                        <p className="hint">
-                          <b>Prepará:</b>{' '}
-                          {step.documents.join('; ')}
-                        </p>
-                      ) : null}
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </section>
-
-            <MapPanel
-              point={result.point}
-              address={result.normalizedAddress}
-              features={result.territorialFeatures}
-            />
-          </div>
-
-          {/* Fuentes consultadas */}
-          <SourceList sources={result.sources} />
-
-          {/* Preguntas adicionales */}
-          <section className="panel">
-            <h2>¿Tenés otra pregunta?</h2>
-
-            <form
-              className="follow-form"
-              onSubmit={askFollowUp}
-            >
-              <input
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Preguntá algo sobre esta orientación…"
-                required
-              />
-
-              <button
-                className="secondary"
-                disabled={followBusy}
-              >
-                {followBusy ? 'Consultando…' : 'Preguntar'}
-              </button>
-            </form>
-
-            {followUp && (
-              <p className="follow-answer">
-                {followUp}
-              </p>
-            )}
-          </section>
-        </div>
-      )}
-
-      <footer>
-        conco · Prototipo frontend. Confirmá siempre los requisitos con la
-        fuente oficial vigente.
-      </footer>
-    </main>
+    </>
   );
 }

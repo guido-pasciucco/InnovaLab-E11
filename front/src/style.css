@@ -483,3 +483,445 @@ footer {
     transition-duration: .01ms !important;
   }
 }
+
+/* =========================================================
+23. VISTA 2 — ANÁLISIS DE LA CONSULTA
+========================================================= */
+
+.vista2 {
+  min-height: 100vh;
+  background: #eef3f6;
+  color: #102b45;
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+.vista2-header {
+  min-height: 66px;
+  padding: 10px max(24px, calc((100% - 1120px) / 2));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: #fff;
+  border-bottom: 1px solid #e2e9ee;
+}
+
+.vista2-brand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.vista2-brand img {
+  display: block;
+  width: 105px;
+  max-height: 44px;
+  object-fit: contain;
+}
+
+.vista2-nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.vista2-nav a {
+  color: #53687b;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.vista2-nav a:hover {
+  color: #07577a;
+}
+
+.vista2-steps {
+  min-height: 56px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  overflow-x: auto;
+  background: #fff;
+  border-bottom: 1px solid #e2e9ee;
+}
+
+.vista2-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.vista2-step-number {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #cbd7e0;
+  border-radius: 50%;
+  background: #fff;
+  color: #61768a;
+  font-size: 11px;
+}
+
+.vista2-step-label {
+  color: #64788b;
+  font-size: 10px;
+}
+
+.vista2-step-active .vista2-step-number {
+  background: #07577a;
+  border-color: #07577a;
+  color: #fff;
+}
+
+.vista2-step-active .vista2-step-label {
+  color: #102b45;
+  font-weight: 700;
+}
+
+.vista2-step-completed .vista2-step-number {
+  background: #e2ebf0;
+  color: #31566e;
+}
+
+.vista2-step-line {
+  width: clamp(14px, 3vw, 45px);
+  height: 1px;
+  margin-left: 5px;
+  background: #d2dce4;
+}
+
+.vista2-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px 55px;
+}
+
+.vista2-intro {
+  margin-bottom: 28px;
+}
+
+.vista2-intro h1 {
+  margin: 0 0 12px;
+  color: #102b45;
+  font: 800 clamp(22px, 3vw, 28px)/1.25 Manrope, sans-serif;
+  letter-spacing: -0.035em;
+}
+
+.vista2-intro p {
+  margin: 0;
+  color: #63798b;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.vista2-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 16px;
+}
+
+.vista2-card {
+  min-width: 0;
+  padding: 24px 20px;
+  background: #fff;
+  border: 1px solid #d8e1e8;
+  border-radius: 2px;
+  box-shadow: 0 2px 5px #17334a12;
+}
+
+.vista2-card h2 {
+  margin: 0 0 24px;
+  color: #102b45;
+  font: 700 14px/1.4 Manrope, sans-serif;
+}
+
+.vista2-query {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  margin-bottom: 18px;
+  padding: 10px 0 10px 13px;
+}
+
+.vista2-query-line {
+  position: absolute;
+  top: 7px;
+  bottom: 7px;
+  left: 0;
+  width: 2px;
+  background: #b9cbd7;
+}
+
+.vista2-query p {
+  margin: 0;
+  color: #526b7f;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.vista2-detail {
+  margin-bottom: 14px;
+  padding: 15px;
+  border: 1px solid #e0e7ec;
+  background: #fff;
+}
+
+.vista2-detail-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.vista2-overline {
+  display: block;
+  margin-bottom: 9px;
+  color: #587d91;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.vista2-detail h3 {
+  margin: 0;
+  color: #102b45;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.vista2-edit {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #526e80;
+  font: inherit;
+  font-size: 10px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.vista2-edit:hover {
+  color: #07577a;
+}
+
+.vista2-detail-note {
+  margin: 12px 0 0;
+  color: #738594;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.vista2-edit-field {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  color: #526b7f;
+  font-size: 11px;
+}
+
+.vista2-edit-field input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid #ccd9e2;
+  border-radius: 4px;
+  color: #102b45;
+  font: inherit;
+}
+
+.vista2-edit-field input:focus-visible {
+  outline: 2px solid #6eaa91;
+  outline-offset: 2px;
+}
+
+.vista2-clarification {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 17px;
+  color: #61778a;
+  font-size: 10px;
+  line-height: 1.6;
+  cursor: pointer;
+}
+
+.vista2-clarification input {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: #07577a;
+}
+
+.vista2-clarification-message {
+  margin: 12px 0 0;
+  color: #315f4f;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.vista2-verifications {
+  display: grid;
+  gap: 22px;
+}
+
+.vista2-verification-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.vista2-verification-heading > span:first-child {
+  color: #526b7f;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.vista2-verification-status {
+  color: #6f8291;
+  font-size: 9px;
+  text-align: right;
+}
+
+.vista2-progress-track {
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid #dce5eb;
+  background: #f7f9fa;
+}
+
+.vista2-progress-value {
+  height: 100%;
+  background: #07577a;
+  transition: width 0.3s ease;
+}
+
+.vista2-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 14px;
+  border-top: 1px solid #e8edf1;
+}
+
+.vista2-cancel {
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: #536c7d;
+  font: inherit;
+  font-size: 10px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.vista2-results-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 17px;
+  border: 0;
+  border-radius: 0;
+  background: #ffc900;
+  color: #172b27;
+  font: 700 11px 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+}
+
+.vista2-results-button:hover {
+  background: #f0bb00;
+}
+
+.vista2 button:focus-visible,
+.vista2 a:focus-visible {
+  outline: 2px solid #17634e;
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .vista2-header {
+    padding: 12px 18px;
+  }
+
+  .vista2-nav {
+    gap: 14px;
+  }
+
+  .vista2-nav a {
+    font-size: 11px;
+  }
+
+  .vista2-steps {
+    justify-content: flex-start;
+    padding: 12px 18px;
+    gap: 9px;
+  }
+
+  .vista2-content {
+    padding: 30px 18px 40px;
+  }
+
+  .vista2-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .vista2-header {
+    gap: 10px;
+  }
+
+  .vista2-brand img {
+    width: 85px;
+  }
+
+  .vista2-nav {
+    gap: 10px;
+  }
+
+  .vista2-nav a {
+    font-size: 10px;
+  }
+
+  .vista2-card {
+    padding: 20px 15px;
+  }
+
+  .vista2-step-label {
+    font-size: 9px;
+  }
+
+  .vista2-step-line {
+    width: 12px;
+    margin-left: 0;
+  }
+
+  .vista2-card-actions {
+    align-items: flex-start;
+  }
+
+  .vista2-results-button {
+    padding: 0 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vista2-progress-value,
+  .vista2-results-button {
+    transition: none;
+  }
+}
