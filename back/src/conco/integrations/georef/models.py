@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class GeorefNamedEntity(BaseModel):
-    """Entidad de Georef con id y nombre (departamento, provincia, localidad)."""
+    """Entidad de Georef con id y nombre (departamento, provincia, localidad, municipio)."""
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -58,3 +58,26 @@ class GeorefAddressesResponse(BaseModel):
     total: int
     start: int = Field(alias="inicio")
     addresses: list[GeorefAddress] = Field(alias="direcciones")
+
+
+class GeorefLocation(BaseModel):
+    """Entidades de Georef que contienen un punto.
+
+    Fuera de la Argentina (por ejemplo, en el mar) las entidades vienen con id y nombre en null.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    lat: float
+    lon: float
+    province: GeorefNamedEntity = Field(alias="provincia")
+    department: GeorefNamedEntity = Field(alias="departamento")
+    municipality: GeorefNamedEntity = Field(alias="municipio")
+
+
+class GeorefLocationResponse(BaseModel):
+    """Respuesta del endpoint /ubicacion de Georef."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    location: GeorefLocation = Field(alias="ubicacion")

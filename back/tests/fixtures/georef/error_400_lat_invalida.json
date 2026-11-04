@@ -1,0 +1,10 @@
+{
+    "errores": [
+        {
+            "codigo_interno": 1001,
+            "mensaje": "El parámetro no es un número real.",
+            "nombre_parametro": "lat",
+            "ubicacion": "querystring"
+        }
+    ]
+}

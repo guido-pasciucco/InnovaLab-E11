@@ -10,6 +10,9 @@ from conco.geolocation.domain import (
     AddressContextProvider,
     AddressFinder,
     AddressSearchError,
+    LocationCheck,
+    LocationChecker,
+    LocationCheckError,
     NearbyOffice,
     NearbyOfficeError,
     NearbyOfficeFinder,
@@ -18,6 +21,7 @@ from conco.geolocation.domain import (
 from conco.geolocation.infrastructure import (
     EpokNearbyOfficeFinder,
     GeorefAddressFinder,
+    GeorefLocationChecker,
     UsigAddressContextProvider,
 )
 
@@ -29,6 +33,9 @@ CONTEXT_UNAVAILABLE_DETAIL = (
 )
 OFFICES_UNAVAILABLE_DETAIL = (
     "El servicio de lugares de la Ciudad no está disponible. Intentá de nuevo más tarde."
+)
+LOCATION_UNAVAILABLE_DETAIL = (
+    "El servicio de ubicación no está disponible. Intentá de nuevo más tarde."
 )
 
 
@@ -49,6 +56,13 @@ class NearbyOfficesResponse(BaseModel):
     """Oficinas de atención cercanas, ordenadas por distancia, con la fuente oficial."""
 
     offices: list[NearbyOffice]
+    source: Source
+
+
+class LocationCheckResponse(BaseModel):
+    """Si un punto está en la Ciudad de Buenos Aires, con la fuente oficial que lo informa."""
+
+    location: LocationCheck
     source: Source
 
 
@@ -197,3 +211,36 @@ async def get_nearby_offices(
             status_code=status.HTTP_502_BAD_GATEWAY, detail=OFFICES_UNAVAILABLE_DETAIL
         ) from exc
     return NearbyOfficesResponse(offices=offices, source=finder.source)
+
+
+def get_location_checker() -> LocationChecker:
+    """Elige qué servicio ubica un punto; los tests lo reemplazan por uno falso."""
+    return GeorefLocationChecker()
+
+
+@router.get("/location-check", response_model=LocationCheckResponse)
+async def check_location(
+    checker: Annotated[LocationChecker, Depends(get_location_checker)],
+    latitude: Annotated[
+        float,
+        Query(ge=-90, le=90, description="Latitud en grados (WGS84), por ejemplo: -34.6047137."),
+    ],
+    longitude: Annotated[
+        float,
+        Query(
+            ge=-180, le=180, description="Longitud en grados (WGS84), por ejemplo: -58.4021372."
+        ),
+    ],
+) -> LocationCheckResponse:
+    """Indica si un punto está dentro de la Ciudad de Buenos Aires (RN-02).
+
+    Un punto de otra provincia o fuera de la Argentina no es un error: responde 200 con
+    `in_caba: false` (fuera de la Argentina, provincia y departamento vienen en null).
+    """
+    try:
+        check = await checker.check(latitude=latitude, longitude=longitude)
+    except LocationCheckError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY, detail=LOCATION_UNAVAILABLE_DETAIL
+        ) from exc
+    return LocationCheckResponse(location=check, source=checker.source)

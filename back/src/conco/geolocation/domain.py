@@ -122,3 +122,34 @@ class NearbyOfficeFinder(Protocol):
         """Devuelve hasta `limit` oficinas ordenadas por distancia, o una lista vacía si no hay
         ninguna en el radio de búsqueda; lanza NearbyOfficeError si falla."""
         ...
+
+
+class LocationCheck(BaseModel):
+    """Resultado de verificar si un punto está dentro de la Ciudad de Buenos Aires (RN-02).
+
+    `province` y `department` se informan como los publica la fuente; fuera de la Argentina
+    (por ejemplo, en el mar) vienen en None.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    in_caba: bool
+    province: str | None
+    department: str | None
+
+
+class LocationCheckError(Exception):
+    """El servicio de ubicación no está disponible o respondió algo inesperado."""
+
+
+class LocationChecker(Protocol):
+    """Puerto: cualquier servicio oficial capaz de decir en qué provincia está un punto."""
+
+    @property
+    def source(self) -> Source:
+        """Fuente oficial que se cita en cada respuesta."""
+        ...
+
+    async def check(self, latitude: float, longitude: float) -> LocationCheck:
+        """Indica si el punto está en CABA; lanza LocationCheckError si falla."""
+        ...

@@ -1,0 +1,22 @@
+{
+    "parametros": {
+        "lat": -34.6047137,
+        "lon": -58.4021372
+    },
+    "ubicacion": {
+        "departamento": {
+            "id": "02021",
+            "nombre": "Comuna 3"
+        },
+        "lat": -34.6047137,
+        "lon": -58.4021372,
+        "municipio": {
+            "id": "022021",
+            "nombre": "Comuna 3"
+        },
+        "provincia": {
+            "id": "02",
+            "nombre": "Ciudad Autónoma de Buenos Aires"
+        }
+    }
+}
