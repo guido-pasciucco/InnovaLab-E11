@@ -82,3 +82,43 @@ class AddressContextProvider(Protocol):
     async def by_coordinates(self, latitude: float, longitude: float) -> AddressContext | None:
         """Devuelve el contexto, o None si no está en CABA; lanza AddressContextError si falla."""
         ...
+
+
+class NearbyOffice(BaseModel):
+    """Oficina de atención presencial de la Ciudad cercana a un punto (sede o subsede comunal).
+
+    Los textos se informan como los publica la fuente oficial (por ejemplo, el barrio en
+    mayúsculas). `info_url` es la página oficial de trámites y servicios de la comuna y
+    `last_updated` es la fecha de la última modificación del dato en la fuente.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    name: str
+    address: str
+    phone: str | None
+    neighborhood: str | None
+    commune: str | None
+    distance_meters: float
+    info_url: str | None
+    last_updated: str | None
+
+
+class NearbyOfficeError(Exception):
+    """El servicio de lugares de la Ciudad no está disponible o respondió algo inesperado."""
+
+
+class NearbyOfficeFinder(Protocol):
+    """Puerto: cualquier servicio oficial capaz de listar oficinas cercanas a un punto de CABA."""
+
+    @property
+    def source(self) -> Source:
+        """Fuente oficial que se cita en cada respuesta."""
+        ...
+
+    async def find_nearby(
+        self, latitude: float, longitude: float, limit: int
+    ) -> list[NearbyOffice]:
+        """Devuelve hasta `limit` oficinas ordenadas por distancia, o una lista vacía si no hay
+        ninguna en el radio de búsqueda; lanza NearbyOfficeError si falla."""
+        ...

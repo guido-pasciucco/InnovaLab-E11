@@ -10,15 +10,25 @@ from conco.geolocation.domain import (
     AddressContextProvider,
     AddressFinder,
     AddressSearchError,
+    NearbyOffice,
+    NearbyOfficeError,
+    NearbyOfficeFinder,
     Source,
 )
-from conco.geolocation.infrastructure import GeorefAddressFinder, UsigAddressContextProvider
+from conco.geolocation.infrastructure import (
+    EpokNearbyOfficeFinder,
+    GeorefAddressFinder,
+    UsigAddressContextProvider,
+)
 
 router = APIRouter(prefix="/geolocation", tags=["Geolocalización"])
 
 CONTEXT_NOT_FOUND_DETAIL = "No se encontró la ubicación dentro de la Ciudad de Buenos Aires."
 CONTEXT_UNAVAILABLE_DETAIL = (
     "El servicio de datos de la Ciudad no está disponible. Intentá de nuevo más tarde."
+)
+OFFICES_UNAVAILABLE_DETAIL = (
+    "El servicio de lugares de la Ciudad no está disponible. Intentá de nuevo más tarde."
 )
 
 
@@ -32,6 +42,13 @@ class AddressContextResponse(BaseModel):
     """Barrio, comuna y códigos postales de una ubicación, con la fuente oficial que los informa."""
 
     context: AddressContext
+    source: Source
+
+
+class NearbyOfficesResponse(BaseModel):
+    """Oficinas de atención cercanas, ordenadas por distancia, con la fuente oficial."""
+
+    offices: list[NearbyOffice]
     source: Source
 
 
@@ -144,3 +161,39 @@ async def get_address_context_by_coordinates(
             status_code=status.HTTP_502_BAD_GATEWAY, detail=CONTEXT_UNAVAILABLE_DETAIL
         ) from exc
     return _context_response(context, provider)
+
+
+def get_nearby_office_finder() -> NearbyOfficeFinder:
+    """Elige qué servicio informa las oficinas cercanas; los tests lo reemplazan por uno falso."""
+    return EpokNearbyOfficeFinder()
+
+
+@router.get("/nearby-offices", response_model=NearbyOfficesResponse)
+async def get_nearby_offices(
+    finder: Annotated[NearbyOfficeFinder, Depends(get_nearby_office_finder)],
+    latitude: Annotated[
+        float,
+        Query(ge=-90, le=90, description="Latitud en grados (WGS84), por ejemplo: -34.6047137."),
+    ],
+    longitude: Annotated[
+        float,
+        Query(
+            ge=-180, le=180, description="Longitud en grados (WGS84), por ejemplo: -58.4021372."
+        ),
+    ],
+    limit: Annotated[
+        int,
+        Query(ge=1, le=5, description="Cantidad máxima de oficinas."),
+    ] = 3,
+) -> NearbyOfficesResponse:
+    """Lista las sedes y subsedes comunales más cercanas a un punto de la Ciudad de Buenos Aires.
+
+    Si no hay ninguna en el radio de búsqueda, devuelve una lista vacía.
+    """
+    try:
+        offices = await finder.find_nearby(latitude=latitude, longitude=longitude, limit=limit)
+    except NearbyOfficeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY, detail=OFFICES_UNAVAILABLE_DETAIL
+        ) from exc
+    return NearbyOfficesResponse(offices=offices, source=finder.source)
