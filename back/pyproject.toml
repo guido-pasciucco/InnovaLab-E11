@@ -1,0 +1,16 @@
+[project]
+name = "conco"
+version = "0.1.0"
+description = "CONCO API: general guidance on commercial procedures for entrepreneurs."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115,<1.0",
+    "uvicorn[standard]>=0.30,<1.0",
+    "pydantic>=2.8,<3.0",
+    "pydantic-settings>=2.16,<3.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.1,<0.14"]
+build-backend = "uv_build"

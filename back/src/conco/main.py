@@ -1,19 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from conco.config import settings
+
 app = FastAPI(
     title="CONCO API",
     description="API inicial para el MVP de orientación general sobre trámites.",
     version="0.1.0",
 )
 
-# Para desarrollo local. Ajustar los orígenes permitidos antes de publicar.
+# Los orígenes permitidos se configuran con CORS_ORIGINS en el archivo .env.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
