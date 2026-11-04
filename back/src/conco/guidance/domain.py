@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import date, datetime
+from enum import StrEnum
 from typing import Protocol
 from uuid import UUID
 
@@ -54,4 +55,52 @@ class ProcedureCatalog(Protocol):
 
     async def get(self, procedure_id: UUID) -> ProcedureDetail | None:
         """Devuelve el detalle, o None si no existe; lanza ProcedureSearchError si falla."""
+        ...
+
+
+class RegulationType(StrEnum):
+    """Tipos de norma que se pueden consultar por número y año."""
+
+    LEY = "ley"
+    DECRETO = "decreto"
+
+
+class Regulation(BaseModel):
+    """Norma oficial publicada (ley o decreto) que respalda un trámite o requisito.
+
+    Se cita como referencia de la fuente, no como una determinación legal (RN-04).
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    type: RegulationType
+    number: int
+    year: int
+    summary: str
+    issuing_body: str | None
+    publication_date: date
+    bulletin_number: int
+    document_url: str | None
+
+
+class RegulationLookupError(Exception):
+    """El registro de normas no está disponible o respondió algo inesperado."""
+
+
+class RegulationRegistry(Protocol):
+    """Puerto: cualquier registro oficial capaz de encontrar una norma por tipo, número y año."""
+
+    @property
+    def source(self) -> Source:
+        """Fuente oficial que se cita en cada respuesta."""
+        ...
+
+    async def find(
+        self, regulation_type: RegulationType, number: int, year: int
+    ) -> list[Regulation]:
+        """Devuelve las normas que coinciden (vacío si no existe; puede haber más de una,
+        por ejemplo decretos del Poder Ejecutivo y de la Legislatura con el mismo número).
+
+        Lanza RegulationLookupError si falla.
+        """
         ...

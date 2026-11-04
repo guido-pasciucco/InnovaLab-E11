@@ -9,13 +9,20 @@ from conco.guidance.domain import (
     ProcedureCatalog,
     ProcedureDetail,
     ProcedureSearchError,
+    Regulation,
+    RegulationLookupError,
+    RegulationRegistry,
+    RegulationType,
     Source,
 )
-from conco.guidance.infrastructure import CabaProcedureCatalog
+from conco.guidance.infrastructure import BoletinOficialRegulationRegistry, CabaProcedureCatalog
 
 router = APIRouter(prefix="/guidance", tags=["Orientación"])
 
 UNAVAILABLE_DETAIL = "El servicio de trámites no está disponible. Intentá de nuevo más tarde."
+REGULATIONS_UNAVAILABLE_DETAIL = (
+    "El Boletín Oficial no está disponible. Intentá de nuevo más tarde."
+)
 
 
 class ProcedureSearchResponse(BaseModel):
@@ -29,6 +36,13 @@ class ProcedureDetailResponse(BaseModel):
     """Detalle de un trámite y la fuente oficial de la que proviene."""
 
     procedure: ProcedureDetail
+    source: Source
+
+
+class RegulationLookupResponse(BaseModel):
+    """Normas encontradas y la fuente oficial de la que provienen."""
+
+    regulations: list[Regulation]
     source: Source
 
 
@@ -82,3 +96,41 @@ async def get_procedure(
             detail="No se encontró el trámite solicitado.",
         )
     return ProcedureDetailResponse(procedure=procedure, source=catalog.source)
+
+
+def get_regulation_registry() -> RegulationRegistry:
+    """Elige qué registro de normas se usa; los tests lo reemplazan por uno falso."""
+    return BoletinOficialRegulationRegistry()
+
+
+@router.get(
+    "/regulations/{regulation_type}/{number}/{year}",
+    response_model=RegulationLookupResponse,
+)
+async def find_regulation(
+    registry: Annotated[RegulationRegistry, Depends(get_regulation_registry)],
+    regulation_type: Annotated[RegulationType, Path(description="Tipo de norma.")],
+    number: Annotated[int, Path(ge=1, description="Número de la norma, por ejemplo: 6101.")],
+    year: Annotated[
+        int, Path(ge=1900, le=2100, description="Año de la norma con cuatro dígitos.")
+    ],
+) -> RegulationLookupResponse:
+    """Busca una ley o un decreto de la Ciudad de Buenos Aires en el Boletín Oficial.
+
+    La norma se muestra como referencia de la fuente oficial: CONCO no interpreta su
+    alcance ni determina si se aplica a un caso concreto (RN-04). Puede haber más de una
+    norma con el mismo tipo, número y año (por ejemplo, decretos del Poder Ejecutivo y de la
+    Legislatura).
+    """
+    try:
+        regulations = await registry.find(regulation_type, number, year)
+    except RegulationLookupError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY, detail=REGULATIONS_UNAVAILABLE_DETAIL
+        ) from exc
+    if not regulations:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No se encontró la norma solicitada en el Boletín Oficial.",
+        )
+    return RegulationLookupResponse(regulations=regulations, source=registry.source)
