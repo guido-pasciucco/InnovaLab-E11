@@ -25,9 +25,14 @@ back/
 ├── src/
 │   └── conco/                # paquete principal (src layout)
 │       ├── __init__.py
-│       ├── main.py           # instancia FastAPI, CORS, endpoints /health y /
+│       ├── main.py           # instancia FastAPI, CORS, /health, / y routers
 │       ├── config.py         # Settings: cors_origins, georef_base_url, timeout
-│       └── integrations/     # un subpaquete por API externa
+│       ├── geolocation/      # API propia: funcionalidad de geolocalización
+│       │   ├── __init__.py
+│       │   ├── api.py        # entrada: endpoint GET /geolocation/addresses
+│       │   ├── domain.py     # modelos propios + puerto AddressFinder
+│       │   └── infrastructure.py # adaptador: Georef → dominio
+│       └── integrations/     # APIs externas: un subpaquete por API
 │           ├── __init__.py
 │           └── georef/
 │               ├── __init__.py
@@ -59,6 +64,32 @@ back/
 | `tests/fixtures/<api>/` | Respuestas reales capturadas | JSON tal cual lo devuelve la API. Sirven de input para los tests unitarios. |
 | `tests/conftest.py` | Config global de pytest | Hoy solo fija `anyio_backend = "asyncio"` para tests async. |
 
+## API propia vs APIs externas
+
+El backend sigue arquitectura hexagonal (Ports & Adapters). La frontera entre lo que el sistema **expone** y lo que **consume** se ve en la estructura de carpetas:
+
+| Lado | Dónde | Qué es |
+|---|---|---|
+| Entrada (driving) — **API propia** | `src/conco/<funcionalidad>/api.py` | Endpoints que CONCO expone al frontend. Un router de FastAPI por funcionalidad. |
+| Núcleo | `src/conco/<funcionalidad>/domain.py` | Modelos propios y el puerto (`Protocol`) que la funcionalidad necesita. No conoce HTTP ni APIs externas. |
+| Frontera (adaptador) | `src/conco/<funcionalidad>/infrastructure.py` | Implementa el puerto usando una integración y traduce sus datos al dominio (*anti-corruption layer*). |
+| Salida (driven) — **APIs externas** | `src/conco/integrations/<api>/` | Clientes HTTP y modelos crudos de cada API de terceros. Sin lógica de negocio. |
+
+```
+api.py  →  domain.py (puerto)  ←  infrastructure.py  →  integrations/<api>/
+(propia)                          (traduce)              (externa)
+```
+
+Reglas de dependencia:
+
+1. **`api.py` nunca importa de `integrations/`.** Depende del puerto de `domain.py`; el adaptador concreto se inyecta con `Depends`.
+2. **`domain.py` no importa de ningún otro módulo del proyecto.** Es el centro; todo lo demás depende de él.
+3. **Solo `infrastructure.py` importa de `integrations/`.** Es el único punto de contacto entre la API propia y una externa.
+4. **`integrations/<api>/` no importa de ninguna funcionalidad.** Una integración no sabe quién la usa.
+5. **Los modelos externos no cruzan la frontera.** Un `GeorefAddress` nunca sale en una respuesta de la API propia; se convierte a `Address` en `infrastructure.py`.
+
+Para saber de qué lado está un archivo: si está dentro de `integrations/`, habla con una API externa; si está dentro de una carpeta de funcionalidad, es parte de la API propia.
+
 ## Tests y fixtures
 
 Los tests están separados en dos capas — unitarios sin internet (`tests/unit/`, con `respx` + fixtures) e integración con internet (`tests/integration/`, opt-in vía `pytest -m integration`). El detalle completo está en [testing.md](testing.md).
@@ -73,6 +104,6 @@ Los tests están separados en dos capas — unitarios sin internet (`tests/unit/
 
 ## Estado actual
 
-- FastAPI con `/` y `/health` — el endpoint de geolocalización está documentado en `docs/prs/pr-03-geolocation-endpoint.md` pero aún no está implementado en `main.py`.
+- FastAPI con `/`, `/health` y `GET /geolocation/addresses` (router de `geolocation/api.py`).
 - Única integración implementada: Georef (`/direcciones`).
-- Estructura pensada para crecer a capas de dominio/aplicación/infraestructura cuando las APIs se conecten a endpoints reales (ver `back/README.md` §Crecimiento previsto).
+- La capa de aplicación (casos de uso) se agregará cuando haya lógica que coordinar (ver `back/README.md` §Crecimiento previsto).

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from conco.config import settings
+from conco.geolocation.api import router as geolocation_router
 
 app = FastAPI(
     title="CONCO API",
@@ -17,6 +18,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(geolocation_router)
 
 
 @app.get("/health", tags=["Estado"])

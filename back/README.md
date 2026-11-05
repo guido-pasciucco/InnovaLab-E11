@@ -34,6 +34,10 @@ back/
 │   └── conco/
 │       ├── main.py             # crea la app de FastAPI y configura CORS
 │       ├── config.py           # lee las variables de entorno con tipos
+│       ├── geolocation/        # funcionalidad: buscar direcciones para el mapa
+│       │   ├── domain.py       # Address, el puerto AddressFinder y AddressSearchError
+│       │   ├── infrastructure.py # adaptador que usa Georef y lo traduce al dominio
+│       │   └── api.py          # endpoint GET /geolocation/addresses
 │       └── integrations/       # un paquete por cada API externa
 │           └── georef/
 │               ├── client.py   # única ubicación de las llamadas HTTP a Georef
@@ -46,11 +50,16 @@ back/
     ├── fixtures/               # respuestas reales guardadas, una carpeta por API
     │   └── georef/
     ├── unit/                   # sin internet: las APIs externas se simulan
-    │   └── georef/
-    │       └── test_client.py
+    │   ├── georef/
+    │   │   └── test_client.py
+    │   └── geolocation/
+    │       ├── test_georef_finder.py
+    │       └── test_api.py
     └── integration/            # con internet: llaman a las APIs reales
-        └── georef/
-            └── test_client.py
+        ├── georef/
+        │   └── test_client.py
+        └── geolocation/
+            └── test_api.py
 ```
 
 Cada carpeta con código Python dentro de `src/` incluye un archivo `__init__.py`, que la convierte en un paquete importable. Las carpetas de `tests/` no lo necesitan.
@@ -61,7 +70,10 @@ Cada carpeta con código Python dentro de `src/` incluye un archivo `__init__.py
 
 | Parte | Responsabilidad | No hace |
 |---|---|---|
-| `main.py` | Crea la app y registra el middleware de CORS | Consumir APIs externas |
+| `main.py` | Crea la app, registra el middleware de CORS y los routers | Consumir APIs externas |
+| `<funcionalidad>/domain.py` | Define los conceptos propios del sistema y el puerto que necesita | Conocer APIs externas |
+| `<funcionalidad>/infrastructure.py` | Implementa el puerto usando una integración y traduce sus datos al dominio | Exponer endpoints |
+| `<funcionalidad>/api.py` | Valida la consulta HTTP y traduce errores a códigos HTTP | Conocer qué API externa se usa |
 | `config.py` | Expone URLs y orígenes permitidos leídos del `.env` | Contener valores hardcodeados |
 | `integrations/<api>/client.py` | Hace la llamada HTTP a una API externa | Conocer reglas de negocio |
 | `integrations/<api>/models.py` | Describe la respuesta de esa API | Representar conceptos propios del sistema |
@@ -98,6 +110,30 @@ Ejemplo de respuesta (abreviado), obtenido con `direccion=Corrientes 2500`:
 }
 ```
 
+## Endpoint de geolocalización
+
+`GET /geolocation/addresses` convierte una dirección escrita libremente en direcciones normalizadas con coordenadas aproximadas.
+
+| Parámetro | Obligatorio | Valor por defecto | Validación |
+|---|---|---|---|
+| `address` | Sí | — | Entre 3 y 200 caracteres, no solo espacios |
+| `province` | No | `caba` | Nombre o id de provincia de Georef |
+| `limit` | No | `5` | Entre 1 y 10 |
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` con `{"addresses": [...]}` | La búsqueda funcionó; la lista puede venir vacía |
+| `422` | Los parámetros no cumplen la validación |
+| `502` | Georef no respondió o devolvió algo inesperado |
+
+`coordinates` puede venir en `null` cuando Georef no tiene datos suficientes para ubicar la dirección.
+
+Para probarlo a mano, levantar la API y abrir `http://127.0.0.1:8000/docs`:
+
+```bash
+uv run uvicorn conco.main:app --reload
+```
+
 ## Cómo incorporar una API nueva
 
 Cada API se integra y se prueba por separado, en este orden:
@@ -122,7 +158,7 @@ Primero se observa la respuesta y después se modela. No se escriben modelos a p
 
 ## Crecimiento previsto
 
-Cuando una API se conecte a un endpoint real, se agregará una carpeta por funcionalidad (por ejemplo, `geolocation/` para direcciones y `guidance/` para orientación por actividad), con capas de dominio, aplicación, infraestructura y API. Hasta entonces, la estructura se mantiene mínima.
+Cada funcionalidad que expone un endpoint tiene su carpeta (`geolocation/` ya existe; `guidance/` para orientación por actividad vendrá después), con capas de dominio, infraestructura y API. La capa de aplicación (casos de uso) se agregará cuando haya lógica que coordinar, por ejemplo caché o combinar varias APIs; mientras tanto, el endpoint usa el puerto directamente.
 
 ## Checklist de la primera integración
 

@@ -27,13 +27,15 @@ export type TerritorialFeature = {
 export type ConsultationRequest = {
   activity: string;
   address: string;
+  /** Coordinates of the address picked from the suggestions; null when unknown. */
+  point?: GeoPoint | null;
 };
 
 export type ConsultationResponse = {
   consultationId: string;
   interpretedActivity: string;
   normalizedAddress: string;
-  point: GeoPoint;
+  point: GeoPoint | null;
   summary: string;
   steps: GuidanceStep[];
   territorialFeatures: TerritorialFeature[];
@@ -47,3 +49,16 @@ export type FollowUpResponse = {
   sourceIds: string[];
   limitations?: string[];
 };
+
+/** Address returned by GET /geolocation/addresses (snake_case, as the backend sends it). */
+export type Address = {
+  full_address: string;
+  street: string | null;
+  number: number | null;
+  department: string | null;
+  locality: string | null;
+  province: string | null;
+  coordinates: { latitude: number; longitude: number } | null;
+};
+
+export type AddressSearchResponse = { addresses: Address[] };

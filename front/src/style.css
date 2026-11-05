@@ -59,6 +59,15 @@ h1,h2,h3 { font-family:"Manrope", sans-serif; }
 .query-field input:focus,.assistant-form textarea:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgb(3 92 128 / 10%); }
 .query-field input[aria-invalid="true"] { border-color:#B42318; }
 .field-hint,.hint { display:block; margin:7px 0 0; color:var(--text-muted); font-size:11px; line-height:1.6; }
+.field-hint--warning { color:#8A5A00; }
+.address-autocomplete { position:relative; }
+.address-suggestions { position:absolute; z-index:20; top:calc(100% + 4px); left:0; right:0; max-height:280px; margin:0; padding:6px; overflow-y:auto; list-style:none; border:1px solid var(--border); border-radius:8px; background:var(--white); box-shadow:var(--shadow); }
+.address-suggestion { display:flex; flex-direction:column; gap:2px; padding:9px 10px; border-radius:6px; cursor:pointer; }
+.address-suggestion strong { color:var(--ink); font-size:13px; }
+.address-suggestion span { color:var(--text-muted); font-size:11px; }
+.address-suggestion.is-active { background:var(--bg); }
+.address-suggestions__status { padding:9px 10px; color:var(--text-muted); font-size:12px; }
+.address-suggestions__status--error { color:#8A5A00; }
 .primary,.secondary { min-height:45px; display:inline-flex; align-items:center; justify-content:center; gap:9px; padding:11px 18px; border:1px solid transparent; border-radius:8px; font-size:13px; font-weight:700; }
 .primary { background:var(--yellow); border-color:var(--yellow); color:var(--ink); }
 .primary:hover:not(:disabled) { background:#E8BA00; border-color:#E8BA00; transform:translateY(-1px); box-shadow:0 5px 14px rgb(29 51 67 / 12%); }
