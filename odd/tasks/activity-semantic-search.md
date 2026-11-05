@@ -17,11 +17,11 @@
 
 | ID | Specs | Route | Status | Commit |
 |---|---|---|---|---|
-| T1 | S3, S4, S5 | inline | pending | |
-| T2 | S1, S2, S7 | inline | pending | |
-| T3 | S7 | inline | pending | |
-| T4 | S6 | inline | pending | |
-| T5 | S1–S6 | inline | pending | |
+| T1 | S3, S4, S5 | inline | done | f582840 |
+| T2 | S1, S2, S7 | inline | done (RED import error → GREEN 18 tests) | f582840 |
+| T3 | S7 | inline | done | f582840, 0d1a5fd |
+| T4 | S6 | inline | done (typecheck + build; front has no test runner) | 0d1a5fd |
+| T5 | S1–S6 | inline | done (browser check) | — |
 
 - T1: config, dependencies, domain port, embedding + Postgres adapters, curated data file, loader command.
 - T2: activity endpoints and their tests.
@@ -36,3 +36,6 @@ Risk: item 5 (new runtime dependencies `fastembed`, `psycopg`, and a database th
 - **L1 (2026-11-05)** — "bueno quiero implementarlo apra este pr para que sea util la api y para el frontend"
 - **L2 (2026-11-05)** — "todo dentro de este pr pero no se si crea otra api para lo del modelo"
 - **L3** — Evidence from the prototype (`back/scripts/learning/procedures_lab.py`): searching procedures directly fails for one-word activities ("Habilitación de actividad económica" never ranks); matching against curated activity aliases works (barbería → Peluquería 0.85, cafetería 0.94, gimnasio 0.30 = no match). Short rare words score spuriously high (~0.7), so the UI lets the person pick among suggestions instead of auto-selecting.
+- **L4** — Design: procedures are stored without embeddings (searching them failed in the prototype); only activity aliases are embedded. The curated file moved to `back/src/conco/guidance/data/activities.json`; the prototype script was removed. `_to_procedure` became the public `to_procedure`, reused by the loader. CABA models gained the optional `field_sector_economico` (`sector`); search requests do not ask for it, so their behavior is unchanged.
+- **L5** — Evidence: `uv run pytest` → 95 passed, 10 deselected; `uv run pytest -m database` → 4 passed (barbería → peluqueria, gimnasio → none, cafetería procedures in curated order, unknown → None). Loader: 868 procedures, 6 activities, 34 aliases. Front: `npm run typecheck` and `npm run build` pass. Browser: "quiero poner una barbería" → suggestion «Peluquería · parecido a «barbería»» → step 3 lists 4 official procedures with note, link and the CABA source; "quiero abrir un gimnasio" → "No encontramos una actividad parecida"; no console errors.
+- **L6** — Open: the curated relation is a draft (RN-04) and needs domain review; deploy needs Postgres + pgvector and ~600 MB RAM for the model.
