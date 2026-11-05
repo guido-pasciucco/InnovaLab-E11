@@ -37,7 +37,15 @@ npm run preview
 Copiá `.env.example` a `.env` si necesitás personalizar la conexión:
 
 - `VITE_API_BASE_URL`: URL base de la API. Por defecto `/api`.
-- `VITE_USE_MOCK_API`: usar datos simulados cuando el valor no sea `false`. Para llamar al backend, configurá `false` y una URL de API válida.
+- `VITE_USE_MOCK_API`: usar datos simulados para la consulta y el asistente cuando el valor no sea `false`, hasta que el backend publique esos endpoints. Para llamar al backend, configurá `false` y una URL de API válida.
+
+El buscador de direcciones no tiene datos simulados: siempre consulta al backend (`GET /geolocation/addresses`). En desarrollo, Vite reenvía `/api` al backend en `http://localhost:8000` (quitando el prefijo `/api`), así que el backend tiene que estar levantado.
+
+## Buscador de direcciones
+
+- El campo de dirección sugiere direcciones normalizadas de Georef a medida que se escribe (desde 3 caracteres, con 300 ms de espera entre pedidos).
+- Hay que elegir una sugerencia para continuar; su coordenada es la que muestra el mapa del paso 4.
+- Si el servicio de direcciones no responde, se acepta la dirección escrita y el mapa se muestra sin marcador.
 
 ## Consideraciones funcionales
 

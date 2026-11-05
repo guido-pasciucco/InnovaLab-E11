@@ -18,6 +18,9 @@ const defaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = defaultIcon;
 
+// Used when the address has no coordinates: the map shows the city without a marker.
+const CABA_CENTER: GeoPoint = { lat: -34.6037, lng: -58.4416 };
+
 function Recenter({ point }: { point: GeoPoint }) {
   const map = useMap();
   useEffect(() => {
@@ -31,7 +34,7 @@ export default function MapPanel({
   address,
   features,
 }: {
-  point: GeoPoint;
+  point: GeoPoint | null;
   address: string;
   features: TerritorialFeature[];
 }) {
@@ -77,22 +80,27 @@ export default function MapPanel({
           </div>
           <span className="badge">OpenStreetMap</span>
         </div>
-        <MapContainer center={[point.lat, point.lng]} zoom={15} scrollWheelZoom className="map">
-          <Recenter point={point} />
+        {!point && (
+          <p className="small-note" role="status">No pudimos ubicar esta dirección en el mapa. Mostramos la Ciudad como referencia.</p>
+        )}
+        <MapContainer center={[(point ?? CABA_CENTER).lat, (point ?? CABA_CENTER).lng]} zoom={point ? 15 : 12} scrollWheelZoom className="map">
+          {point && <Recenter point={point} />}
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <Marker position={[point.lat, point.lng]}>
-            <Popup>{address}</Popup>
-          </Marker>
+          {point && (
+            <Marker position={[point.lat, point.lng]}>
+              <Popup>{address}</Popup>
+            </Marker>
+          )}
           {features.filter((feature) => visibleLayers.includes(feature.id)).map((feature) => (
             <GeoJSON key={feature.id} data={feature.geometry} />
           ))}
         </MapContainer>
         <p className="hint">
-          La precisión del punto y las capas dependen de la información que entregue el backend.
-          En la versión de demostración, la coordenada puede ser ilustrativa.
+          La ubicación del punto es aproximada: la informa el servicio nacional de direcciones Georef.
+          Las capas dependen de la información que entregue el backend.
         </p>
       </section>
     </div>
