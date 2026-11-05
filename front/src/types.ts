@@ -86,9 +86,21 @@ export type OfficialProcedure = {
   last_updated: string;
 };
 
+/** Context answers keyed by question id; a missing key means "not answered". */
+export type ContextAnswers = Record<string, boolean>;
+
+export type ContextQuestion = {
+  id: string;
+  text: string;
+  answer: boolean | null;
+};
+
 /** Response of GET /guidance/activities/{slug}/procedures. */
 export type ActivityProceduresResponse = {
   activity: { slug: string; name: string };
-  procedures: { procedure: OfficialProcedure; note: string }[];
+  questions: ContextQuestion[];
+  /** `applies`: no conditions or all met; `may_apply`: some condition is still unanswered. */
+  procedures: { procedure: OfficialProcedure; note: string; status: 'applies' | 'may_apply' }[];
+  excluded_count: number;
   source: OfficialSource;
 };

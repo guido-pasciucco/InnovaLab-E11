@@ -217,3 +217,16 @@ h1,h2,h3 { font-family:"Manrope", sans-serif; }
 .map-location strong { color:var(--ink); font-size:12px; line-height:1.5; overflow-wrap:anywhere; }
 .map-workspace .map-panel { min-width:0; }
 @media (max-width:850px) { .map-workspace { grid-template-columns:1fr; } }
+.context-card { margin-bottom:18px; padding:20px; }
+.context-card h2 { margin:0 0 4px; font-size:16px; }
+.context-question { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px 0; border-top:1px solid #E8EEF1; font-size:13px; }
+.context-question:first-of-type { margin-top:12px; }
+.answer-toggle { display:flex; flex:0 0 auto; border:1px solid var(--border); border-radius:7px; overflow:hidden; }
+.answer-toggle button { padding:6px 12px; border:0; border-left:1px solid var(--border); background:var(--white); color:var(--text-soft); font-size:12px; font-weight:600; }
+.answer-toggle button:first-child { border-left:0; }
+.answer-toggle button.is-selected { background:var(--blue); color:var(--white); }
+.guidance-tag--maybe { background:#FFF9DF; color:#5D4D1B; }
+.excluded-note { margin:0 0 14px; color:var(--text-muted); font-size:12px; }
+@media (max-width: 560px) {
+  .context-question { flex-direction:column; align-items:flex-start; gap:8px; }
+}

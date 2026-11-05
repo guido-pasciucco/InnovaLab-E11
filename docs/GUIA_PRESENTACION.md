@@ -14,6 +14,7 @@ La persona escribe qué quiere hacer y dónde. CONCO **ubica la dirección con d
 | 1 · Dirección | Autocompletado con direcciones normalizadas de CABA | ✅ Real | API Georef (Gobierno Nacional) |
 | 2 · Análisis | Pantalla de «interpretando tu consulta» | ⚠️ Demostración | Espera simulada; no hay análisis real |
 | 3 · Orientación (con actividad elegida) | Trámites oficiales, cuándo aplica cada uno, resumen, enlace y fuente | ✅ Real | API de trámites de la Ciudad + relación curada |
+| 3 · Preguntas de contexto | «¿Vas a contratar personal?», «¿menos de 200 m²?»… descartan trámites en vivo | ✅ Real | Condiciones de la relación curada |
 | 3 · Orientación (sin actividad elegida) | Tres pasos genéricos | ⚠️ Demostración | Datos fijos del frontend |
 | 3 · Fuentes | «Trámites del Gobierno de la Ciudad», con licencia | ✅ Real | API de trámites de la Ciudad |
 | 3 · Fuentes | «Guía oficial de habilitaciones (fuente piloto)» y dos datasets piloto | ⚠️ Demostración | Datos fijos del frontend |
@@ -51,9 +52,10 @@ La persona escribe qué quiere hacer y dónde. CONCO **ubica la dirección con d
 2. **Dirección real.** Escribir `Av. Santa Fe 1800` y elegir la sugerencia. Decir: «normalizamos la dirección con Georef, la API oficial de direcciones, y la ubicamos en el mapa».
 3. **Actividad con otras palabras.** Escribir `quiero poner una barbería`. Aparece **Peluquería · parecido a «barbería»**. Decir: «el sistema entiende el significado, no solo las palabras: barbería no aparece en ningún lado y aun así encuentra peluquería».
 4. **Trámites oficiales.** Enviar y mostrar el paso 3: Habilitación de actividad económica (y la exprés), cartel o toldo, Registro de Empleadores. Señalar **«Cuándo aplica»** y el enlace a buenosaires.gob.ar. Decir: «cada trámite viene de la Ciudad y cita su fuente».
-5. **Honestidad del sistema.** Volver, escribir `quiero abrir un gimnasio`: «No encontramos una actividad parecida». Decir: «si no sabemos, lo decimos; no inventamos trámites».
-6. **Mapa.** Mostrar el marcador. Aclarar que las capas territoriales todavía no están.
-7. **Cierre.** Próximos pasos: validar la lista curada con alguien del área, sumar actividades, Código Urbanístico para saber si la actividad está permitida en esa dirección.
+5. **Más contexto, lista más precisa.** En «Contanos más de tu comercio», responder «No» a personal y «Sí» a menos de 200 m²: desaparecen el Registro de Empleadores y la rúbrica laboral. Después «Sí» a continuar un local ya habilitado: las habilitaciones se reemplazan por la Transmisión. Decir: «la habilitación es una sola; lo que cambia según tu comercio son los trámites que se suman».
+6. **Honestidad del sistema.** Volver, escribir `quiero abrir un gimnasio`: «No encontramos una actividad parecida». Decir: «si no sabemos, lo decimos; no inventamos trámites».
+7. **Mapa.** Mostrar el marcador. Aclarar que las capas territoriales todavía no están.
+8. **Cierre.** Próximos pasos: validar la lista curada con alguien del área, sumar actividades, Código Urbanístico para saber si la actividad está permitida en esa dirección.
 
 Consultas que salen bien: `cafetería`, `abrir una confitería`, `quiero poner una barbería`, `vender pizzas`, `food truck`, `local de ropa`.
 
@@ -62,7 +64,7 @@ Evitar en vivo: `abrir un maxikiosco` y `local de zapatillas` (sugieren Restaura
 ## Lo que todavía no hace
 
 - **No dice si la actividad está permitida en esa dirección.** Eso depende del Código Urbanístico (usos por zona), que es otra fuente y no está integrada.
-- **No personaliza los trámites.** Muestra los que *suelen* aplicar y en qué caso («si vas a contratar personal»), pero no sabe los m² del local ni si habrá empleados.
+- **Personaliza poco.** Seis preguntas de sí o no descartan trámites, pero no decide entre habilitación común y exprés (eso depende del rubro y la zona, en el Código Urbanístico) y las condiciones son un borrador sin validar.
 - **No analiza la consulta.** El paso 2 es una espera simulada; no hay IA interpretando el texto.
 - **El asistente no responde de verdad.** Devuelve un texto fijo.
 - **El mapa no tiene capas.** Solo el marcador de la dirección.
