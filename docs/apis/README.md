@@ -49,15 +49,19 @@ Convenciones comunes a todas las integraciones:
 
 > Al momento de escribir este documento, `GUIA_INTEGRACION_APIS.md` y `APIS_CON_REGISTRO.md` existen en la copia local pero todavía no están versionados en el repositorio.
 
+## Candidatas en evaluación
+
+APIs probadas que todavía no están integradas: [`candidatas/`](candidatas/README.md) (USIG Catastro, Ciudad 3D, habilitaciones aprobadas de la AGC, diccionario CLAE de CEP XXI, OpenStreetMap y Mapa de Oportunidades Comerciales).
+
 ## Candidatas descartadas
 
 Se evaluaron con llamadas reales el 2026-10-31 (PR #53 y PR #57 de `guido-pasciucco/InnovaLab-E11`).
 
 | Candidata | Motivo del descarte |
 |---|---|
-| BA Data (CKAN de `data.buenosaires.gob.ar`) | Bloquea las consultas del servidor con un desafío anti-bots y sus datos son descargas masivas (requieren base de datos) |
+| BA Data (CKAN de `data.buenosaires.gob.ar`) | Bloquea las consultas del servidor con un desafío anti-bots y sus datos son descargas masivas (requieren base de datos). **Corrección del 2026-11-05:** `package_show` y `package_list` sí responden JSON y los archivos se descargan desde `cdn.buenosaires.gob.ar`; solo `package_search` sigue bloqueado. Ver [habilitaciones aprobadas](candidatas/habilitaciones-aprobadas.md) |
 | datos.gob.ar (CKAN de Nación) | Sin resultados útiles para trámites de CABA |
-| CLAE / nomenclador de actividades | No es consultable en vivo y es una clasificación fiscal nacional |
+| CLAE / nomenclador de actividades | No es consultable en vivo y es una clasificación fiscal nacional. Como descarga sí sirve: ver [CEP XXI](candidatas/cep-xxi-clae.md) |
 | Guía de trámites de argentina.gob.ar | No expone una API pública |
 | USIG `normalizar` | Georef ya cubre la normalización y las coordenadas |
 | JSON:API de la Ciudad, `node/sedes` | Los horarios son de relleno (`00:00 a 00:00`) |
@@ -69,3 +73,22 @@ Se evaluaron con llamadas reales el 2026-10-31 (PR #53 y PR #57 de `guido-pasciu
 | Padrón de AFIP | Requiere certificado |
 
 Fecha de verificación: 2026-10-31.
+
+### Relevamiento del 2026-11-05
+
+Búsqueda de fuentes para relacionar la actividad con su rubro y sus trámites. Estas no tienen API utilizable o aportan poco:
+
+| Candidata | Motivo del descarte |
+|---|---|
+| ARCA `soa.afip.gob.ar/sr-padron/v2` y `sr-parametros/v1/actividades` | Responden `404`: ya no existen |
+| argentina.gob.ar `/jsonapi` y `/api/node/tramite` | Responden `404` |
+| JSON:API de buenosaires.gob.ar para rubros | No hay tipos de contenido de rubros; `taxonomy_term/tematicas` está vacío y `search_page` pide autorización |
+| Nomenclador NAES de AGIP y tabla NAES ↔ CLAE (Comisión Arbitral) | Solo PDF o Excel publicados por resolución (RG 19/2025), sin buscador |
+| Rubros de la AGC por Ley 6101 y cuadro de asimilación (Decreto 87/19) | Solo PDF y normativa, sin buscador público |
+| MOC en vivo | Plataforma discontinuada; quedan los [CSV históricos](candidatas/mapa-oportunidades-comerciales.md) |
+| `cdn.buenosaires.gob.ar` como directorio | `403` al listar; los archivos sueltos sí se descargan |
+| `hub.tumidata.org` (copia de habilitaciones) | No respondió |
+| datos.jus.gob.ar (IGJ, Registro Nacional de Sociedades) | Permite consultas, pero solo hay una muestra de sociedades sin columna de actividad |
+| ESCO (Comisión Europea) | Ocupaciones, no actividades comerciales; solo serviría para sinónimos |
+| Wikidata (código CIIU, P1796) | Cobertura muy baja: 436 ítems y ninguno para «peluquería» |
+| ANMAT, INAES, Mi Argentina | No se encontró API pública (sin verificar con llamadas) |

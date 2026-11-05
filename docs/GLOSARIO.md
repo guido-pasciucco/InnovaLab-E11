@@ -216,6 +216,25 @@ Comportamiento alternativo cuando algo falla (ej.: una fuente no responde), para
 
 ---
 
+## Catastro y territorio
+
+### Catastro
+Registro oficial que describe los bienes inmuebles de un territorio: qué existe, dónde está, de quién es y cuánto mide. En CABA lo gestiona el organismo catastral junto con AGIP (fiscal) y USIG (geoespacial). Equivale al "libro de planos" de la ciudad.
+
+### Parcela
+Unidad catastral básica: un predio de dominio continuo con límites definidos. Es lo que se percibe como "el terreno o edificio" en una dirección (ej.: el inmueble de Av. Corrientes 2801). En CABA la ciudad se divide en circunscripciones → secciones → manzanas → parcelas (~391.400).
+
+### SMP (Sistema de Mensura Parcelaria)
+Código compuesto de identificación catastral de una parcela en CABA: `sección-manzana-parcela` (ej.: `013-099-018` = sección 013, manzana 099, parcela 018). Es el identificador que usan los servicios de USIG para consultar datos de la parcela, como Ciudad 3D.
+
+### Sección / Manzana catastral
+Niveles de la división catastral de CABA: la ciudad tiene 99 secciones y ~12.192 manzanas. Cada manzana agrupa parcelas; cada sección agrupa manzanas. Juntas con la parcela forman el SMP.
+
+### Dirección → punto → SMP → distrito
+Cadena de consultas para pasar de una dirección escrita a los datos urbanísticos de su parcela: la dirección se geocodifica a coordenadas (Georef), el punto se resuelve a una parcela con USIG Catastro (obtiene el SMP) y el SMP se consulta en Ciudad 3D (obtiene distrito, catalogación y afectaciones). Ver [`apis/candidatas/README.md`](apis/candidatas/README.md).
+
+---
+
 ## Roles del equipo
 
 | Rol | Responsabilidad principal |
