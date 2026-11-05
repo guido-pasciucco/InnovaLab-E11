@@ -18,5 +18,9 @@ class Settings(BaseSettings):
     caba_tramites_site_url: str = "https://buenosaires.gob.ar"
     caba_tramites_timeout_seconds: float = 10.0
 
+    usig_base_url: str = "https://ws.usig.buenosaires.gob.ar"
+    usig_docs_url: str = "http://usig.buenosaires.gob.ar/apis/"
+    usig_timeout_seconds: float = 10.0
+
 
 settings = Settings()

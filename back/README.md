@@ -13,6 +13,7 @@ El backend es el único punto que consume APIs externas. El frontend se comunica
 3. Proporcionar orientación general sobre los procedimientos.
 4. Ofrecer enlaces de referencia oficiales.
 5. Geocodificar una dirección para mostrar una ubicación aproximada en el mapa.
+6. Informar barrio, comuna y código postal de una dirección o un punto de CABA.
 
 ## Tecnologías
 
@@ -34,10 +35,10 @@ back/
 │   └── conco/
 │       ├── main.py             # crea la app de FastAPI y configura CORS
 │       ├── config.py           # lee las variables de entorno con tipos
-│       ├── geolocation/        # funcionalidad: buscar direcciones para el mapa
-│       │   ├── domain.py       # Address, el puerto AddressFinder y AddressSearchError
-│       │   ├── infrastructure.py # adaptador que usa Georef y lo traduce al dominio
-│       │   └── api.py          # endpoint GET /geolocation/addresses
+│       ├── geolocation/        # funcionalidad: buscar direcciones para el mapa y ubicarlas en CABA
+│       │   ├── domain.py       # Address, AddressContext, Source, los puertos AddressFinder y AddressContextProvider y sus errores
+│       │   ├── infrastructure.py # adaptadores que usan Georef y USIG y los traducen al dominio
+│       │   └── api.py          # endpoints GET /geolocation/addresses y /geolocation/address-context
 │       ├── guidance/           # funcionalidad: orientación sobre trámites oficiales
 │       │   ├── domain.py       # Procedure, ProcedureDetail, Source, el puerto ProcedureCatalog y ProcedureSearchError
 │       │   ├── infrastructure.py # adaptador que usa la API de trámites de la Ciudad y pasa el HTML a texto
@@ -46,26 +47,35 @@ back/
 │           ├── georef/
 │           │   ├── client.py   # única ubicación de las llamadas HTTP a Georef
 │           │   └── models.py   # forma de la respuesta JSON de Georef
-│           └── caba_tramites/
-│               ├── client.py   # única ubicación de las llamadas HTTP a la API de trámites de la Ciudad
-│               └── models.py   # forma de la respuesta JSON:API de trámites
+│           ├── caba_tramites/
+│           │   ├── client.py   # única ubicación de las llamadas HTTP a la API de trámites de la Ciudad
+│           │   └── models.py   # forma de la respuesta JSON:API de trámites
+│           └── usig/
+│               ├── client.py   # única ubicación de las llamadas HTTP a USIG (datos útiles)
+│               └── models.py   # forma de la respuesta de datos útiles (solo los campos usados)
 ├── scripts/
 │   └── probes/                 # un script por API para explorarla en forma aislada
 │       ├── georef.py           # ejecuta el cliente e imprime lo que devuelve
-│       └── caba_tramites.py
+│       ├── caba_tramites.py
+│       └── usig.py
 └── tests/
     ├── conftest.py             # configuración compartida de pytest
     ├── fixtures/               # respuestas reales guardadas, una carpeta por API
     │   ├── georef/
-    │   └── caba_tramites/
+    │   ├── caba_tramites/
+    │   └── usig/
     ├── unit/                   # sin internet: las APIs externas se simulan
     │   ├── georef/
     │   │   └── test_client.py
     │   ├── caba_tramites/
     │   │   └── test_client.py
+    │   ├── usig/
+    │   │   └── test_client.py
     │   ├── geolocation/
     │   │   ├── test_georef_finder.py
-    │   │   └── test_api.py
+    │   │   ├── test_usig_context_provider.py
+    │   │   ├── test_api.py
+    │   │   └── test_address_context_api.py
     │   └── guidance/
     │       ├── test_caba_catalog.py
     │       └── test_api.py
@@ -74,8 +84,11 @@ back/
         │   └── test_client.py
         ├── caba_tramites/
         │   └── test_client.py
+        ├── usig/
+        │   └── test_client.py
         ├── geolocation/
-        │   └── test_api.py
+        │   ├── test_api.py
+        │   └── test_address_context_api.py
         └── guidance/
             └── test_api.py
 ```
@@ -224,6 +237,92 @@ Para explorar la API en forma aislada:
 ```bash
 uv run python scripts/probes/caba_tramites.py habilitaci
 uv run python scripts/probes/caba_tramites.py --id 338718b4-a2a0-44af-baa4-083f5d834b12
+```
+
+## Tercera API: USIG (datos útiles)
+
+| Dato | Valor |
+|---|---|
+| Proveedor | Unidad de Sistemas de Información Geográfica (USIG), Gobierno de la Ciudad de Buenos Aires |
+| Endpoint | `GET https://ws.usig.buenosaires.gob.ar/datos_utiles` |
+| Documentación | `http://usig.buenosaires.gob.ar/apis/` (por `https` el certificado del sitio de documentación no valida; la API sí funciona por `https`) |
+| Acceso | Sin clave de acceso |
+| Licencia | Creative Commons Reconocimiento 2.5 Argentina (CC BY 2.5 AR) |
+| Uso en CONCO | Informar barrio, comuna y código postal de una dirección o de un punto de CABA |
+| Parámetros | `calle` y `altura`, o bien `x` (longitud) e `y` (latitud) en WGS84 |
+
+**Limitaciones:**
+
+- Todas las respuestas llegan con estado `200`, incluso los errores: si no encuentra la dirección devuelve el texto plano `ERROR: No se pudo normalizar o geocodificar la dirección.`; si faltan parámetros o no son números, devuelve una página de ayuda en HTML; si el punto está fuera de la Ciudad, devuelve JSON con `comuna` y `barrio` vacíos. El cliente informa la dirección no encontrada y el punto fuera de la Ciudad como "no encontrado" (`404` en los endpoints) y la página de ayuda como error (`502`).
+- El `Content-Type` no es confiable: por calle y altura declara `text/javascript` aunque el cuerpo es JSON. El cliente interpreta el cuerpo sin mirarlo.
+- Por coordenadas no se informan códigos postales.
+- La normalización de calles es estricta: por ejemplo, `Avenida de Mayo 500` no se encuentra.
+- La respuesta también trae `seccion_catastral` y `codigo_de_planeamiento_urbano`. CONCO **no** los usa ni los expone: no informa catastro ni zonificación (RN-04).
+- El servidor es antiguo; el cliente usa un tiempo máximo de espera (`USIG_TIMEOUT_SECONDS`) y ante cualquier falla responde con un error controlado.
+
+Ejemplo de respuesta (abreviado), obtenido con `calle=Corrientes&altura=2500`:
+
+```json
+{
+  "comuna": "Comuna 3",
+  "barrio": "Balvanera",
+  "codigo_postal": "1046",
+  "codigo_postal_argentino": "C1046AAP"
+}
+```
+
+## Endpoints de contexto de una dirección en CABA
+
+Informan barrio, comuna y códigos postales de una ubicación dentro de la Ciudad (RN-02). Toda respuesta incluye `source` con nombre, URL y licencia de la fuente oficial (RN-05). No informan catastro ni zonificación (RN-04).
+
+### `GET /geolocation/address-context`
+
+| Parámetro | Obligatorio | Validación |
+|---|---|---|
+| `street` | Sí | Entre 2 y 100 caracteres, no solo espacios |
+| `number` | Sí | Entero entre 1 y 99999 |
+
+### `GET /geolocation/address-context/by-coordinates`
+
+| Parámetro | Obligatorio | Validación |
+|---|---|---|
+| `latitude` | Sí | Entre -90 y 90 |
+| `longitude` | Sí | Entre -180 y 180 |
+
+Se validan solo los rangos generales de latitud y longitud: un punto fuera de CABA responde `404`, porque USIG no lo ubica en la Ciudad.
+
+Respuesta (`200`) de ambos endpoints:
+
+```json
+{
+  "context": {
+    "neighborhood": "Balvanera",
+    "commune": "Comuna 3",
+    "postal_code": "1046",
+    "argentine_postal_code": "C1046AAP"
+  },
+  "source": {
+    "name": "USIG - Datos útiles (Gobierno de la Ciudad de Buenos Aires)",
+    "url": "http://usig.buenosaires.gob.ar/apis/",
+    "license": "Creative Commons Reconocimiento 2.5 Argentina (CC BY 2.5 AR)"
+  }
+}
+```
+
+`postal_code` y `argentine_postal_code` pueden venir en `null` (por coordenadas siempre vienen en `null`).
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` | La ubicación está en CABA |
+| `404` | USIG no encuentra la dirección o la ubicación está fuera de CABA |
+| `422` | Los parámetros no cumplen la validación |
+| `502` | USIG no respondió o devolvió algo inesperado |
+
+Para explorar la API en forma aislada:
+
+```bash
+uv run python scripts/probes/usig.py Corrientes 2500
+uv run python scripts/probes/usig.py --coords -34.604792 -58.401981   # latitud longitud
 ```
 
 ## Cómo incorporar una API nueva
