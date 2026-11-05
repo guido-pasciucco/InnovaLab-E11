@@ -1,12 +1,48 @@
-#Frontend
+# ConCo — Frontend
 
-Esta carpeta contiene la interfaz de usuario de "CONCO". 
+Frontend de ConCo desarrollado con React, TypeScript y Vite. La experiencia se organiza en cinco etapas:
 
-"Sistema Inteligente de Gestión, Consultas, Comerciales, Para Emprendedores" 
+1. **Consulta:** actividad, dirección y ejemplos rápidos.
+2. **Análisis:** revisión de los datos ingresados y consulta al servicio.
+3. **Orientación:** trámites/requisitos orientativos, lista de revisión y fuentes.
+4. **Mapa:** visualización territorial con Leaflet.
+5. **Asistente:** envío de preguntas de seguimiento.
 
-Tecnologías:
+## Requisitos
 
-- React
-- TypeScript
-- Vite
-- Leaflet.
+- Node.js 20 o superior (recomendado).
+- npm.
+
+## Ejecutar en desarrollo
+
+Desde esta carpeta (`front`):
+
+```bash
+npm ci
+npm run dev
+```
+
+Abrí la URL local que informe Vite (normalmente `http://localhost:5173`).
+
+## Verificar y compilar
+
+```bash
+npm run typecheck
+npm run build
+npm run preview
+```
+
+## Configuración de API
+
+Copiá `.env.example` a `.env` si necesitás personalizar la conexión:
+
+- `VITE_API_BASE_URL`: URL base de la API. Por defecto `/api`.
+- `VITE_USE_MOCK_API`: usar datos simulados cuando el valor no sea `false`. Para llamar al backend, configurá `false` y una URL de API válida.
+
+## Consideraciones funcionales
+
+- El frontend conserva los servicios `submitConsultation` y `submitFollowUp` y el modelo de datos existente.
+- La respuesta mock está identificada como demostración; no equivale a una validación oficial de habilitaciones o zonificación.
+- El marcador geográfico de la respuesta mock es ilustrativo. Para producción, el backend debe geocodificar la dirección y devolver coordenadas y capas territoriales verificadas.
+- El asistente depende de la integración configurada en el backend; con mock devuelve una respuesta demostrativa.
+- El diseño se implementó tomando como referencia la paleta y la estructura de las vistas HTML/CSS/JS suministradas (cinco pasos, barra de consulta, orientación, mapa y asistente). No se recibió una exportación/captura verificable del frame de Figma, por lo que no se afirma una coincidencia píxel a píxel con ese archivo.
