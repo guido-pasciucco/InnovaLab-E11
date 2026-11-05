@@ -39,9 +39,13 @@ back/
 │       │   ├── infrastructure.py # adaptador que usa Georef y lo traduce al dominio
 │       │   └── api.py          # endpoint GET /geolocation/addresses
 │       ├── guidance/           # funcionalidad: orientación sobre trámites oficiales
-│       │   ├── domain.py       # Procedure, ProcedureDetail, Source, el puerto ProcedureCatalog y ProcedureSearchError
+│       │   ├── domain.py       # trámites, actividades y los puertos ProcedureCatalog, ActivityDirectory y TextEmbedder
 │       │   ├── infrastructure.py # adaptador que usa la API de trámites de la Ciudad y pasa el HTML a texto
-│       │   └── api.py          # endpoints GET /guidance/procedures y /guidance/procedures/{procedure_id}
+│       │   ├── embeddings.py   # adaptador que corre el modelo de embeddings dentro de la API
+│       │   ├── activity_directory.py # adaptador que busca actividades en Postgres con pgvector
+│       │   ├── load_catalog.py # comando que carga trámites y actividades en la base
+│       │   ├── data/activities.json # relación curada actividad → trámites (borrador)
+│       │   └── api.py          # endpoints GET /guidance/procedures y /guidance/activities
 │       └── integrations/       # un paquete por cada API externa
 │           ├── georef/
 │           │   ├── client.py   # única ubicación de las llamadas HTTP a Georef
@@ -226,6 +230,57 @@ uv run python scripts/probes/caba_tramites.py habilitaci
 uv run python scripts/probes/caba_tramites.py --id 338718b4-a2a0-44af-baa4-083f5d834b12
 ```
 
+## Búsqueda de actividades
+
+La API de trámites solo busca por texto en el título y ningún trámite menciona actividades: «cafetería» no encuentra «Habilitación de actividad económica». Por eso la relación entre actividades y trámites es **curada**: `src/conco/guidance/data/activities.json` dice, para cada actividad, qué trámites suelen aplicar y en qué caso. Es un **borrador** que tiene que revisar alguien que conozca el tema (RN-04).
+
+Para entender lo que escribe la persona se usan **embeddings**: un modelo multilingüe convierte cada nombre y sinónimo de actividad en un vector de 384 números, y la consulta se compara por similitud coseno. Así, «quiero poner una barbería» sugiere «Peluquería» aunque no compartan palabras.
+
+- El modelo (`paraphrase-multilingual-MiniLM-L12-v2`, ONNX con `fastembed`) corre **dentro de la API**, detrás del puerto `TextEmbedder`. Se carga en segundo plano al arrancar y ocupa unos 600 MB de RAM. La primera vez se descarga (~220 MB).
+- Los datos viven en Postgres con la extensión pgvector. En desarrollo se usa el Supabase local de `back/supabase/` (solo la base de datos, puerto `55322`).
+- Por debajo de `ACTIVITY_MIN_SIMILARITY` (0.5) no se sugiere nada. Con palabras cortas o poco comunes el modelo puede dar similitudes altas sin sentido, por eso el frontend muestra las sugerencias para que la persona elija, en vez de elegir solo.
+
+### Levantar la base y cargar los datos
+
+Desde la carpeta `back/` (necesita Docker):
+
+```bash
+npx supabase start -x gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+uv run python -m conco.guidance.load_catalog
+```
+
+`supabase start` aplica las migraciones de `supabase/migrations/`. `load_catalog` trae los 868 trámites publicados, valida el archivo curado y vectoriza los alias; se vuelve a correr cada vez que cambia `activities.json` o para actualizar los trámites. `npx supabase db reset` borra la base y vuelve a aplicar las migraciones (después hay que volver a cargar los datos).
+
+| Variable | Valor por defecto |
+|---|---|
+| `DATABASE_URL` | `postgresql://postgres:postgres@127.0.0.1:55322/postgres` |
+| `EMBEDDING_MODEL` | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (si cambia, hay que volver a cargar los datos) |
+| `ACTIVITY_MIN_SIMILARITY` | `0.5` |
+
+### `GET /guidance/activities`
+
+Sugiere actividades parecidas por significado al texto.
+
+| Parámetro | Obligatorio | Valor por defecto | Validación |
+|---|---|---|---|
+| `query` | Sí | — | Entre 2 y 100 caracteres, no solo espacios |
+| `limit` | No | `5` | Entre 1 y 10 |
+
+Respuesta (`200`): `{"activities": [{"slug": "peluqueria", "name": "Peluquería", "matched_alias": "barbería", "similarity": 0.8512}]}`, de la más a la menos parecida. La lista puede venir vacía.
+
+### `GET /guidance/activities/{slug}/procedures`
+
+Devuelve los trámites que suelen aplicar a la actividad, en el orden en que conviene revisarlos.
+
+Respuesta (`200`): `{"activity": {"slug", "name"}, "procedures": [{"procedure": {...}, "note": "Si vas a contratar personal."}], "source": {...}}`. Cada `procedure` tiene los mismos campos que en la búsqueda de trámites; `note` dice en qué caso aplica.
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` | La consulta funcionó |
+| `404` | La actividad no existe (solo los trámites) |
+| `422` | Los parámetros no cumplen la validación (el `slug` va en minúsculas, con números y guiones) |
+| `503` | La base de datos no está disponible |
+
 ## Cómo incorporar una API nueva
 
 Cada API se integra y se prueba por separado, en este orden:
@@ -268,3 +323,4 @@ Desde la carpeta `back/`:
 |---|---|
 | `uv run pytest` | Tests unitarios. No usan internet: simulan las APIs externas con `respx` y respuestas reales guardadas en `tests/fixtures/`. |
 | `uv run pytest -m integration` | Tests de integración. Llaman a las APIs reales, por lo que necesitan internet y que el servicio esté disponible. |
+| `uv run pytest -m database` | Tests contra la base local. Necesitan la base levantada y los datos cargados con `load_catalog`. |

@@ -72,7 +72,7 @@ class CabaProcedureCatalog:
             response = await search_procedures(query, limit=limit)
         except CabaTramitesError as exc:
             raise ProcedureSearchError(str(exc)) from exc
-        return [_to_procedure(procedure) for procedure in response.procedures]
+        return [to_procedure(procedure) for procedure in response.procedures]
 
     async def get(self, procedure_id: UUID) -> ProcedureDetail | None:
         try:
@@ -89,7 +89,7 @@ def _text(text: CabaText) -> str:
     return html_to_text(text.value)
 
 
-def _to_procedure(procedure: CabaProcedure) -> Procedure:
+def to_procedure(procedure: CabaProcedure) -> Procedure:
     """Copia los datos del resumen y arma el enlace a la página oficial del trámite."""
     attributes = procedure.attributes
     return Procedure(
@@ -116,7 +116,7 @@ def _step(step: CabaStepItem) -> str:
 
 
 def _to_detail(detail: CabaProcedureDetail) -> ProcedureDetail:
-    summary = _to_procedure(detail.procedure)
+    summary = to_procedure(detail.procedure)
     return ProcedureDetail(
         **summary.model_dump(),
         requirements=[

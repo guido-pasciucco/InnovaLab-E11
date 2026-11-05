@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from conco.config import settings
 from conco.integrations.caba_tramites.models import (
     CabaIncludedResource,
+    CabaProcedure,
     CabaProcedureDetail,
     CabaProcedureDocument,
     CabaProceduresResponse,
@@ -89,6 +90,38 @@ async def search_procedures(query: str, limit: int = 10) -> CabaProceduresRespon
             response = await client.get(PROCEDURES_PATH, params=search_params(query, limit))
             response.raise_for_status()
             return CabaProceduresResponse.model_validate_json(response.content)
+    except httpx.HTTPError as exc:
+        raise CabaTramitesError(f"No se pudo consultar la API de trámites: {exc}") from exc
+    except ValidationError as exc:
+        raise CabaTramitesError("La API de trámites devolvió una respuesta inesperada.") from exc
+
+
+LIST_PAGE_SIZE = 50
+
+
+def list_params(offset: int) -> dict[str, str | int]:
+    """Parámetros JSON:API para una página del catálogo completo de trámites publicados."""
+    return {
+        "filter[status]": 1,
+        "sort": "title",
+        "page[limit]": LIST_PAGE_SIZE,
+        "page[offset]": offset,
+        "fields[node--tramites_obelisco]": f"{PROCEDURE_FIELDS},field_sector_economico",
+    }
+
+
+async def list_procedures() -> list[CabaProcedure]:
+    """Recorre todas las páginas y devuelve cada trámite publicado, con su sector económico."""
+    procedures: list[CabaProcedure] = []
+    try:
+        async with _client() as client:
+            while True:
+                response = await client.get(PROCEDURES_PATH, params=list_params(len(procedures)))
+                response.raise_for_status()
+                page = CabaProceduresResponse.model_validate_json(response.content).procedures
+                procedures.extend(page)
+                if len(page) < LIST_PAGE_SIZE:
+                    return procedures
     except httpx.HTTPError as exc:
         raise CabaTramitesError(f"No se pudo consultar la API de trámites: {exc}") from exc
     except ValidationError as exc:

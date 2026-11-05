@@ -25,6 +25,8 @@ class CabaProcedureAttributes(BaseModel):
     path: CabaPath
     changed: datetime
     body: CabaText
+    # Solo llega cuando se pide; marca los trámites orientados a negocios (ej.: «gastronomico»).
+    sector: str | None = Field(default=None, alias="field_sector_economico")
 
 
 class CabaProcedure(BaseModel):

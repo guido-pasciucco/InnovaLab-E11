@@ -1,0 +1,79 @@
+{
+  "status": "Draft. Procedures that usually apply to each activity; not a legal determination (RN-04). Must be reviewed by someone with domain knowledge before showing it to users.",
+  "activities": [
+    {
+      "slug": "cafeteria",
+      "name": "Cafetería",
+      "synonyms": ["café", "bar de café", "coffee shop", "confitería"],
+      "procedures": [
+        {"id": "338718b4-a2a0-44af-baa4-083f5d834b12", "title": "Habilitación de actividad económica", "note": "Para abrir el local; requiere evaluación técnica."},
+        {"id": "15e0394b-c7b5-4f93-bc25-ee012d695aec", "title": "Habilitación de actividad económica exprés", "note": "Alternativa si el local tiene menos de 200 m² y cumple los requisitos de ubicación y uso."},
+        {"id": "be2b17ec-9bc0-480a-ac7f-2d389e6a7812", "title": "Solicitud de permiso de área gastronómica", "note": "Si querés poner mesas y sillas en la vereda."},
+        {"id": "c5e44825-3fc3-4abe-86cf-ec8dfa68f7fc", "title": "Inscripción al Curso de Manipulación de Alimentos", "note": "Para quienes manipulan alimentos en el local."},
+        {"id": "266d2abd-ffd7-4407-ba10-2499509c3ea0", "title": "Exclusión del Registro de Generadores Especiales de Residuos Sólidos Urbanos para Locales Gastronómicos y Hoteleros", "note": "Si el local genera pocos residuos, para quedar fuera del registro de grandes generadores."},
+        {"id": "119c61aa-b66e-41c5-80ec-f80571455577", "title": "Consulta de usos - Visado de anuncio publicitario (frontal, saliente) marquesina y/o toldos", "note": "Si vas a poner un cartel, una marquesina o un toldo."},
+        {"id": "1fb7a579-8fc2-4216-b113-684cc272f7f1", "title": "Inscripción en el Registro de Empleadores", "note": "Si vas a contratar personal."}
+      ]
+    },
+    {
+      "slug": "restaurante",
+      "name": "Restaurante",
+      "synonyms": ["restorán", "parrilla", "pizzería", "rotisería", "casa de comidas", "bodegón"],
+      "procedures": [
+        {"id": "338718b4-a2a0-44af-baa4-083f5d834b12", "title": "Habilitación de actividad económica", "note": "Para abrir el local; requiere evaluación técnica."},
+        {"id": "be2b17ec-9bc0-480a-ac7f-2d389e6a7812", "title": "Solicitud de permiso de área gastronómica", "note": "Si querés poner mesas y sillas en la vereda."},
+        {"id": "c5e44825-3fc3-4abe-86cf-ec8dfa68f7fc", "title": "Inscripción al Curso de Manipulación de Alimentos", "note": "Para quienes manipulan alimentos en el local."},
+        {"id": "1304fa97-1f5f-48d7-b867-d30ca2f78689", "title": "Inscripción en el Registro de Generadores Especiales de Residuos Sólidos Urbanos para Fracción Húmedos", "note": "Si el local genera grandes volúmenes de residuos húmedos."},
+        {"id": "266d2abd-ffd7-4407-ba10-2499509c3ea0", "title": "Exclusión del Registro de Generadores Especiales de Residuos Sólidos Urbanos para Locales Gastronómicos y Hoteleros", "note": "Si el local genera pocos residuos, para quedar fuera del registro de grandes generadores."},
+        {"id": "fc321f1e-badb-4439-be4e-5d4fbfc963ac", "title": "Impacto Ambiental: Certificado de Aptitud Ambiental (CAA)", "note": "Si la actividad está alcanzada por la evaluación de impacto ambiental."},
+        {"id": "119c61aa-b66e-41c5-80ec-f80571455577", "title": "Consulta de usos - Visado de anuncio publicitario (frontal, saliente) marquesina y/o toldos", "note": "Si vas a poner un cartel, una marquesina o un toldo."},
+        {"id": "1fb7a579-8fc2-4216-b113-684cc272f7f1", "title": "Inscripción en el Registro de Empleadores", "note": "Si vas a contratar personal."}
+      ]
+    },
+    {
+      "slug": "kiosco",
+      "name": "Kiosco",
+      "synonyms": ["quiosco", "maxikiosco", "drugstore", "polirrubro"],
+      "procedures": [
+        {"id": "338718b4-a2a0-44af-baa4-083f5d834b12", "title": "Habilitación de actividad económica", "note": "Para abrir el local; requiere evaluación técnica."},
+        {"id": "15e0394b-c7b5-4f93-bc25-ee012d695aec", "title": "Habilitación de actividad económica exprés", "note": "Alternativa si el local tiene menos de 200 m² y cumple los requisitos de ubicación y uso."},
+        {"id": "119c61aa-b66e-41c5-80ec-f80571455577", "title": "Consulta de usos - Visado de anuncio publicitario (frontal, saliente) marquesina y/o toldos", "note": "Si vas a poner un cartel, una marquesina o un toldo."},
+        {"id": "1fb7a579-8fc2-4216-b113-684cc272f7f1", "title": "Inscripción en el Registro de Empleadores", "note": "Si vas a contratar personal."}
+      ]
+    },
+    {
+      "slug": "peluqueria",
+      "name": "Peluquería",
+      "synonyms": ["barbería", "salón de belleza", "estética", "manicuría"],
+      "procedures": [
+        {"id": "338718b4-a2a0-44af-baa4-083f5d834b12", "title": "Habilitación de actividad económica", "note": "Para abrir el local; requiere evaluación técnica."},
+        {"id": "15e0394b-c7b5-4f93-bc25-ee012d695aec", "title": "Habilitación de actividad económica exprés", "note": "Alternativa si el local tiene menos de 200 m² y cumple los requisitos de ubicación y uso."},
+        {"id": "119c61aa-b66e-41c5-80ec-f80571455577", "title": "Consulta de usos - Visado de anuncio publicitario (frontal, saliente) marquesina y/o toldos", "note": "Si vas a poner un cartel, una marquesina o un toldo."},
+        {"id": "1fb7a579-8fc2-4216-b113-684cc272f7f1", "title": "Inscripción en el Registro de Empleadores", "note": "Si vas a contratar personal."}
+      ]
+    },
+    {
+      "slug": "comercio-minorista",
+      "name": "Comercio minorista",
+      "synonyms": ["tienda de ropa", "local de ropa", "librería", "ferretería", "zapatería", "local comercial"],
+      "procedures": [
+        {"id": "338718b4-a2a0-44af-baa4-083f5d834b12", "title": "Habilitación de actividad económica", "note": "Para abrir el local; requiere evaluación técnica."},
+        {"id": "15e0394b-c7b5-4f93-bc25-ee012d695aec", "title": "Habilitación de actividad económica exprés", "note": "Alternativa si el local tiene menos de 200 m² y cumple los requisitos de ubicación y uso."},
+        {"id": "119c61aa-b66e-41c5-80ec-f80571455577", "title": "Consulta de usos - Visado de anuncio publicitario (frontal, saliente) marquesina y/o toldos", "note": "Si vas a poner un cartel, una marquesina o un toldo."},
+        {"id": "971d30cf-f009-4f84-906f-82e6fae77e59", "title": "Solicitud de espacio de carga y descarga en la vía pública", "note": "Si recibís mercadería con frecuencia y necesitás un espacio reservado en la calle."},
+        {"id": "1fb7a579-8fc2-4216-b113-684cc272f7f1", "title": "Inscripción en el Registro de Empleadores", "note": "Si vas a contratar personal."}
+      ]
+    },
+    {
+      "slug": "foodtruck",
+      "name": "Foodtruck",
+      "synonyms": ["food truck", "carro de comida", "venta de comida en la calle", "puesto ambulante de comida"],
+      "procedures": [
+        {"id": "47ea4e24-dc8c-42e7-be37-0ab13d421534", "title": "Habilitación de foodtrucks", "note": "Para habilitar el vehículo como foodtruck."},
+        {"id": "89f286b0-dddc-426f-96cd-38bc25372966", "title": "Permiso de uso de foodtrucks en el espacio público", "note": "Para instalarte en un espacio público."},
+        {"id": "c5e44825-3fc3-4abe-86cf-ec8dfa68f7fc", "title": "Inscripción al Curso de Manipulación de Alimentos", "note": "Para quienes manipulan alimentos."},
+        {"id": "1fb7a579-8fc2-4216-b113-684cc272f7f1", "title": "Inscripción en el Registro de Empleadores", "note": "Si vas a contratar personal."}
+      ]
+    }
+  ]
+}

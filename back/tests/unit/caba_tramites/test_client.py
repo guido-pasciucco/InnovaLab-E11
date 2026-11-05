@@ -12,6 +12,7 @@ from conco.config import settings
 from conco.integrations.caba_tramites.client import (
     CabaTramitesError,
     get_procedure,
+    list_procedures,
     normalize_query,
     search_procedures,
 )
@@ -246,3 +247,51 @@ async def test_get_procedure_unexpected_paragraph_shape_raises_caba_tramites_err
 
     with pytest.raises(CabaTramitesError):
         await get_procedure(HABILITACION_ID)
+
+
+def _catalog_page(size: int, start: int, sector: str | None = None) -> dict[str, Any]:
+    """Página del catálogo completo armada con el primer trámite real del fixture de búsqueda."""
+    node = load_fixture("busqueda_habilitaci.json")["data"][0]
+    nodes = []
+    for index in range(start, start + size):
+        copy = json.loads(json.dumps(node))
+        copy["id"] = str(UUID(int=index + 1))
+        copy["attributes"]["field_sector_economico"] = sector
+        nodes.append(copy)
+    return {"data": nodes}
+
+
+@respx.mock
+async def test_list_procedures_walks_every_page() -> None:
+    route = respx.get(PROCEDURES_URL)
+    route.side_effect = [
+        httpx.Response(200, json=_catalog_page(50, start=0)),
+        httpx.Response(200, json=_catalog_page(1, start=50, sector="gastronomico")),
+    ]
+
+    procedures = await list_procedures()
+
+    assert len(procedures) == 51
+    assert [call.request.url.params["page[offset]"] for call in route.calls] == ["0", "50"]
+    assert procedures[0].attributes.sector is None
+    assert procedures[-1].attributes.sector == "gastronomico"
+
+
+@respx.mock
+async def test_list_procedures_asks_only_published_with_sector() -> None:
+    route = respx.get(PROCEDURES_URL).respond(200, json=_catalog_page(3, start=0))
+
+    await list_procedures()
+
+    params = route.calls[0].request.url.params
+    assert params["filter[status]"] == "1"
+    assert params["page[limit]"] == "50"
+    assert params["fields[node--tramites_obelisco]"] == "title,path,changed,body,field_sector_economico"
+
+
+@respx.mock
+async def test_list_procedures_http_error_raises_caba_tramites_error() -> None:
+    respx.get(PROCEDURES_URL).respond(500)
+
+    with pytest.raises(CabaTramitesError):
+        await list_procedures()
