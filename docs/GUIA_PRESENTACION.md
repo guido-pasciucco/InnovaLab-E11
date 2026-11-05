@@ -23,6 +23,28 @@ La persona escribe qué quiere hacer y dónde. CONCO **ubica la dirección con d
 
 > Para la demo, el frontend tiene que usar los datos simulados de la consulta (`VITE_USE_MOCK_API` sin definir o distinto de `false`). El backend todavía no tiene `/consultations`: con `false`, el envío falla.
 
+## Cómo funciona la búsqueda por detrás
+
+**Preparación (una vez, con `load_catalog`):**
+
+1. Se traen de la API de la Ciudad los 868 trámites publicados y se guardan en Postgres.
+2. Se lee la lista curada (`activities.json`): cada actividad con sus sinónimos y sus trámites, con una nota de cuándo aplica cada uno.
+3. Un modelo de embeddings convierte cada nombre y sinónimo de actividad («peluquería», «barbería», «estética»…) en un vector de 384 números que representa su **significado**. Los vectores se guardan en la base (pgvector).
+
+**En cada búsqueda:**
+
+1. La persona escribe «quiero poner una barbería». El backend convierte ese texto en un vector con el **mismo** modelo.
+2. Postgres compara ese vector con los de todos los sinónimos (similitud coseno: cuánto apuntan en la misma dirección) y devuelve las actividades más parecidas, descartando las que quedan por debajo de 0.5.
+3. La persona elige «Peluquería» de la lista.
+4. El backend busca en la lista curada los trámites de esa actividad y los devuelve con su nota, su resumen, el enlace oficial y la fuente. En este paso no interviene la IA: es una consulta común a la base.
+
+```text
+"quiero poner una barbería" → vector → actividad más parecida: Peluquería (0.85)
+                                        → trámites curados de Peluquería → pantalla
+```
+
+**Por qué así:** la IA solo resuelve el **vocabulario** (barbería ≈ peluquería). Qué trámites corresponden lo decide una lista que una persona puede revisar, así que nunca aparecen trámites inventados. Buscar directamente en los textos de los trámites no funcionaba, porque ninguno menciona actividades.
+
 ## Guion sugerido (5 minutos)
 
 1. **El problema.** «Quiero abrir una cafetería en Av. Cabildo 2040: ¿qué trámites necesito?». La información oficial existe, pero está organizada por trámite, no por actividad.
