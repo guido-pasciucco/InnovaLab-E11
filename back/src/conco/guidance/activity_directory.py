@@ -64,7 +64,11 @@ class PostgresActivityDirectory:
 
     async def suggest(self, query: str, limit: int) -> list[ActivitySuggestion]:
         # El modelo usa CPU: se corre en otro hilo para no bloquear las demás peticiones.
-        [vector] = await asyncio.to_thread(self._embedder.embed, [query])
+        try:
+            [vector] = await asyncio.to_thread(self._embedder.embed, [query])
+        except Exception as exc:
+            # Por ejemplo, el modelo no se pudo descargar: la búsqueda no está disponible.
+            raise ActivityDirectoryError(f"No se pudo vectorizar la consulta: {exc}") from exc
         params = {
             "query": to_pgvector(vector),
             "model": self._embedder.model_name,

@@ -78,3 +78,18 @@ async def test_directory_raises_domain_error_when_database_is_down() -> None:
 
     with pytest.raises(ActivityDirectoryError):
         await directory.suggest("barbería", limit=5)
+
+
+class _BrokenEmbedder:
+    model_name = "test-model"
+
+    def embed(self, texts: list[str]) -> list[list[float]]:
+        raise RuntimeError("model download failed")
+
+
+@pytest.mark.anyio
+async def test_directory_raises_domain_error_when_model_fails() -> None:
+    directory = PostgresActivityDirectory(_BrokenEmbedder())
+
+    with pytest.raises(ActivityDirectoryError):
+        await directory.suggest("barbería", limit=5)
