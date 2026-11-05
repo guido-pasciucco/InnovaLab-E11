@@ -12,6 +12,7 @@ from conco.guidance.domain import (
     ActivityProcedures,
     ActivitySuggestion,
     ApplicableProcedure,
+    ContextAnswers,
     Procedure,
     Source,
 )
@@ -51,23 +52,49 @@ ACTIVITY_PROCEDURES = ActivityProcedures(
                 last_updated=datetime(2026, 8, 7, 18, 57, 1, tzinfo=UTC),
             ),
             note="Para abrir el local; requiere evaluación técnica.",
-        )
+        ),
+        ApplicableProcedure(
+            procedure=Procedure(
+                id=UUID("1fb7a579-8fc2-4216-b113-684cc272f7f1"),
+                title="Inscripción en el Registro de Empleadores",
+                official_url="https://buenosaires.gob.ar/tramites/registro-de-empleadores",
+                summary="Registrate como empleador.",
+                last_updated=datetime(2026, 8, 7, 18, 57, 1, tzinfo=UTC),
+            ),
+            note="Si vas a contratar personal.",
+            applies_when=ContextAnswers(has_employees=True),
+        ),
     ],
 )
+HABILITACION_JSON = {
+    "procedure": {
+        "id": "338718b4-a2a0-44af-baa4-083f5d834b12",
+        "title": "Habilitación de actividad económica",
+        "official_url": "https://buenosaires.gob.ar/tramites/habilitacion-de-actividad-economica",
+        "summary": "Con este trámite podés solicitar la habilitación.",
+        "last_updated": "2026-08-07T18:57:01Z",
+    },
+    "note": "Para abrir el local; requiere evaluación técnica.",
+    "status": "applies",
+}
+EMPLEADORES_JSON = {
+    "procedure": {
+        "id": "1fb7a579-8fc2-4216-b113-684cc272f7f1",
+        "title": "Inscripción en el Registro de Empleadores",
+        "official_url": "https://buenosaires.gob.ar/tramites/registro-de-empleadores",
+        "summary": "Registrate como empleador.",
+        "last_updated": "2026-08-07T18:57:01Z",
+    },
+    "note": "Si vas a contratar personal.",
+    "status": "may_apply",
+}
 ACTIVITY_PROCEDURES_JSON = {
     "activity": {"slug": "peluqueria", "name": "Peluquería"},
-    "procedures": [
-        {
-            "procedure": {
-                "id": "338718b4-a2a0-44af-baa4-083f5d834b12",
-                "title": "Habilitación de actividad económica",
-                "official_url": "https://buenosaires.gob.ar/tramites/habilitacion-de-actividad-economica",
-                "summary": "Con este trámite podés solicitar la habilitación.",
-                "last_updated": "2026-08-07T18:57:01Z",
-            },
-            "note": "Para abrir el local; requiere evaluación técnica.",
-        }
+    "questions": [
+        {"id": "has_employees", "text": "¿Vas a contratar personal?", "answer": None}
     ],
+    "procedures": [HABILITACION_JSON, EMPLEADORES_JSON],
+    "excluded_count": 0,
     "source": SOURCE_JSON,
 }
 UNAVAILABLE_JSON = {
@@ -222,3 +249,35 @@ def test_procedures_returns_503_when_directory_fails(
 
     assert response.status_code == 503
     assert response.json() == UNAVAILABLE_JSON
+
+
+def test_procedures_answer_confirms_conditional_procedure(client: TestClient) -> None:
+    response = client.get(PROCEDURES_URL, params={"has_employees": "true"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["questions"] == [
+        {"id": "has_employees", "text": "¿Vas a contratar personal?", "answer": True}
+    ]
+    assert body["procedures"] == [HABILITACION_JSON, {**EMPLEADORES_JSON, "status": "applies"}]
+    assert body["excluded_count"] == 0
+
+
+def test_procedures_answer_drops_contradicted_procedure(client: TestClient) -> None:
+    response = client.get(PROCEDURES_URL, params={"has_employees": "false"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["procedures"] == [HABILITACION_JSON]
+    assert body["excluded_count"] == 1
+    assert body["questions"][0]["answer"] is False
+
+
+@pytest.mark.parametrize("params", [{"has_employees": "quizas"}, {"unknown_question": "true"}])
+def test_procedures_rejects_invalid_answers(
+    client: TestClient, directory: FakeActivityDirectory, params: dict
+) -> None:
+    response = client.get(PROCEDURES_URL, params=params)
+
+    assert response.status_code == 422
+    assert directory.procedures_calls == []

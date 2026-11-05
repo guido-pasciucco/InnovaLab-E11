@@ -35,3 +35,11 @@ async def test_procedures_come_in_curated_order(directory: PostgresActivityDirec
 
 async def test_unknown_activity_returns_none(directory: PostgresActivityDirectory) -> None:
     assert await directory.procedures_for("gimnasio") is None
+
+
+async def test_procedures_carry_their_conditions(directory: PostgresActivityDirectory) -> None:
+    result = await directory.procedures_for("cafeteria")
+
+    assert result is not None
+    conditions = {str(p.procedure.id): p.applies_when.answered() for p in result.procedures}
+    assert conditions[HABILITACION_ID] == {"takes_over_existing": False}

@@ -10,6 +10,7 @@ from conco.guidance.domain import (
     ActivityProcedures,
     ActivitySuggestion,
     ApplicableProcedure,
+    ContextAnswers,
     Procedure,
     TextEmbedder,
 )
@@ -34,7 +35,7 @@ _SUGGEST_SQL = """
 _ACTIVITY_SQL = "select slug, name from public.activities where slug = %s"
 
 _PROCEDURES_SQL = """
-    select p.id, p.title, p.url, p.summary, p.changed_at, ap.note
+    select p.id, p.title, p.url, p.summary, p.changed_at, ap.note, ap.applies_when
     from public.activity_procedures ap
     join public.procedures p on p.id = ap.procedure_id
     where ap.activity_slug = %s
@@ -99,8 +100,9 @@ class PostgresActivityDirectory:
                         last_updated=changed_at,
                     ),
                     note=note,
+                    applies_when=ContextAnswers.model_validate(applies_when),
                 )
-                for procedure_id, title, url, summary, changed_at, note in procedure_rows
+                for procedure_id, title, url, summary, changed_at, note, applies_when in procedure_rows
             ],
         )
 

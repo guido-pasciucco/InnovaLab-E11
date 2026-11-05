@@ -11,10 +11,12 @@ from pathlib import Path
 from uuid import UUID
 
 import psycopg
+from psycopg.types.json import Jsonb
 from pydantic import BaseModel, ConfigDict, model_validator
 
 from conco.config import settings
 from conco.guidance.activity_directory import to_pgvector
+from conco.guidance.domain import ContextAnswers
 from conco.guidance.embeddings import FastEmbedTextEmbedder
 from conco.guidance.infrastructure import to_procedure
 from conco.integrations.caba_tramites.client import list_procedures
@@ -30,6 +32,8 @@ class CuratedProcedure(BaseModel):
     id: UUID
     title: str
     note: str
+    # Preguntas de contexto que deciden si aplica; un nombre desconocido es un error.
+    applies_when: ContextAnswers = ContextAnswers()
 
 
 class CuratedActivity(BaseModel):
@@ -129,11 +133,13 @@ def load(database_url: str) -> None:
         )
         cursor.executemany(
             """
-            insert into public.activity_procedures (activity_slug, procedure_id, note, position)
-            values (%s, %s, %s, %s)
+            insert into public.activity_procedures
+                (activity_slug, procedure_id, note, position, applies_when)
+            values (%s, %s, %s, %s, %s)
             """,
             [
-                (activity.slug, procedure.id, procedure.note, position)
+                (activity.slug, procedure.id, procedure.note, position,
+                 Jsonb(procedure.applies_when.answered()))
                 for activity in catalog.activities
                 for position, procedure in enumerate(activity.procedures)
             ],
