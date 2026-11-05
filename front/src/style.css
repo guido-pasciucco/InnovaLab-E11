@@ -105,6 +105,9 @@ h1,h2,h3 { font-family:"Manrope", sans-serif; }
 .guidance-card>p { margin:0; color:var(--text-soft); font-size:13px; line-height:1.7; }
 .document-list { display:grid; gap:5px; margin-top:14px; color:var(--text-soft); font-size:12px; }
 .document-list strong { margin-bottom:2px; color:var(--ink); }
+.guidance-card>p.guidance-note { margin-bottom:8px; color:var(--ink); }
+.procedure-link { display:inline-block; margin-top:12px; color:var(--blue); font-size:13px; font-weight:600; text-decoration:none; }
+.procedure-link:hover { text-decoration:underline; }
 .review-check { display:flex; align-items:center; gap:9px; margin-top:17px; padding-top:14px; border-top:1px solid #E8EEF1; color:var(--blue); font-size:12px; font-weight:600; cursor:pointer; }
 .review-check input { width:16px; height:16px; accent-color:var(--blue); }
 .progress-panel { margin-top:16px; padding:17px 19px; border:1px solid var(--border); border-radius:10px; background:#fff; }

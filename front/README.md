@@ -47,6 +47,13 @@ El buscador de direcciones no tiene datos simulados: siempre consulta al backend
 - Hay que elegir una sugerencia para continuar; su coordenada es la que muestra el mapa del paso 4.
 - Si el servicio de direcciones no responde, se acepta la dirección escrita y el mapa se muestra sin marcador.
 
+## Buscador de actividades
+
+- El campo de actividad sugiere actividades curadas parecidas por significado a lo que se escribe (`GET /guidance/activities`, desde 3 caracteres): «quiero poner una barbería» sugiere «Peluquería».
+- Elegir una sugerencia es opcional. Si se elige, el paso 3 muestra los trámites oficiales que suelen aplicar a esa actividad (`GET /guidance/activities/{slug}/procedures`), con cuándo aplica cada uno, el enlace a buenosaires.gob.ar y la fuente citada.
+- Si no se elige ninguna, o si no se pudieron cargar los trámites, el paso 3 muestra la orientación general de siempre.
+- Necesita la base de datos del backend levantada y cargada (ver `back/README.md`, «Búsqueda de actividades»).
+
 ## Consideraciones funcionales
 
 - El frontend conserva los servicios `submitConsultation` y `submitFollowUp` y el modelo de datos existente.

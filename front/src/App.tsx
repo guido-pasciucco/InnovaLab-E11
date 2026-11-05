@@ -2,16 +2,32 @@ import { useMemo, useState, type FormEvent } from "react";
 import QueryForm from "./Componentes/QueryForm";
 import MapPanel from "./Componentes/MapPanel";
 import SourceList from "./Componentes/SourceList";
-import { submitConsultation, submitFollowUp } from "./api/client";
-import type { ConsultationRequest, ConsultationResponse } from "./types";
+import { getActivityProcedures, submitConsultation, submitFollowUp } from "./api/client";
+import type { ActivityProceduresResponse, ConsultationRequest, ConsultationResponse, SourceReference } from "./types";
 
 type Step = 1 | 2 | 3 | 4 | 5;
 const steps = ["Consulta", "Análisis", "Orientación", "Mapa", "Asistente"];
+
+/** Official procedures of the picked activity, or null when none was picked or they could not be loaded. */
+async function loadActivityProcedures(slug: string | null | undefined): Promise<ActivityProceduresResponse | null> {
+  if (!slug) return null;
+  try {
+    return await getActivityProcedures(slug);
+  } catch {
+    return null;
+  }
+}
+
+function toSourceReference(data: ActivityProceduresResponse): SourceReference {
+  return { id: "caba-tramites", title: data.source.name, publisher: "Gobierno de la Ciudad de Buenos Aires", url: data.source.url, note: data.source.license };
+}
 
 export default function App() {
   const [step, setStep] = useState<Step>(1);
   const [query, setQuery] = useState<ConsultationRequest>({ activity: "", address: "" });
   const [result, setResult] = useState<ConsultationResponse | null>(null);
+  const [activityProcedures, setActivityProcedures] = useState<ActivityProceduresResponse | null>(null);
+  const [proceduresUnavailable, setProceduresUnavailable] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [checked, setChecked] = useState<string[]>([]);
@@ -19,20 +35,31 @@ export default function App() {
   const [answer, setAnswer] = useState("");
   const [assistantBusy, setAssistantBusy] = useState(false);
 
-  const progress = useMemo(() => result?.steps.length
-    ? Math.round((checked.length / result.steps.length) * 100) : 0, [checked, result]);
+  const guidanceCount = activityProcedures?.procedures.length ?? result?.steps.length ?? 0;
+  const progress = useMemo(() => guidanceCount
+    ? Math.round((checked.length / guidanceCount) * 100) : 0, [checked, guidanceCount]);
+  const sources = useMemo(() => [
+    ...(activityProcedures ? [toSourceReference(activityProcedures)] : []),
+    ...(result?.sources ?? []),
+  ], [activityProcedures, result]);
 
   async function handleSubmit(data: ConsultationRequest) {
     setQuery(data);
     setResult(null);
+    setActivityProcedures(null);
+    setProceduresUnavailable(false);
     setChecked([]);
     setAnswer("");
     setError("");
     setStep(2);
     setBusy(true);
     try {
-      const response = await submitConsultation(data);
+      const [response, procedures] = await Promise.all([
+        submitConsultation(data), loadActivityProcedures(data.activitySlug),
+      ]);
       setResult(response);
+      setActivityProcedures(procedures);
+      setProceduresUnavailable(!!data.activitySlug && !procedures);
       setStep(3);
     } catch (err) {
       setError(err instanceof Error ? err.message : "No pudimos procesar la consulta. Intentá nuevamente.");
@@ -46,6 +73,8 @@ export default function App() {
     setStep(1);
     setQuery({ activity: "", address: "" });
     setResult(null);
+    setActivityProcedures(null);
+    setProceduresUnavailable(false);
     setChecked([]);
     setQuestion("");
     setAnswer("");
@@ -147,8 +176,25 @@ export default function App() {
                 <h1>Trámites relacionados</h1>
                 <p>Una guía inicial de temas que conviene revisar para avanzar con tu actividad.</p>
               </div>
+              {proceduresUnavailable && <div className="notice"><span className="notice-icon">i</span><div><strong>No pudimos cargar los trámites oficiales</strong><p>Te mostramos una orientación general. Intentá de nuevo más tarde.</p></div></div>}
               <div className="guidance-list">
-                {result.steps.length ? result.steps.map((item, index) => (
+                {activityProcedures ? activityProcedures.procedures.map(({ procedure, note }, index) => (
+                  <article className="guidance-card" key={procedure.id}>
+                    <div className="guidance-card__top">
+                      <span className="guidance-number">{String(index + 1).padStart(2, "0")}</span>
+                      <span className="guidance-tag">TRÁMITE OFICIAL</span>
+                    </div>
+                    <h2>{procedure.title}</h2>
+                    <p className="guidance-note"><strong>Cuándo aplica:</strong> {note}</p>
+                    <p>{procedure.summary}</p>
+                    <a className="procedure-link" href={procedure.official_url} target="_blank" rel="noreferrer">Ver el trámite en buenosaires.gob.ar <span aria-hidden="true">↗</span></a>
+                    <label className="review-check">
+                      <input type="checkbox" checked={checked.includes(procedure.id)}
+                        onChange={e => setChecked(old => e.target.checked ? [...old, procedure.id] : old.filter(id => id !== procedure.id))} />
+                      <span>Marcar como revisado</span>
+                    </label>
+                  </article>
+                )) : result.steps.length ? result.steps.map((item, index) => (
                   <article className="guidance-card" key={item.id}>
                     <div className="guidance-card__top">
                       <span className="guidance-number">{String(index + 1).padStart(2, "0")}</span>
@@ -166,7 +212,7 @@ export default function App() {
                 )) : <article className="guidance-card"><h2>Orientación en preparación</h2><p>{result.summary}</p></article>}
               </div>
               <div className="progress-panel">
-                <div><strong>Tu avance</strong><span>{checked.length} de {result.steps.length} revisados</span></div>
+                <div><strong>Tu avance</strong><span>{checked.length} de {guidanceCount} revisados</span></div>
                 <div className="progress-track"><span style={{ width: `${progress}%` }} /></div>
               </div>
               <div className="orientation-actions">
@@ -177,11 +223,13 @@ export default function App() {
             <aside className="side-column">
               <section className="panel understood-card">
                 <h2>Lo que entendimos</h2>
-                <div className="result-detail"><span>Actividad</span><p>{result.interpretedActivity}</p></div>
+                <div className="result-detail"><span>Actividad</span><p>{activityProcedures?.activity.name ?? result.interpretedActivity}</p></div>
                 <div className="result-detail"><span>Ubicación</span><p>{result.normalizedAddress}</p></div>
-                <p className="small-note">{result.summary}</p>
+                <p className="small-note">{activityProcedures
+                  ? "Estos son trámites que suelen aplicar a esta actividad. Es una orientación general: verificá los requisitos con el organismo responsable."
+                  : result.summary}</p>
               </section>
-              <SourceList sources={result.sources} />
+              <SourceList sources={sources} />
               {result.limitations.length > 0 && <div className="notice"><span className="notice-icon">i</span><div><strong>Tené en cuenta</strong><p>{result.limitations.join(" ")}</p></div></div>}
             </aside>
           </div>

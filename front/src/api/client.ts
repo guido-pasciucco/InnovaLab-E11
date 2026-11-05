@@ -1,5 +1,6 @@
 import type {
-  AddressSearchResponse, ConsultationRequest, ConsultationResponse, FollowUpRequest, FollowUpResponse,
+  ActivityProceduresResponse, ActivitySuggestionsResponse, AddressSearchResponse, ConsultationRequest,
+  ConsultationResponse, FollowUpRequest, FollowUpResponse,
 } from '../types';
 import { mockConsultation, mockFollowUp } from './mock';
 
@@ -49,4 +50,15 @@ export async function searchAddresses(
 ): Promise<AddressSearchResponse> {
   const params = new URLSearchParams({ address, limit: String(options.limit ?? 5) });
   return request<AddressSearchResponse>(`/geolocation/addresses?${params}`, { signal: options.signal });
+}
+
+export async function suggestActivities(
+  query: string, options: { limit?: number; signal?: AbortSignal } = {},
+): Promise<ActivitySuggestionsResponse> {
+  const params = new URLSearchParams({ query, limit: String(options.limit ?? 5) });
+  return request<ActivitySuggestionsResponse>(`/guidance/activities?${params}`, { signal: options.signal });
+}
+
+export async function getActivityProcedures(slug: string): Promise<ActivityProceduresResponse> {
+  return request<ActivityProceduresResponse>(`/guidance/activities/${encodeURIComponent(slug)}/procedures`);
 }
