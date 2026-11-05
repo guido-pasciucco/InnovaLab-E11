@@ -1,0 +1,100 @@
+{
+    "cantidad": 2,
+    "direcciones": [
+        {
+            "altura": {
+                "unidad": null,
+                "valor": null
+            },
+            "calle": {
+                "categoria": "AV",
+                "id": "0203501001185",
+                "nombre": "AV CORRIENTES"
+            },
+            "calle_cruce_1": {
+                "categoria": null,
+                "id": null,
+                "nombre": null
+            },
+            "calle_cruce_2": {
+                "categoria": null,
+                "id": null,
+                "nombre": null
+            },
+            "departamento": {
+                "id": "02035",
+                "nombre": "Comuna 5"
+            },
+            "localidad_censal": {
+                "id": "02000010",
+                "nombre": "Ciudad Autónoma de Buenos Aires"
+            },
+            "nomenclatura": "AV CORRIENTES, Comuna 5, Ciudad Autónoma de Buenos Aires",
+            "piso": null,
+            "provincia": {
+                "id": "02",
+                "nombre": "Ciudad Autónoma de Buenos Aires"
+            },
+            "ubicacion": {
+                "lat": -34.602076384555346,
+                "lon": -58.4320467784316
+            }
+        },
+        {
+            "altura": {
+                "unidad": null,
+                "valor": null
+            },
+            "calle": {
+                "categoria": "AV",
+                "id": "0203501001185",
+                "nombre": "AV CORRIENTES"
+            },
+            "calle_cruce_1": {
+                "categoria": null,
+                "id": null,
+                "nombre": null
+            },
+            "calle_cruce_2": {
+                "categoria": null,
+                "id": null,
+                "nombre": null
+            },
+            "departamento": {
+                "id": "02035",
+                "nombre": "Comuna 5"
+            },
+            "localidad_censal": {
+                "id": "02000010",
+                "nombre": "Ciudad Autónoma de Buenos Aires"
+            },
+            "nomenclatura": "AV CORRIENTES, Comuna 5, Ciudad Autónoma de Buenos Aires",
+            "piso": null,
+            "provincia": {
+                "id": "02",
+                "nombre": "Ciudad Autónoma de Buenos Aires"
+            },
+            "ubicacion": {
+                "lat": -34.60212243965975,
+                "lon": -58.43148221021455
+            }
+        }
+    ],
+    "inicio": 0,
+    "parametros": {
+        "direccion": {
+            "altura": {
+                "unidad": null,
+                "valor": null
+            },
+            "calles": [
+                "Corrientes"
+            ],
+            "piso": null,
+            "tipo": "simple"
+        },
+        "max": 2,
+        "provincia": "caba"
+    },
+    "total": 86
+}

@@ -11,5 +11,8 @@ class Settings(BaseSettings):
         "http://127.0.0.1:5173",
     ]
 
+    georef_base_url: str = "https://apis.datos.gob.ar/georef/api"
+    georef_timeout_seconds: float = 10.0
+
 
 settings = Settings()

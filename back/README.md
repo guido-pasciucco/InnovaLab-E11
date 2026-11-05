@@ -38,11 +38,24 @@ back/
 │           └── georef/
 │               ├── client.py   # única ubicación de las llamadas HTTP a Georef
 │               └── models.py   # forma de la respuesta JSON de Georef
-└── scripts/
-    └── probe_georef.py         # ejecuta el cliente e imprime lo que devuelve
+├── scripts/
+│   └── probes/                 # un script por API para explorarla en forma aislada
+│       └── georef.py           # ejecuta el cliente e imprime lo que devuelve
+└── tests/
+    ├── conftest.py             # configuración compartida de pytest
+    ├── fixtures/               # respuestas reales guardadas, una carpeta por API
+    │   └── georef/
+    ├── unit/                   # sin internet: las APIs externas se simulan
+    │   └── georef/
+    │       └── test_client.py
+    └── integration/            # con internet: llaman a las APIs reales
+        └── georef/
+            └── test_client.py
 ```
 
-Cada carpeta con código Python incluye un archivo `__init__.py`, que la convierte en un paquete importable.
+Cada carpeta con código Python dentro de `src/` incluye un archivo `__init__.py`, que la convierte en un paquete importable. Las carpetas de `tests/` no lo necesitan.
+
+> **No confundir:** `src/conco/integrations/` agrupa las **integraciones con APIs externas**, mientras que `tests/integration/` agrupa un **tipo de test** (el que usa internet). Los tests de una API se ubican en `tests/unit/<api>/` y `tests/integration/<api>/`.
 
 ## Qué hace cada parte
 
@@ -52,7 +65,9 @@ Cada carpeta con código Python incluye un archivo `__init__.py`, que la convier
 | `config.py` | Expone URLs y orígenes permitidos leídos del `.env` | Contener valores hardcodeados |
 | `integrations/<api>/client.py` | Hace la llamada HTTP a una API externa | Conocer reglas de negocio |
 | `integrations/<api>/models.py` | Describe la respuesta de esa API | Representar conceptos propios del sistema |
-| `scripts/probe_<api>.py` | Permite explorar una API en forma aislada | Formar parte de la app en producción |
+| `scripts/probes/<api>.py` | Permite explorar una API en forma aislada | Formar parte de la app en producción |
+| `tests/unit/<api>/` | Prueba el cliente simulando la API con respuestas reales guardadas | Usar internet |
+| `tests/integration/<api>/` | Comprueba que la API real siga respondiendo como se espera | Correrse por defecto (`uv run pytest -m integration`) |
 
 **Regla principal:** solo los archivos dentro de `integrations/<api>/` conocen los detalles de esa API (URLs, parámetros y formato de respuesta).
 
@@ -88,9 +103,10 @@ Ejemplo de respuesta (abreviado), obtenido con `direccion=Corrientes 2500`:
 Cada API se integra y se prueba por separado, en este orden:
 
 1. Crear `src/conco/integrations/<api>/client.py` con la llamada HTTP.
-2. Crear `scripts/probe_<api>.py` y ejecutarlo para observar la respuesta real.
+2. Crear `scripts/probes/<api>.py` y ejecutarlo para observar la respuesta real.
 3. Con esa respuesta, definir `src/conco/integrations/<api>/models.py`.
 4. Agregar la URL base de la API a `.env.example` y a `config.py`.
+5. Guardar respuestas reales en `tests/fixtures/<api>/` y escribir los tests en `tests/unit/<api>/` y `tests/integration/<api>/`.
 
 Primero se observa la respuesta y después se modela. No se escriben modelos a partir de suposiciones.
 
@@ -110,8 +126,17 @@ Cuando una API se conecte a un endpoint real, se agregará una carpeta por funci
 
 ## Checklist de la primera integración
 
-- [ ] `pyproject.toml` creado con FastAPI, Pydantic y httpx
-- [ ] `src/conco/main.py` y `config.py` creados
-- [ ] `integrations/georef/client.py` realiza la consulta de direcciones
-- [ ] `scripts/probe_georef.py` imprime la respuesta de Georef
-- [ ] `integrations/georef/models.py` refleja la respuesta observada
+- [x] `pyproject.toml` creado con FastAPI, Pydantic y httpx
+- [x] `src/conco/main.py` y `config.py` creados
+- [x] `integrations/georef/client.py` realiza la consulta de direcciones
+- [x] `scripts/probes/georef.py` imprime la respuesta de Georef
+- [x] `integrations/georef/models.py` refleja la respuesta observada
+
+## Tests
+
+Desde la carpeta `back/`:
+
+| Comando | Qué ejecuta |
+|---|---|
+| `uv run pytest` | Tests unitarios. No usan internet: simulan las APIs externas con `respx` y respuestas reales guardadas en `tests/fixtures/`. |
+| `uv run pytest -m integration` | Tests de integración. Llaman a las APIs reales, por lo que necesitan internet y que el servicio esté disponible. |
