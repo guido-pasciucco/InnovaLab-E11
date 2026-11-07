@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from psycopg_pool import AsyncConnectionPool
 
 from conco.config import settings
 from conco.geolocation.api import router as geolocation_router
@@ -12,11 +13,23 @@ from conco.guidance.embeddings import FastEmbedTextEmbedder
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    """Carga el modelo de embeddings en segundo plano: la API arranca sin esperarlo."""
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    """Carga el modelo de embeddings en segundo plano y abre el pool de Postgres."""
     warm_up = asyncio.create_task(asyncio.to_thread(FastEmbedTextEmbedder().warm_up))
+    # open() no espera a que haya conexiones: si la base está caída, la API levanta
+    # igual y cada búsqueda falla con 503 hasta que la base responda.
+    pool = AsyncConnectionPool(
+        settings.database_url,
+        min_size=1,
+        max_size=10,
+        timeout=settings.database_pool_timeout_seconds,
+        open=False,
+    )
+    await pool.open()
+    app.state.db_pool = pool
     yield
     warm_up.cancel()
+    await pool.close()
 
 
 app = FastAPI(

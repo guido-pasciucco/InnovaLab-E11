@@ -1,3 +1,5 @@
+// TODO(eliminar): componente sin uso. Versión anterior del mapa, reemplazada por
+// Componentes/MapPanel.tsx en el flujo guiado de 5 pasos. Pendiente de eliminación.
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import type { GeoPoint, TerritorialFeature } from './types';

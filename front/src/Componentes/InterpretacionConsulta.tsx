@@ -1,3 +1,6 @@
+// TODO(eliminar): componente sin uso. Pantalla "Revisá tu consulta" de la versión
+// demo anterior del flujo (consulta simulada con mock.ts); el paso "Análisis" de
+// App.tsx la reemplazó. Pendiente de eliminación.
 import { useEffect, useState, type FormEvent } from 'react';
 import type { ConsultationRequest } from '../types';
 
