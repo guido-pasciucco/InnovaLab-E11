@@ -124,10 +124,11 @@ h1,h2,h3 { font-family:"Manrope", sans-serif; }
 .result-detail>span { display:block; margin-bottom:5px; color:var(--text-muted); font-size:10px; font-weight:700; letter-spacing:.7px; text-transform:uppercase; }
 .result-detail p { margin:0; color:var(--ink); font-size:13px; line-height:1.6; overflow-wrap:anywhere; }
 .small-note { margin:12px 0 0; color:var(--text-muted); font-size:11px; line-height:1.65; }
+.source-panel { padding:22px; }
 .source-list { display:grid; gap:12px; margin:0; padding:0; list-style:none; }
 .source-list li { display:grid; gap:5px; padding:12px 0; border-top:1px solid #E8EEF1; }
 .source-list strong { color:var(--ink); font-size:12px; }
-.source-list span,.source-list p { color:var(--text-muted); font-size:11px; line-height:1.5; }
+.source-list span,.source-list p { margin:0; color:var(--text-muted); font-size:11px; line-height:1.5; }
 .source-list a { color:var(--blue); font-size:11px; font-weight:600; }
 .notice { display:flex; align-items:flex-start; gap:11px; padding:16px; border:1px solid #E7D58A; border-radius:9px; background:#FFF9DF; color:#5D4D1B; font-size:12px; line-height:1.6; }
 .notice-icon { width:22px; height:22px; flex:0 0 22px; display:grid; place-items:center; border:1px solid #B99A25; border-radius:50%; font-weight:700; }
@@ -201,7 +202,7 @@ h1,h2,h3 { font-family:"Manrope", sans-serif; }
   .map-page .map-panel { padding:15px; }
   .map { height:380px; }
   .page-heading h1 { font-size:30px; }
-  .guidance-card { padding:18px; }
+  .guidance-card,.source-panel { padding:18px; }
 }
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; transition-duration:.01ms !important; }
