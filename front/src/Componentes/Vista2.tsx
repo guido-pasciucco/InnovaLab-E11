@@ -1,3 +1,5 @@
+// TODO(eliminar): componente sin uso. Pantalla de confirmación de la versión demo
+// anterior del flujo; el paso "Análisis" de App.tsx la reemplazó. Pendiente de eliminación.
 import type {
   ConsultationRequest,
   ConsultationResponse,
