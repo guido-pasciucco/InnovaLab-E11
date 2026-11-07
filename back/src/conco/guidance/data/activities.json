@@ -1,0 +1,469 @@
+{
+  "status": "Draft. Procedures that usually apply to each activity; not a legal determination (RN-04). Must be reviewed by someone with domain knowledge before showing it to users.",
+  "activities": [
+    {
+      "slug": "cafeteria",
+      "name": "Cafetería",
+      "synonyms": [
+        "café",
+        "bar de café",
+        "coffee shop",
+        "confitería"
+      ],
+      "procedures": [
+        {
+          "id": "338718b4-a2a0-44af-baa4-083f5d834b12",
+          "title": "Habilitación de actividad económica",
+          "note": "Para abrir el local con una habilitación nueva; requiere evaluación técnica.",
+          "applies_when": {
+            "takes_over_existing": false
+          }
+        },
+        {
+          "id": "15e0394b-c7b5-4f93-bc25-ee012d695aec",
+          "title": "Habilitación de actividad económica exprés",
+          "note": "Alternativa si el local tiene menos de 200 m² y cumple los requisitos de ubicación y uso.",
+          "applies_when": {
+            "under_200_m2": true,
+            "takes_over_existing": false
+          }
+        },
+        {
+          "id": "db771727-8bcb-4cac-8349-02439dfeb258",
+          "title": "Transmisión de autorización de actividad económica",
+          "note": "Si continuás un local ya habilitado: en lugar de una habilitación nueva, se transfiere la del titular anterior.",
+          "applies_when": {
+            "takes_over_existing": true
+          }
+        },
+        {
+          "id": "750ed713-e172-4d06-9a8f-d9505aafe2f4",
+          "title": "Ingresos Brutos/Contribuyentes locales - Alta",
+          "note": "Para inscribirte como contribuyente de la Ciudad antes de empezar a facturar."
+        },
+        {
+          "id": "be2b17ec-9bc0-480a-ac7f-2d389e6a7812",
+          "title": "Solicitud de permiso de área gastronómica",
+          "note": "Si querés poner mesas y sillas en la vereda.",
+          "applies_when": {
+            "sidewalk_tables": true
+          }
+        },
+        {
+          "id": "c5e44825-3fc3-4abe-86cf-ec8dfa68f7fc",
+          "title": "Inscripción al Curso de Manipulación de Alimentos",
+          "note": "Para quienes manipulan alimentos en el local."
+        },
+        {
+          "id": "266d2abd-ffd7-4407-ba10-2499509c3ea0",
+          "title": "Exclusión del Registro de Generadores Especiales de Residuos Sólidos Urbanos para Locales Gastronómicos y Hoteleros",
+          "note": "Si el local genera pocos residuos, para quedar fuera del registro de grandes generadores."
+        },
+        {
+          "id": "119c61aa-b66e-41c5-80ec-f80571455577",
+          "title": "Consulta de usos - Visado de anuncio publicitario (frontal, saliente) marquesina y/o toldos",
+          "note": "Si vas a poner un cartel, una marquesina o un toldo.",
+          "applies_when": {
+            "signage": true
+          }
+        },
+        {
+          "id": "1fb7a579-8fc2-4216-b113-684cc272f7f1",
+          "title": "Inscripción en el Registro de Empleadores",
+          "note": "Si vas a contratar personal.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "181ce79d-1986-49bb-80fc-db30752765f5",
+          "title": "Solicitud de rúbrica de documentación laboral",
+          "note": "Si contratás personal, para rubricar los libros laborales.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "eb207120-23e2-42c1-9be6-e26a47370031",
+          "title": "Consulta obligatoria para inmuebles en APH o catalogados",
+          "note": "Si el inmueble está en un área de protección histórica o está catalogado.",
+          "applies_when": {
+            "protected_building": true
+          }
+        }
+      ]
+    },
+    {
+      "slug": "restaurante",
+      "name": "Restaurante",
+      "synonyms": [
+        "restorán",
+        "parrilla",
+        "pizzería",
+        "rotisería",
+        "casa de comidas",
+        "bodegón"
+      ],
+      "procedures": [
+        {
+          "id": "338718b4-a2a0-44af-baa4-083f5d834b12",
+          "title": "Habilitación de actividad económica",
+          "note": "Para abrir el local con una habilitación nueva; requiere evaluación técnica.",
+          "applies_when": {
+            "takes_over_existing": false
+          }
+        },
+        {
+          "id": "db771727-8bcb-4cac-8349-02439dfeb258",
+          "title": "Transmisión de autorización de actividad económica",
+          "note": "Si continuás un local ya habilitado: en lugar de una habilitación nueva, se transfiere la del titular anterior.",
+          "applies_when": {
+            "takes_over_existing": true
+          }
+        },
+        {
+          "id": "750ed713-e172-4d06-9a8f-d9505aafe2f4",
+          "title": "Ingresos Brutos/Contribuyentes locales - Alta",
+          "note": "Para inscribirte como contribuyente de la Ciudad antes de empezar a facturar."
+        },
+        {
+          "id": "be2b17ec-9bc0-480a-ac7f-2d389e6a7812",
+          "title": "Solicitud de permiso de área gastronómica",
+          "note": "Si querés poner mesas y sillas en la vereda.",
+          "applies_when": {
+            "sidewalk_tables": true
+          }
+        },
+        {
+          "id": "c5e44825-3fc3-4abe-86cf-ec8dfa68f7fc",
+          "title": "Inscripción al Curso de Manipulación de Alimentos",
+          "note": "Para quienes manipulan alimentos en el local."
+        },
+        {
+          "id": "1304fa97-1f5f-48d7-b867-d30ca2f78689",
+          "title": "Inscripción en el Registro de Generadores Especiales de Residuos Sólidos Urbanos para Fracción Húmedos",
+          "note": "Si el local genera grandes volúmenes de residuos húmedos."
+        },
+        {
+          "id": "266d2abd-ffd7-4407-ba10-2499509c3ea0",
+          "title": "Exclusión del Registro de Generadores Especiales de Residuos Sólidos Urbanos para Locales Gastronómicos y Hoteleros",
+          "note": "Si el local genera pocos residuos, para quedar fuera del registro de grandes generadores."
+        },
+        {
+          "id": "fc321f1e-badb-4439-be4e-5d4fbfc963ac",
+          "title": "Impacto Ambiental: Certificado de Aptitud Ambiental (CAA)",
+          "note": "Si la actividad está alcanzada por la evaluación de impacto ambiental."
+        },
+        {
+          "id": "119c61aa-b66e-41c5-80ec-f80571455577",
+          "title": "Consulta de usos - Visado de anuncio publicitario (frontal, saliente) marquesina y/o toldos",
+          "note": "Si vas a poner un cartel, una marquesina o un toldo.",
+          "applies_when": {
+            "signage": true
+          }
+        },
+        {
+          "id": "1fb7a579-8fc2-4216-b113-684cc272f7f1",
+          "title": "Inscripción en el Registro de Empleadores",
+          "note": "Si vas a contratar personal.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "181ce79d-1986-49bb-80fc-db30752765f5",
+          "title": "Solicitud de rúbrica de documentación laboral",
+          "note": "Si contratás personal, para rubricar los libros laborales.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "eb207120-23e2-42c1-9be6-e26a47370031",
+          "title": "Consulta obligatoria para inmuebles en APH o catalogados",
+          "note": "Si el inmueble está en un área de protección histórica o está catalogado.",
+          "applies_when": {
+            "protected_building": true
+          }
+        }
+      ]
+    },
+    {
+      "slug": "kiosco",
+      "name": "Kiosco",
+      "synonyms": [
+        "quiosco",
+        "maxikiosco",
+        "drugstore",
+        "polirrubro"
+      ],
+      "procedures": [
+        {
+          "id": "338718b4-a2a0-44af-baa4-083f5d834b12",
+          "title": "Habilitación de actividad económica",
+          "note": "Para abrir el local con una habilitación nueva; requiere evaluación técnica.",
+          "applies_when": {
+            "takes_over_existing": false
+          }
+        },
+        {
+          "id": "15e0394b-c7b5-4f93-bc25-ee012d695aec",
+          "title": "Habilitación de actividad económica exprés",
+          "note": "Alternativa si el local tiene menos de 200 m² y cumple los requisitos de ubicación y uso.",
+          "applies_when": {
+            "under_200_m2": true,
+            "takes_over_existing": false
+          }
+        },
+        {
+          "id": "db771727-8bcb-4cac-8349-02439dfeb258",
+          "title": "Transmisión de autorización de actividad económica",
+          "note": "Si continuás un local ya habilitado: en lugar de una habilitación nueva, se transfiere la del titular anterior.",
+          "applies_when": {
+            "takes_over_existing": true
+          }
+        },
+        {
+          "id": "750ed713-e172-4d06-9a8f-d9505aafe2f4",
+          "title": "Ingresos Brutos/Contribuyentes locales - Alta",
+          "note": "Para inscribirte como contribuyente de la Ciudad antes de empezar a facturar."
+        },
+        {
+          "id": "119c61aa-b66e-41c5-80ec-f80571455577",
+          "title": "Consulta de usos - Visado de anuncio publicitario (frontal, saliente) marquesina y/o toldos",
+          "note": "Si vas a poner un cartel, una marquesina o un toldo.",
+          "applies_when": {
+            "signage": true
+          }
+        },
+        {
+          "id": "1fb7a579-8fc2-4216-b113-684cc272f7f1",
+          "title": "Inscripción en el Registro de Empleadores",
+          "note": "Si vas a contratar personal.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "181ce79d-1986-49bb-80fc-db30752765f5",
+          "title": "Solicitud de rúbrica de documentación laboral",
+          "note": "Si contratás personal, para rubricar los libros laborales.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "eb207120-23e2-42c1-9be6-e26a47370031",
+          "title": "Consulta obligatoria para inmuebles en APH o catalogados",
+          "note": "Si el inmueble está en un área de protección histórica o está catalogado.",
+          "applies_when": {
+            "protected_building": true
+          }
+        }
+      ]
+    },
+    {
+      "slug": "peluqueria",
+      "name": "Peluquería",
+      "synonyms": [
+        "barbería",
+        "salón de belleza",
+        "estética",
+        "manicuría"
+      ],
+      "procedures": [
+        {
+          "id": "338718b4-a2a0-44af-baa4-083f5d834b12",
+          "title": "Habilitación de actividad económica",
+          "note": "Para abrir el local con una habilitación nueva; requiere evaluación técnica.",
+          "applies_when": {
+            "takes_over_existing": false
+          }
+        },
+        {
+          "id": "15e0394b-c7b5-4f93-bc25-ee012d695aec",
+          "title": "Habilitación de actividad económica exprés",
+          "note": "Alternativa si el local tiene menos de 200 m² y cumple los requisitos de ubicación y uso.",
+          "applies_when": {
+            "under_200_m2": true,
+            "takes_over_existing": false
+          }
+        },
+        {
+          "id": "db771727-8bcb-4cac-8349-02439dfeb258",
+          "title": "Transmisión de autorización de actividad económica",
+          "note": "Si continuás un local ya habilitado: en lugar de una habilitación nueva, se transfiere la del titular anterior.",
+          "applies_when": {
+            "takes_over_existing": true
+          }
+        },
+        {
+          "id": "750ed713-e172-4d06-9a8f-d9505aafe2f4",
+          "title": "Ingresos Brutos/Contribuyentes locales - Alta",
+          "note": "Para inscribirte como contribuyente de la Ciudad antes de empezar a facturar."
+        },
+        {
+          "id": "119c61aa-b66e-41c5-80ec-f80571455577",
+          "title": "Consulta de usos - Visado de anuncio publicitario (frontal, saliente) marquesina y/o toldos",
+          "note": "Si vas a poner un cartel, una marquesina o un toldo.",
+          "applies_when": {
+            "signage": true
+          }
+        },
+        {
+          "id": "1fb7a579-8fc2-4216-b113-684cc272f7f1",
+          "title": "Inscripción en el Registro de Empleadores",
+          "note": "Si vas a contratar personal.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "181ce79d-1986-49bb-80fc-db30752765f5",
+          "title": "Solicitud de rúbrica de documentación laboral",
+          "note": "Si contratás personal, para rubricar los libros laborales.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "eb207120-23e2-42c1-9be6-e26a47370031",
+          "title": "Consulta obligatoria para inmuebles en APH o catalogados",
+          "note": "Si el inmueble está en un área de protección histórica o está catalogado.",
+          "applies_when": {
+            "protected_building": true
+          }
+        }
+      ]
+    },
+    {
+      "slug": "comercio-minorista",
+      "name": "Comercio minorista",
+      "synonyms": [
+        "tienda de ropa",
+        "local de ropa",
+        "librería",
+        "ferretería",
+        "zapatería",
+        "local comercial"
+      ],
+      "procedures": [
+        {
+          "id": "338718b4-a2a0-44af-baa4-083f5d834b12",
+          "title": "Habilitación de actividad económica",
+          "note": "Para abrir el local con una habilitación nueva; requiere evaluación técnica.",
+          "applies_when": {
+            "takes_over_existing": false
+          }
+        },
+        {
+          "id": "15e0394b-c7b5-4f93-bc25-ee012d695aec",
+          "title": "Habilitación de actividad económica exprés",
+          "note": "Alternativa si el local tiene menos de 200 m² y cumple los requisitos de ubicación y uso.",
+          "applies_when": {
+            "under_200_m2": true,
+            "takes_over_existing": false
+          }
+        },
+        {
+          "id": "db771727-8bcb-4cac-8349-02439dfeb258",
+          "title": "Transmisión de autorización de actividad económica",
+          "note": "Si continuás un local ya habilitado: en lugar de una habilitación nueva, se transfiere la del titular anterior.",
+          "applies_when": {
+            "takes_over_existing": true
+          }
+        },
+        {
+          "id": "750ed713-e172-4d06-9a8f-d9505aafe2f4",
+          "title": "Ingresos Brutos/Contribuyentes locales - Alta",
+          "note": "Para inscribirte como contribuyente de la Ciudad antes de empezar a facturar."
+        },
+        {
+          "id": "119c61aa-b66e-41c5-80ec-f80571455577",
+          "title": "Consulta de usos - Visado de anuncio publicitario (frontal, saliente) marquesina y/o toldos",
+          "note": "Si vas a poner un cartel, una marquesina o un toldo.",
+          "applies_when": {
+            "signage": true
+          }
+        },
+        {
+          "id": "971d30cf-f009-4f84-906f-82e6fae77e59",
+          "title": "Solicitud de espacio de carga y descarga en la vía pública",
+          "note": "Si recibís mercadería con frecuencia y necesitás un espacio reservado en la calle."
+        },
+        {
+          "id": "1fb7a579-8fc2-4216-b113-684cc272f7f1",
+          "title": "Inscripción en el Registro de Empleadores",
+          "note": "Si vas a contratar personal.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "181ce79d-1986-49bb-80fc-db30752765f5",
+          "title": "Solicitud de rúbrica de documentación laboral",
+          "note": "Si contratás personal, para rubricar los libros laborales.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "eb207120-23e2-42c1-9be6-e26a47370031",
+          "title": "Consulta obligatoria para inmuebles en APH o catalogados",
+          "note": "Si el inmueble está en un área de protección histórica o está catalogado.",
+          "applies_when": {
+            "protected_building": true
+          }
+        }
+      ]
+    },
+    {
+      "slug": "foodtruck",
+      "name": "Foodtruck",
+      "synonyms": [
+        "food truck",
+        "carro de comida",
+        "venta de comida en la calle",
+        "puesto ambulante de comida"
+      ],
+      "procedures": [
+        {
+          "id": "47ea4e24-dc8c-42e7-be37-0ab13d421534",
+          "title": "Habilitación de foodtrucks",
+          "note": "Para habilitar el vehículo como foodtruck."
+        },
+        {
+          "id": "89f286b0-dddc-426f-96cd-38bc25372966",
+          "title": "Permiso de uso de foodtrucks en el espacio público",
+          "note": "Para instalarte en un espacio público."
+        },
+        {
+          "id": "750ed713-e172-4d06-9a8f-d9505aafe2f4",
+          "title": "Ingresos Brutos/Contribuyentes locales - Alta",
+          "note": "Para inscribirte como contribuyente de la Ciudad antes de empezar a facturar."
+        },
+        {
+          "id": "c5e44825-3fc3-4abe-86cf-ec8dfa68f7fc",
+          "title": "Inscripción al Curso de Manipulación de Alimentos",
+          "note": "Para quienes manipulan alimentos."
+        },
+        {
+          "id": "1fb7a579-8fc2-4216-b113-684cc272f7f1",
+          "title": "Inscripción en el Registro de Empleadores",
+          "note": "Si vas a contratar personal.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "181ce79d-1986-49bb-80fc-db30752765f5",
+          "title": "Solicitud de rúbrica de documentación laboral",
+          "note": "Si contratás personal, para rubricar los libros laborales.",
+          "applies_when": {
+            "has_employees": true
+          }
+        }
+      ]
+    }
+  ]
+}

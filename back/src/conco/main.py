@@ -1,13 +1,29 @@
+import asyncio
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from conco.config import settings
 from conco.geolocation.api import router as geolocation_router
+from conco.guidance.api import router as guidance_router
+from conco.guidance.embeddings import FastEmbedTextEmbedder
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    """Carga el modelo de embeddings en segundo plano: la API arranca sin esperarlo."""
+    warm_up = asyncio.create_task(asyncio.to_thread(FastEmbedTextEmbedder().warm_up))
+    yield
+    warm_up.cancel()
+
 
 app = FastAPI(
     title="CONCO API",
     description="API inicial para el MVP de orientación general sobre trámites.",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 # Los orígenes permitidos se configuran con CORS_ORIGINS en el archivo .env.
@@ -20,6 +36,7 @@ app.add_middleware(
 )
 
 app.include_router(geolocation_router)
+app.include_router(guidance_router)
 
 
 @app.get("/health", tags=["Estado"])

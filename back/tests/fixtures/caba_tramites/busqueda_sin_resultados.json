@@ -1,0 +1,21 @@
+{
+  "jsonapi": {
+    "version": "1.1",
+    "meta": {
+      "links": {
+        "self": {
+          "href": "https://jsonapi.org/format/1.1/"
+        }
+      }
+    }
+  },
+  "data": [],
+  "meta": {
+    "count": 0
+  },
+  "links": {
+    "self": {
+      "href": "https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco?fields%5Bnode--tramites_obelisco%5D=title%2Cpath%2Cchanged%2Cbody&filter%5Bstatus%5D=1&filter%5Btitle%5D%5Boperator%5D=CONTAINS&filter%5Btitle%5D%5Bvalue%5D=caf&page%5Blimit%5D=10&sort=title"
+    }
+  }
+}

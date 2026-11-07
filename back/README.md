@@ -38,27 +38,49 @@ back/
 │       │   ├── domain.py       # Address, el puerto AddressFinder y AddressSearchError
 │       │   ├── infrastructure.py # adaptador que usa Georef y lo traduce al dominio
 │       │   └── api.py          # endpoint GET /geolocation/addresses
+│       ├── guidance/           # funcionalidad: orientación sobre trámites oficiales
+│       │   ├── domain.py       # trámites, actividades y los puertos ProcedureCatalog, ActivityDirectory y TextEmbedder
+│       │   ├── infrastructure.py # adaptador que usa la API de trámites de la Ciudad y pasa el HTML a texto
+│       │   ├── embeddings.py   # adaptador que corre el modelo de embeddings dentro de la API
+│       │   ├── activity_directory.py # adaptador que busca actividades en Postgres con pgvector
+│       │   ├── load_catalog.py # comando que carga trámites y actividades en la base
+│       │   ├── data/activities.json # relación curada actividad → trámites (borrador)
+│       │   └── api.py          # endpoints GET /guidance/procedures y /guidance/activities
 │       └── integrations/       # un paquete por cada API externa
-│           └── georef/
-│               ├── client.py   # única ubicación de las llamadas HTTP a Georef
-│               └── models.py   # forma de la respuesta JSON de Georef
+│           ├── georef/
+│           │   ├── client.py   # única ubicación de las llamadas HTTP a Georef
+│           │   └── models.py   # forma de la respuesta JSON de Georef
+│           └── caba_tramites/
+│               ├── client.py   # única ubicación de las llamadas HTTP a la API de trámites de la Ciudad
+│               └── models.py   # forma de la respuesta JSON:API de trámites
 ├── scripts/
 │   └── probes/                 # un script por API para explorarla en forma aislada
-│       └── georef.py           # ejecuta el cliente e imprime lo que devuelve
+│       ├── georef.py           # ejecuta el cliente e imprime lo que devuelve
+│       └── caba_tramites.py
 └── tests/
     ├── conftest.py             # configuración compartida de pytest
     ├── fixtures/               # respuestas reales guardadas, una carpeta por API
-    │   └── georef/
+    │   ├── georef/
+    │   └── caba_tramites/
     ├── unit/                   # sin internet: las APIs externas se simulan
     │   ├── georef/
     │   │   └── test_client.py
-    │   └── geolocation/
-    │       ├── test_georef_finder.py
+    │   ├── caba_tramites/
+    │   │   └── test_client.py
+    │   ├── geolocation/
+    │   │   ├── test_georef_finder.py
+    │   │   └── test_api.py
+    │   └── guidance/
+    │       ├── test_caba_catalog.py
     │       └── test_api.py
     └── integration/            # con internet: llaman a las APIs reales
         ├── georef/
         │   └── test_client.py
-        └── geolocation/
+        ├── caba_tramites/
+        │   └── test_client.py
+        ├── geolocation/
+        │   └── test_api.py
+        └── guidance/
             └── test_api.py
 ```
 
@@ -134,6 +156,147 @@ Para probarlo a mano, levantar la API y abrir `http://127.0.0.1:8000/docs`:
 uv run uvicorn conco.main:app --reload
 ```
 
+## Segunda API: trámites de la Ciudad de Buenos Aires
+
+| Dato | Valor |
+|---|---|
+| Proveedor | Gobierno de la Ciudad de Buenos Aires (buenosaires.gob.ar) |
+| Endpoint | `GET https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco` (búsqueda) y `.../tramites_obelisco/{uuid}` (detalle) |
+| Formato | JSON:API de Drupal, sin clave de acceso |
+| Licencia | Creative Commons Reconocimiento 2.5 Argentina (CC BY 2.5 AR) |
+| Uso en CONCO | Buscar trámites oficiales y mostrar requisitos, pasos, organismo y enlace para iniciarlos |
+| Parámetros principales | `filter[status]=1`, `filter[title][operator]=CONTAINS`, `filter[title][value]`, `sort=title`, `page[limit]`, `include` y `fields[...]` |
+
+**Limitaciones:**
+
+- La API no tiene documentación pública: es el JSON:API que Drupal expone por defecto. Su forma puede cambiar sin aviso; el test de integración es la alerta temprana.
+- La búsqueda es solo por texto en el título (no distingue mayúsculas ni acentos). No hay búsqueda por actividad ni por relevancia.
+- El contenido de cada trámite está armado con párrafos anidados (requisitos, pasos, organismo, botón para iniciar). El cliente pide solo esos párrafos y descarta el resto (costos, normativa, textos de ayuda).
+- Un id inexistente o no publicado no devuelve 404: redirige (301) a una página HTML. El cliente lo informa como "no encontrado".
+- Sin `filter[status]=1`, las páginas vienen incompletas porque la API omite los trámites no publicados.
+
+Ejemplo de respuesta de la búsqueda (abreviado), obtenido con `filter[title][value]=habilitaci`:
+
+```json
+{
+  "data": [
+    {
+      "type": "node--tramites_obelisco",
+      "id": "338718b4-a2a0-44af-baa4-083f5d834b12",
+      "attributes": {
+        "title": "Habilitación de actividad económica",
+        "changed": "2026-08-07T18:57:01+00:00",
+        "path": { "alias": "/tramites/habilitacion-de-actividad-economica" },
+        "body": { "value": "Con este trámite podés solicitar la habilitación...", "format": "plain_text" }
+      }
+    }
+  ],
+  "meta": { "count": 11 }
+}
+```
+
+## Endpoints de orientación sobre trámites
+
+Toda respuesta incluye `source` (nombre, URL y licencia de la fuente oficial) y cada trámite incluye `official_url`, el enlace a su página oficial (RN-05). La información es orientación general: la persona debe verificarla con el organismo responsable (RN-04, RN-07).
+
+### `GET /guidance/procedures`
+
+Busca trámites oficiales por su nombre.
+
+| Parámetro | Obligatorio | Valor por defecto | Validación |
+|---|---|---|---|
+| `query` | Sí | — | Entre 3 y 100 caracteres, no solo espacios |
+| `limit` | No | `10` | Entre 1 y 20 |
+
+Respuesta (`200`): `{"procedures": [...], "source": {...}}`. Cada trámite tiene `id`, `title`, `official_url`, `summary` (texto plano) y `last_updated`. La lista puede venir vacía.
+
+### `GET /guidance/procedures/{procedure_id}`
+
+Devuelve el detalle de un trámite a partir del `id` que entrega la búsqueda.
+
+Respuesta (`200`): `{"procedure": {...}, "source": {...}}`. Además de los datos del resumen, el trámite incluye `requirements` y `steps` (listas de textos planos, en el orden de la página oficial), `responsible_office` y `start_url` (enlace oficial para iniciar el trámite). Estos dos últimos pueden venir en `null`.
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` | La consulta funcionó |
+| `404` | El trámite no existe o no está publicado (solo el detalle) |
+| `422` | Los parámetros no cumplen la validación (en el detalle, si el id no es un UUID) |
+| `502` | La API de la Ciudad no respondió o devolvió algo inesperado |
+
+Para explorar la API en forma aislada:
+
+```bash
+uv run python scripts/probes/caba_tramites.py habilitaci
+uv run python scripts/probes/caba_tramites.py --id 338718b4-a2a0-44af-baa4-083f5d834b12
+```
+
+## Búsqueda de actividades
+
+La API de trámites solo busca por texto en el título y ningún trámite menciona actividades: «cafetería» no encuentra «Habilitación de actividad económica». Por eso la relación entre actividades y trámites es **curada**: `src/conco/guidance/data/activities.json` dice, para cada actividad, qué trámites suelen aplicar y en qué caso. Es un **borrador** que tiene que revisar alguien que conozca el tema (RN-04).
+
+Para entender lo que escribe la persona se usan **embeddings**: un modelo multilingüe convierte cada nombre y sinónimo de actividad en un vector de 384 números, y la consulta se compara por similitud coseno. Así, «quiero poner una barbería» sugiere «Peluquería» aunque no compartan palabras.
+
+- El modelo (`paraphrase-multilingual-MiniLM-L12-v2`, ONNX con `fastembed`) corre **dentro de la API**, detrás del puerto `TextEmbedder`. Se carga en segundo plano al arrancar y ocupa unos 600 MB de RAM. La primera vez se descarga (~220 MB).
+- Los datos viven en Postgres con la extensión pgvector. En desarrollo se usa el Supabase local de `back/supabase/` (solo la base de datos, puerto `55322`).
+- Por debajo de `ACTIVITY_MIN_SIMILARITY` (0.5) no se sugiere nada. Con palabras cortas o poco comunes el modelo puede dar similitudes altas sin sentido, por eso el frontend muestra las sugerencias para que la persona elija, en vez de elegir solo.
+
+### Levantar la base y cargar los datos
+
+Desde la carpeta `back/` (necesita Docker):
+
+```bash
+npx supabase start -x gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+uv run python -m conco.guidance.load_catalog
+```
+
+`supabase start` aplica las migraciones de `supabase/migrations/`. `load_catalog` trae los 868 trámites publicados, valida el archivo curado y vectoriza los alias; se vuelve a correr cada vez que cambia `activities.json` o para actualizar los trámites. `npx supabase db reset` borra la base y vuelve a aplicar las migraciones (después hay que volver a cargar los datos).
+
+| Variable | Valor por defecto |
+|---|---|
+| `DATABASE_URL` | `postgresql://postgres:postgres@127.0.0.1:55322/postgres` |
+| `EMBEDDING_MODEL` | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (si cambia, hay que volver a cargar los datos) |
+| `ACTIVITY_MIN_SIMILARITY` | `0.5` |
+
+### `GET /guidance/activities`
+
+Sugiere actividades parecidas por significado al texto.
+
+| Parámetro | Obligatorio | Valor por defecto | Validación |
+|---|---|---|---|
+| `query` | Sí | — | Entre 2 y 100 caracteres, no solo espacios |
+| `limit` | No | `5` | Entre 1 y 10 |
+
+Respuesta (`200`): `{"activities": [{"slug": "peluqueria", "name": "Peluquería", "matched_alias": "barbería", "similarity": 0.8512}]}`, de la más a la menos parecida. La lista puede venir vacía.
+
+### `GET /guidance/activities/{slug}/procedures`
+
+Devuelve los trámites que suelen aplicar a la actividad, en el orden en que conviene revisarlos. Las respuestas de contexto son opcionales (`true` o `false`) y descartan los trámites que no corresponden:
+
+| Parámetro | Pregunta |
+|---|---|
+| `has_employees` | ¿Vas a contratar personal? |
+| `under_200_m2` | ¿El local tiene menos de 200 m²? |
+| `sidewalk_tables` | ¿Vas a poner mesas y sillas en la vereda? |
+| `signage` | ¿Vas a poner un cartel, una marquesina o un toldo? |
+| `protected_building` | ¿El inmueble está en un área de protección histórica (APH) o está catalogado? |
+| `takes_over_existing` | ¿Vas a continuar un local que ya está habilitado? |
+
+Respuesta (`200`): `{"activity": {"slug", "name"}, "questions": [{"id": "has_employees", "text": "¿Vas a contratar personal?", "answer": null}], "procedures": [{"procedure": {...}, "note": "Si vas a contratar personal.", "status": "may_apply"}], "excluded_count": 0, "source": {...}}`.
+
+- `questions` trae solo las preguntas que usa esa actividad, con la respuesta recibida (`null` si no se respondió).
+- Cada `procedure` tiene los mismos campos que en la búsqueda de trámites; `note` dice en qué caso aplica.
+- `status` es `applies` si el trámite no tiene condiciones o todas se cumplen, y `may_apply` si falta responder alguna.
+- `excluded_count` cuenta los trámites descartados por las respuestas.
+
+Las condiciones de cada trámite están en `applies_when` dentro de `src/conco/guidance/data/activities.json`. Al cambiarlas, hay que volver a correr la carga.
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` | La consulta funcionó |
+| `404` | La actividad no existe (solo los trámites) |
+| `422` | Los parámetros no cumplen la validación (el `slug` va en minúsculas, con números y guiones; las respuestas, `true` o `false`; no se aceptan preguntas desconocidas) |
+| `503` | La base de datos no está disponible |
+
 ## Cómo incorporar una API nueva
 
 Cada API se integra y se prueba por separado, en este orden:
@@ -158,7 +321,7 @@ Primero se observa la respuesta y después se modela. No se escriben modelos a p
 
 ## Crecimiento previsto
 
-Cada funcionalidad que expone un endpoint tiene su carpeta (`geolocation/` ya existe; `guidance/` para orientación por actividad vendrá después), con capas de dominio, infraestructura y API. La capa de aplicación (casos de uso) se agregará cuando haya lógica que coordinar, por ejemplo caché o combinar varias APIs; mientras tanto, el endpoint usa el puerto directamente.
+Cada funcionalidad que expone un endpoint tiene su carpeta (`geolocation/` y `guidance/` ya existen), con capas de dominio, infraestructura y API. La capa de aplicación (casos de uso) se agregará cuando haya lógica que coordinar, por ejemplo caché o combinar varias APIs; mientras tanto, el endpoint usa el puerto directamente.
 
 ## Checklist de la primera integración
 
@@ -176,3 +339,4 @@ Desde la carpeta `back/`:
 |---|---|
 | `uv run pytest` | Tests unitarios. No usan internet: simulan las APIs externas con `respx` y respuestas reales guardadas en `tests/fixtures/`. |
 | `uv run pytest -m integration` | Tests de integración. Llaman a las APIs reales, por lo que necesitan internet y que el servicio esté disponible. |
+| `uv run pytest -m database` | Tests contra la base local. Necesitan la base levantada y los datos cargados con `load_catalog`. |

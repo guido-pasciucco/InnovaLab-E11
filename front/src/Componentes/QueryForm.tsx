@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
+import ActivityAutocomplete from "./ActivityAutocomplete";
 import AddressAutocomplete from "./AddressAutocomplete";
-import type { Address, ConsultationRequest, GeoPoint } from "../types";
+import type { ActivitySuggestion, Address, ConsultationRequest, GeoPoint } from "../types";
 
 type Props = { onSubmit: (value: ConsultationRequest) => void; busy: boolean };
 // Georef works best without the neighbourhood, so the examples only carry street and number.
@@ -16,6 +17,7 @@ function toGeoPoint(coordinates: Address["coordinates"]): GeoPoint | null {
 
 export default function QueryForm({ onSubmit, busy }: Props) {
   const [activity, setActivity] = useState("");
+  const [selectedActivity, setSelectedActivity] = useState<ActivitySuggestion | null>(null);
   const [address, setAddress] = useState("");
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [searchAvailable, setSearchAvailable] = useState(true);
@@ -27,9 +29,10 @@ export default function QueryForm({ onSubmit, busy }: Props) {
       setError("Completá la actividad y la dirección para continuar.");
       return;
     }
+    const activitySlug = selectedActivity?.slug ?? null;
     if (selectedAddress) {
       setError("");
-      onSubmit({ activity: activity.trim(), address: selectedAddress.full_address, point: toGeoPoint(selectedAddress.coordinates) });
+      onSubmit({ activity: activity.trim(), address: selectedAddress.full_address, point: toGeoPoint(selectedAddress.coordinates), activitySlug });
       return;
     }
     if (searchAvailable) {
@@ -37,15 +40,17 @@ export default function QueryForm({ onSubmit, busy }: Props) {
       return;
     }
     setError("");
-    onSubmit({ activity: activity.trim(), address: address.trim(), point: null });
+    onSubmit({ activity: activity.trim(), address: address.trim(), point: null, activitySlug });
   }
 
   return (
     <form className="query-form panel" onSubmit={handleSubmit} noValidate>
       <div className="query-field">
         <label htmlFor="activity">¿Qué actividad querés realizar?</label>
-        <input id="activity" name="activity" value={activity} onChange={e => { setActivity(e.target.value); setError(""); }}
-          placeholder="Ej.: abrir una cafetería" maxLength={300} autoComplete="off" aria-invalid={!!error && !activity.trim()} />
+        <ActivityAutocomplete id="activity" value={activity} selected={selectedActivity}
+          invalid={!!error && !activity.trim()}
+          onChange={value => { setActivity(value); setError(""); }} onSelect={setSelectedActivity} />
+        <span className="field-hint">Elegí una actividad de la lista para ver los trámites oficiales que suelen aplicar.</span>
       </div>
       <div className="query-field">
         <label htmlFor="address">¿En qué dirección?</label>
@@ -58,7 +63,7 @@ export default function QueryForm({ onSubmit, busy }: Props) {
       {error && <p className="error-message" role="alert">{error}</p>}
       <button className="primary query-submit" type="submit" disabled={busy}>{busy ? "Consultando…" : <>Consultar requisitos <span aria-hidden="true">→</span></>}</button>
       <div className="examples"><span className="examples-title">Probá con un ejemplo</span><div className="example-chips">
-        {examples.map(item => <button key={item.label} type="button" className="chip" onClick={() => { setActivity(item.activity); setAddress(item.address); setSelectedAddress(null); setError(""); }}>{item.label}</button>)}
+        {examples.map(item => <button key={item.label} type="button" className="chip" onClick={() => { setActivity(item.activity); setSelectedActivity(null); setAddress(item.address); setSelectedAddress(null); setError(""); }}>{item.label}</button>)}
       </div></div>
       <p className="hint">La orientación es inicial y depende de las fuentes oficiales conectadas.</p>
     </form>

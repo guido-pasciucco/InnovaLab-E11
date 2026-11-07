@@ -10,6 +10,8 @@ dependencies = [
     "pydantic>=2.8,<3.0",
     "pydantic-settings>=2.16,<3.0",
     "httpx>=0.28,<1.0",
+    "fastembed>=0.7,<1.0",
+    "psycopg[binary]>=3.2,<4.0",
 ]
 
 [build-system]
@@ -24,7 +26,8 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--import-mode=importlib -m 'not integration'"
+addopts = "--import-mode=importlib -m 'not integration and not database'"
 markers = [
     "integration: calls real external APIs (needs internet)",
+    "database: needs the local database loaded (npx supabase start + load_catalog)",
 ]
