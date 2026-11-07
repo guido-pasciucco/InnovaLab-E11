@@ -10,12 +10,15 @@ from conco.guidance.domain import (
     ActivityDirectory,
     ActivityDirectoryError,
     ActivitySuggestion,
-    ApplicableProcedure,
+    ContextAnswers,
+    ContextQuestion,
+    ContextualProcedure,
     Procedure,
     ProcedureCatalog,
     ProcedureDetail,
     ProcedureSearchError,
     Source,
+    apply_context,
 )
 from conco.guidance.embeddings import FastEmbedTextEmbedder
 from conco.guidance.infrastructure import CabaProcedureCatalog
@@ -49,10 +52,13 @@ class ActivitySuggestionsResponse(BaseModel):
 
 
 class ActivityProceduresResponse(BaseModel):
-    """Trámites que suelen aplicar a una actividad y la fuente oficial de la que provienen."""
+    """Trámites que suelen aplicar a una actividad, afinados con las respuestas de contexto,
+    y la fuente oficial de la que provienen."""
 
     activity: Activity
-    procedures: list[ApplicableProcedure]
+    questions: list[ContextQuestion]
+    procedures: list[ContextualProcedure]
+    excluded_count: int
     source: Source
 
 
@@ -106,8 +112,12 @@ async def get_activity_procedures(
             description="Identificador de la actividad devuelto por la sugerencia.",
         ),
     ],
+    answers: Annotated[ContextAnswers, Query()],
 ) -> ActivityProceduresResponse:
-    """Devuelve los trámites que suelen aplicar a la actividad, con cuándo aplica cada uno."""
+    """Devuelve los trámites que suelen aplicar a la actividad, con cuándo aplica cada uno.
+
+    Las respuestas de contexto (opcionales) descartan los trámites que no corresponden.
+    """
     try:
         result = await directory.procedures_for(slug)
     except ActivityDirectoryError as exc:
@@ -120,9 +130,8 @@ async def get_activity_procedures(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No se encontró la actividad solicitada.",
         )
-    return ActivityProceduresResponse(
-        activity=result.activity, procedures=result.procedures, source=catalog.source
-    )
+    contextual = apply_context(result, answers)
+    return ActivityProceduresResponse(**contextual.model_dump(), source=catalog.source)
 
 
 @router.get("/procedures", response_model=ProcedureSearchResponse)

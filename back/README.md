@@ -270,15 +270,31 @@ Respuesta (`200`): `{"activities": [{"slug": "peluqueria", "name": "Peluquería"
 
 ### `GET /guidance/activities/{slug}/procedures`
 
-Devuelve los trámites que suelen aplicar a la actividad, en el orden en que conviene revisarlos.
+Devuelve los trámites que suelen aplicar a la actividad, en el orden en que conviene revisarlos. Las respuestas de contexto son opcionales (`true` o `false`) y descartan los trámites que no corresponden:
 
-Respuesta (`200`): `{"activity": {"slug", "name"}, "procedures": [{"procedure": {...}, "note": "Si vas a contratar personal."}], "source": {...}}`. Cada `procedure` tiene los mismos campos que en la búsqueda de trámites; `note` dice en qué caso aplica.
+| Parámetro | Pregunta |
+|---|---|
+| `has_employees` | ¿Vas a contratar personal? |
+| `under_200_m2` | ¿El local tiene menos de 200 m²? |
+| `sidewalk_tables` | ¿Vas a poner mesas y sillas en la vereda? |
+| `signage` | ¿Vas a poner un cartel, una marquesina o un toldo? |
+| `protected_building` | ¿El inmueble está en un área de protección histórica (APH) o está catalogado? |
+| `takes_over_existing` | ¿Vas a continuar un local que ya está habilitado? |
+
+Respuesta (`200`): `{"activity": {"slug", "name"}, "questions": [{"id": "has_employees", "text": "¿Vas a contratar personal?", "answer": null}], "procedures": [{"procedure": {...}, "note": "Si vas a contratar personal.", "status": "may_apply"}], "excluded_count": 0, "source": {...}}`.
+
+- `questions` trae solo las preguntas que usa esa actividad, con la respuesta recibida (`null` si no se respondió).
+- Cada `procedure` tiene los mismos campos que en la búsqueda de trámites; `note` dice en qué caso aplica.
+- `status` es `applies` si el trámite no tiene condiciones o todas se cumplen, y `may_apply` si falta responder alguna.
+- `excluded_count` cuenta los trámites descartados por las respuestas.
+
+Las condiciones de cada trámite están en `applies_when` dentro de `src/conco/guidance/data/activities.json`. Al cambiarlas, hay que volver a correr la carga.
 
 | Respuesta | Cuándo |
 |---|---|
 | `200` | La consulta funcionó |
 | `404` | La actividad no existe (solo los trámites) |
-| `422` | Los parámetros no cumplen la validación (el `slug` va en minúsculas, con números y guiones) |
+| `422` | Los parámetros no cumplen la validación (el `slug` va en minúsculas, con números y guiones; las respuestas, `true` o `false`; no se aceptan preguntas desconocidas) |
 | `503` | La base de datos no está disponible |
 
 ## Cómo incorporar una API nueva

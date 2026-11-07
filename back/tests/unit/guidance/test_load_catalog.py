@@ -93,3 +93,22 @@ async def test_directory_raises_domain_error_when_model_fails() -> None:
 
     with pytest.raises(ActivityDirectoryError):
         await directory.suggest("barbería", limit=5)
+
+
+def test_reads_procedure_conditions(tmp_path: Path) -> None:
+    activity = _activity("kiosco", [HABILITACION_ID])
+    activity["procedures"][0]["applies_when"] = {"takes_over_existing": False}
+
+    catalog = read_curated_catalog(_write_catalog(tmp_path, [activity]))
+
+    assert catalog.activities[0].procedures[0].applies_when.answered() == {
+        "takes_over_existing": False
+    }
+
+
+def test_rejects_unknown_condition(tmp_path: Path) -> None:
+    activity = _activity("kiosco", [HABILITACION_ID])
+    activity["procedures"][0]["applies_when"] = {"has_pets": True}
+
+    with pytest.raises(ValidationError, match="has_pets"):
+        read_curated_catalog(_write_catalog(tmp_path, [activity]))

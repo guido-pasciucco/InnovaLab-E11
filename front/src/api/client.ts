@@ -1,5 +1,5 @@
 import type {
-  ActivityProceduresResponse, ActivitySuggestionsResponse, AddressSearchResponse, ConsultationRequest,
+  ActivityProceduresResponse, ActivitySuggestionsResponse, AddressSearchResponse, ConsultationRequest, ContextAnswers,
   ConsultationResponse, FollowUpRequest, FollowUpResponse,
 } from '../types';
 import { mockConsultation, mockFollowUp } from './mock';
@@ -59,6 +59,8 @@ export async function suggestActivities(
   return request<ActivitySuggestionsResponse>(`/guidance/activities?${params}`, { signal: options.signal });
 }
 
-export async function getActivityProcedures(slug: string): Promise<ActivityProceduresResponse> {
-  return request<ActivityProceduresResponse>(`/guidance/activities/${encodeURIComponent(slug)}/procedures`);
+export async function getActivityProcedures(slug: string, answers: ContextAnswers = {}): Promise<ActivityProceduresResponse> {
+  const params = new URLSearchParams(Object.entries(answers).map(([id, value]) => [id, String(value)]));
+  const query = params.toString() ? `?${params}` : '';
+  return request<ActivityProceduresResponse>(`/guidance/activities/${encodeURIComponent(slug)}/procedures${query}`);
 }

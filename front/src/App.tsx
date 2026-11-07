@@ -1,9 +1,10 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useRef, useState, type FormEvent } from "react";
 import QueryForm from "./Componentes/QueryForm";
 import MapPanel from "./Componentes/MapPanel";
 import SourceList from "./Componentes/SourceList";
+import ContextQuestions from "./Componentes/ContextQuestions";
 import { getActivityProcedures, submitConsultation, submitFollowUp } from "./api/client";
-import type { ActivityProceduresResponse, ConsultationRequest, ConsultationResponse, SourceReference } from "./types";
+import type { ActivityProceduresResponse, ConsultationRequest, ConsultationResponse, ContextAnswers, SourceReference } from "./types";
 
 type Step = 1 | 2 | 3 | 4 | 5;
 const steps = ["Consulta", "Análisis", "Orientación", "Mapa", "Asistente"];
@@ -28,6 +29,10 @@ export default function App() {
   const [result, setResult] = useState<ConsultationResponse | null>(null);
   const [activityProcedures, setActivityProcedures] = useState<ActivityProceduresResponse | null>(null);
   const [proceduresUnavailable, setProceduresUnavailable] = useState(false);
+  const [contextAnswers, setContextAnswers] = useState<ContextAnswers>({});
+  const [refining, setRefining] = useState(false);
+  const [refineError, setRefineError] = useState(false);
+  const refineRequest = useRef(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [checked, setChecked] = useState<string[]>([]);
@@ -48,6 +53,8 @@ export default function App() {
     setResult(null);
     setActivityProcedures(null);
     setProceduresUnavailable(false);
+    setContextAnswers({});
+    setRefineError(false);
     setChecked([]);
     setAnswer("");
     setError("");
@@ -69,12 +76,36 @@ export default function App() {
     }
   }
 
+  async function answerContext(id: string, value: boolean | null) {
+    if (!activityProcedures) return;
+    const { [id]: _previous, ...rest } = contextAnswers;
+    const answers = value === null ? rest : { ...rest, [id]: value };
+    setContextAnswers(answers);
+    setRefining(true);
+    setRefineError(false);
+    // Only the latest answer wins when the person clicks faster than the API responds.
+    const requestId = ++refineRequest.current;
+    try {
+      const refined = await getActivityProcedures(activityProcedures.activity.slug, answers);
+      if (requestId !== refineRequest.current) return;
+      setActivityProcedures(refined);
+      const ids = new Set(refined.procedures.map(({ procedure }) => procedure.id));
+      setChecked(old => old.filter(checkedId => ids.has(checkedId)));
+    } catch {
+      if (requestId === refineRequest.current) setRefineError(true);
+    } finally {
+      if (requestId === refineRequest.current) setRefining(false);
+    }
+  }
+
   function startOver() {
     setStep(1);
     setQuery({ activity: "", address: "" });
     setResult(null);
     setActivityProcedures(null);
     setProceduresUnavailable(false);
+    setContextAnswers({});
+    setRefineError(false);
     setChecked([]);
     setQuestion("");
     setAnswer("");
@@ -177,12 +208,23 @@ export default function App() {
                 <p>Una guía inicial de temas que conviene revisar para avanzar con tu actividad.</p>
               </div>
               {proceduresUnavailable && <div className="notice"><span className="notice-icon">i</span><div><strong>No pudimos cargar los trámites oficiales</strong><p>Te mostramos una orientación general. Intentá de nuevo más tarde.</p></div></div>}
+              {activityProcedures && (
+                <ContextQuestions questions={activityProcedures.questions} busy={refining} onAnswer={answerContext} />
+              )}
+              {refineError && <div className="notice"><span className="notice-icon">i</span><div><strong>No pudimos actualizar los trámites</strong><p>Seguimos mostrando la lista anterior. Probá responder de nuevo.</p></div></div>}
+              {activityProcedures && activityProcedures.excluded_count > 0 && (
+                <p className="excluded-note" aria-live="polite">
+                  Descartamos {activityProcedures.excluded_count} {activityProcedures.excluded_count === 1 ? "trámite" : "trámites"} según tus respuestas.
+                </p>
+              )}
               <div className="guidance-list">
-                {activityProcedures ? activityProcedures.procedures.map(({ procedure, note }, index) => (
+                {activityProcedures ? activityProcedures.procedures.map(({ procedure, note, status }, index) => (
                   <article className="guidance-card" key={procedure.id}>
                     <div className="guidance-card__top">
                       <span className="guidance-number">{String(index + 1).padStart(2, "0")}</span>
-                      <span className="guidance-tag">TRÁMITE OFICIAL</span>
+                      {status === "applies"
+                        ? <span className="guidance-tag">TRÁMITE OFICIAL</span>
+                        : <span className="guidance-tag guidance-tag--maybe">PUEDE APLICAR</span>}
                     </div>
                     <h2>{procedure.title}</h2>
                     <p className="guidance-note"><strong>Cuándo aplica:</strong> {note}</p>

@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import Protocol
+from typing import Literal, Protocol
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Source(BaseModel):
@@ -73,13 +73,46 @@ class ActivitySuggestion(Activity):
     similarity: float
 
 
+class ContextAnswers(BaseModel):
+    """Lo que la persona contó de su comercio; None significa que no respondió.
+
+    Cada campo es una pregunta de contexto y su descripción es el texto que se le muestra.
+    Las condiciones del archivo curado usan los mismos campos.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    has_employees: bool | None = Field(default=None, description="¿Vas a contratar personal?")
+    under_200_m2: bool | None = Field(
+        default=None, description="¿El local tiene menos de 200 m²?"
+    )
+    sidewalk_tables: bool | None = Field(
+        default=None, description="¿Vas a poner mesas y sillas en la vereda?"
+    )
+    signage: bool | None = Field(
+        default=None, description="¿Vas a poner un cartel, una marquesina o un toldo?"
+    )
+    protected_building: bool | None = Field(
+        default=None,
+        description="¿El inmueble está en un área de protección histórica (APH) o está catalogado?",
+    )
+    takes_over_existing: bool | None = Field(
+        default=None, description="¿Vas a continuar un local que ya está habilitado?"
+    )
+
+    def answered(self) -> dict[str, bool]:
+        return self.model_dump(exclude_none=True)
+
+
 class ApplicableProcedure(BaseModel):
-    """Trámite que suele aplicar a una actividad y en qué caso aplica."""
+    """Trámite que suele aplicar a una actividad, en qué caso aplica y con qué condiciones."""
 
     model_config = ConfigDict(frozen=True)
 
     procedure: Procedure
     note: str
+    # Respuestas que tiene que tener el contexto para que el trámite aplique; vacío = siempre.
+    applies_when: ContextAnswers = ContextAnswers()
 
 
 class ActivityProcedures(BaseModel):
@@ -89,6 +122,71 @@ class ActivityProcedures(BaseModel):
 
     activity: Activity
     procedures: list[ApplicableProcedure]
+
+
+class ContextQuestion(BaseModel):
+    """Pregunta de contexto que afina los trámites de una actividad, con la respuesta dada."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: str
+    text: str
+    answer: bool | None
+
+
+class ContextualProcedure(BaseModel):
+    """Trámite que sigue en pie según el contexto.
+
+    `applies`: no tiene condiciones o todas se cumplen. `may_apply`: falta responder alguna.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    procedure: Procedure
+    note: str
+    status: Literal["applies", "may_apply"]
+
+
+class ContextualProcedures(BaseModel):
+    """Trámites de una actividad afinados con el contexto que dio la persona."""
+
+    model_config = ConfigDict(frozen=True)
+
+    activity: Activity
+    questions: list[ContextQuestion]
+    procedures: list[ContextualProcedure]
+    excluded_count: int
+
+
+def apply_context(result: ActivityProcedures, answers: ContextAnswers) -> ContextualProcedures:
+    """Descarta los trámites cuyas condiciones contradicen las respuestas.
+
+    Solo se preguntan las condiciones que usa esta actividad, en el orden de ContextAnswers.
+    """
+    given = answers.answered()
+    procedures: list[ContextualProcedure] = []
+    for applicable in result.procedures:
+        conditions = applicable.applies_when.answered()
+        if any(key in given and given[key] != value for key, value in conditions.items()):
+            continue
+        status = "applies" if conditions.keys() <= given.keys() else "may_apply"
+        procedures.append(
+            ContextualProcedure(
+                procedure=applicable.procedure, note=applicable.note, status=status
+            )
+        )
+    used = {key for applicable in result.procedures for key in applicable.applies_when.answered()}
+    questions = [
+        ContextQuestion(id=key, text=field.description or key, answer=getattr(answers, key))
+        for key, field in ContextAnswers.model_fields.items()
+        if key in used
+    ]
+    return ContextualProcedures(
+        activity=result.activity,
+        questions=questions,
+        procedures=procedures,
+        excluded_count=len(result.procedures) - len(procedures),
+    )
 
 
 class ActivityDirectoryError(Exception):
