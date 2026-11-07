@@ -2,6 +2,7 @@ import asyncio
 from collections.abc import Sequence
 
 import psycopg
+from psycopg_pool import AsyncConnectionPool
 
 from conco.config import settings
 from conco.guidance.domain import (
@@ -55,10 +56,12 @@ class PostgresActivityDirectory:
         self,
         embedder: TextEmbedder,
         database_url: str | None = None,
+        pool: AsyncConnectionPool | None = None,
         min_similarity: float | None = None,
     ) -> None:
         self._embedder = embedder
         self._database_url = database_url or settings.database_url
+        self._pool = pool
         self._min_similarity = (
             settings.activity_min_similarity if min_similarity is None else min_similarity
         )
@@ -108,6 +111,10 @@ class PostgresActivityDirectory:
 
     async def _fetch(self, sql: str, params: object) -> list[tuple]:
         try:
+            if self._pool is not None:
+                async with self._pool.connection() as conn:
+                    cursor = await conn.execute(sql, params)
+                    return await cursor.fetchall()
             async with await psycopg.AsyncConnection.connect(self._database_url) as conn:
                 cursor = await conn.execute(sql, params)
                 return await cursor.fetchall()
