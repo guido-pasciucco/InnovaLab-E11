@@ -1,5 +1,7 @@
 # USIG EPOK (lugares de la Ciudad)
 
+> **Estado:** en PR #68 (abierto; cadena 07/09) — todavía no está en main.
+
 EPOK es el servicio de lugares de USIG (Gobierno de la Ciudad). CONCO lo usa para indicar las sedes y subsedes comunales más cercanas a un punto, donde la persona puede hacer atención presencial.
 
 ## 1. Ficha
@@ -20,7 +22,7 @@ EPOK es el servicio de lugares de USIG (Gobierno de la Ciudad). CONCO lo usa par
 
 | Uso | MVP | Reglas |
 |---|---|---|
-| Sedes y subsedes comunales más cercanas a un punto, con dirección, teléfono y enlace oficial | Ítems 3 y 4: enlaces a fuentes oficiales y ubicación | [RN-05](../REGLAS_DE_NEGOCIO.md) (cita la fuente y el enlace de la comuna), [RN-06](../REGLAS_DE_NEGOCIO.md) (CONCO indica dónde ir; no gestiona el trámite) |
+| Sedes y subsedes comunales más cercanas a un punto, con dirección, teléfono y enlace oficial | Ítems 3 y 4: enlaces a fuentes oficiales y ubicación | [RN-05](../../REGLAS_DE_NEGOCIO.md) (cita la fuente y el enlace de la comuna), [RN-06](../../REGLAS_DE_NEGOCIO.md) (CONCO indica dónde ir; no gestiona el trámite) |
 
 ## 3. Endpoints que llama CONCO
 
@@ -100,11 +102,11 @@ Respuesta real abreviada (`back/tests/fixtures/epok/contenido_sedes_de_comunas_2
 
 | Capa | Ubicación | Qué hace |
 |---|---|---|
-| Cliente | [`back/src/conco/integrations/epok/client.py`](../../back/src/conco/integrations/epok/client.py) | `find_nearby(longitude, latitude, categories, radius_meters)` y `get_object(object_id)` |
-| Modelos | [`back/src/conco/integrations/epok/models.py`](../../back/src/conco/integrations/epok/models.py) | `EpokNearbyPlaces`, `EpokPlace`, `EpokObjectContent` |
+| Cliente | [`back/src/conco/integrations/epok/client.py`](../../../back/src/conco/integrations/epok/client.py) | `find_nearby(longitude, latitude, categories, radius_meters)` y `get_object(object_id)` |
+| Modelos | [`back/src/conco/integrations/epok/models.py`](../../../back/src/conco/integrations/epok/models.py) | `EpokNearbyPlaces`, `EpokPlace`, `EpokObjectContent` |
 | Error | `EpokError` | Ver la última fila de la tabla anterior |
-| Adaptador | [`back/src/conco/geolocation/infrastructure.py`](../../back/src/conco/geolocation/infrastructure.py) | `EpokNearbyOfficeFinder`: pide el contenido solo de las `limit` más cercanas, en paralelo (`asyncio.gather`) |
-| Error de dominio | [`back/src/conco/geolocation/domain.py`](../../back/src/conco/geolocation/domain.py) | `NearbyOfficeError` |
+| Adaptador | [`back/src/conco/geolocation/infrastructure.py`](../../../back/src/conco/geolocation/infrastructure.py) | `EpokNearbyOfficeFinder`: pide el contenido solo de las `limit` más cercanas, en paralelo (`asyncio.gather`) |
+| Error de dominio | [`back/src/conco/geolocation/domain.py`](../../../back/src/conco/geolocation/domain.py) | `NearbyOfficeError` |
 
 ### `GET /geolocation/nearby-offices`
 
@@ -132,7 +134,7 @@ Cada oficina trae `name`, `address`, `phone`, `neighborhood`, `commune`, `distan
 | `EPOK_TIMEOUT_SECONDS` | `10.0` |
 | `EPOK_RADIUS_METERS` | `3000` |
 
-Definidas en [`back/src/conco/config.py`](../../back/src/conco/config.py).
+Definidas en [`back/src/conco/config.py`](../../../back/src/conco/config.py).
 
 ## 7. Tests y probe
 
@@ -157,6 +159,6 @@ uv run python scripts/probes/epok.py -34.6047137 -58.4021372 1000    # radio en 
 ## 9. Fuentes
 
 - Servicio: <https://epok.buenosaires.gob.ar>
-- Seguimiento: [epok-integration](../../odd/tasks/epok-integration.md)
+- Seguimiento: [epok-integration](../../../odd/tasks/epok-integration.md)
 
 Fecha de verificación: 2026-10-31.

@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-11-12
 **Estado:** Pendiente de validar (regla RN-01 aún no es firme)
-**Contexto relacionado:** [RN-01](../REGLAS_DE_NEGOCIO.md), [RN-04](../REGLAS_DE_NEGOCIO.md), [RN-05](../REGLAS_DE_NEGOCIO.md), [PROPUESTA_TECBA.md](../PROPUESTA_TECBA.md), [APIS_CON_REGISTRO.md](../APIS_CON_REGISTRO.md)
+**Contexto relacionado:** [RN-01](../REGLAS_DE_NEGOCIO.md), [RN-04](../REGLAS_DE_NEGOCIO.md), [RN-05](../REGLAS_DE_NEGOCIO.md), [PROPUESTA_TECBA.md](../PROPUESTA_TECBA.md), [apis/APIS_CON_REGISTRO.md](../apis/APIS_CON_REGISTRO.md)
 
 ## Contexto
 
@@ -23,7 +23,7 @@ CONCO se compromete a que toda orientación esté respaldada por una fuente ofic
 
 ### 2. Costo y operación
 
-Un LLM en el camino crítico de cada consulta exige API key paga (Claude API está en `APIS_CON_REGISTRO.md` como candidata que requiere credenciales), latencia extra y gestión de prompts. La búsqueda por embeddings corre local con `fastembed` (int8, ~300-400 MB), sin costo por consulta.
+Un LLM en el camino crítico de cada consulta exige API key paga (Claude API está en `apis/APIS_CON_REGISTRO.md` como candidata que requiere credenciales), latencia extra y gestión de prompts. La búsqueda por embeddings corre local con `fastembed` (int8, ~300-400 MB), sin costo por consulta.
 
 ### 3. El caso piloto no lo necesita
 
@@ -54,11 +54,11 @@ RN-07 exige mostrar limitaciones. Un sistema que "adivina" con IA contradice el 
 
 - Validación formal de RN-01 contra los requisitos del MVP.
 - Si el usuario pide interacciones más conversacionales (el front ya tiene `submitFollowUp`, hoy mock).
-- Cambios en `APIS_CON_REGISTRO.md`: si Claude API se aprueba, re-evaluar este ADR.
+- Cambios en `apis/APIS_CON_REGISTRO.md`: si Claude API se aprueba, re-evaluar este ADR.
 
 ## Referencias
 
 - Regla: `docs/REGLAS_DE_NEGOCIO.md` RN-01 (estado: pendiente de validar)
 - Plan original: `docs/PROPUESTA_TECBA.md`
-- APIs con credenciales evaluadas: `docs/APIS_CON_REGISTRO.md`
+- APIs con credenciales evaluadas: `docs/apis/APIS_CON_REGISTRO.md`
 - Implementación actual: `front/` (`QueryForm`, `InterpretacionConsulta`), `back/src/conco/guidance/`

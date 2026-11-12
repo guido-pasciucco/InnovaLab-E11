@@ -1,5 +1,7 @@
 # USIG datos útiles
 
+> **Estado:** en PR #66 (abierto; cadena 05/09) — todavía no está en main.
+
 Servicio `datos_utiles` de la Unidad de Sistemas de Información Geográfica (USIG) del Gobierno de la Ciudad. CONCO lo usa para informar barrio, comuna y códigos postales de una dirección o de un punto de CABA.
 
 ## 1. Ficha
@@ -19,8 +21,8 @@ Servicio `datos_utiles` de la Unidad de Sistemas de Información Geográfica (US
 
 | Uso | MVP | Reglas |
 |---|---|---|
-| Barrio, comuna y código postal de una ubicación | Ítem 4: contexto de la ubicación aproximada | [RN-02](../REGLAS_DE_NEGOCIO.md) (si USIG no la ubica en la Ciudad, responde `404`), [RN-05](../REGLAS_DE_NEGOCIO.md) (cita la fuente) |
-| No exponer catastro ni zonificación | Excluido del MVP, ítem 2 | [RN-04](../REGLAS_DE_NEGOCIO.md): `seccion_catastral` y `codigo_de_planeamiento_urbano` se ignoran al interpretar la respuesta |
+| Barrio, comuna y código postal de una ubicación | Ítem 4: contexto de la ubicación aproximada | [RN-02](../../REGLAS_DE_NEGOCIO.md) (si USIG no la ubica en la Ciudad, responde `404`), [RN-05](../../REGLAS_DE_NEGOCIO.md) (cita la fuente) |
+| No exponer catastro ni zonificación | Excluido del MVP, ítem 2 | [RN-04](../../REGLAS_DE_NEGOCIO.md): `seccion_catastral` y `codigo_de_planeamiento_urbano` se ignoran al interpretar la respuesta |
 
 ## 3. Endpoints que llama CONCO
 
@@ -83,11 +85,11 @@ Punto fuera de CABA (`back/tests/fixtures/usig/datos_utiles_coordenadas_fuera_de
 
 | Capa | Ubicación | Qué hace |
 |---|---|---|
-| Cliente | [`back/src/conco/integrations/usig/client.py`](../../back/src/conco/integrations/usig/client.py) | `get_datos_utiles_by_address(street, number)` y `get_datos_utiles_by_coordinates(longitude, latitude)`; clasifica por el cuerpo |
-| Modelo | [`back/src/conco/integrations/usig/models.py`](../../back/src/conco/integrations/usig/models.py) | `UsigDatosUtiles`: solo `comuna`, `barrio`, `codigo_postal`, `codigo_postal_argentino` |
+| Cliente | [`back/src/conco/integrations/usig/client.py`](../../../back/src/conco/integrations/usig/client.py) | `get_datos_utiles_by_address(street, number)` y `get_datos_utiles_by_coordinates(longitude, latitude)`; clasifica por el cuerpo |
+| Modelo | [`back/src/conco/integrations/usig/models.py`](../../../back/src/conco/integrations/usig/models.py) | `UsigDatosUtiles`: solo `comuna`, `barrio`, `codigo_postal`, `codigo_postal_argentino` |
 | Error | `UsigError` | Página de ayuda HTML, cuerpo no JSON, error HTTP o timeout |
-| Adaptador | [`back/src/conco/geolocation/infrastructure.py`](../../back/src/conco/geolocation/infrastructure.py) | `UsigAddressContextProvider` |
-| Error de dominio | [`back/src/conco/geolocation/domain.py`](../../back/src/conco/geolocation/domain.py) | `AddressContextError` |
+| Adaptador | [`back/src/conco/geolocation/infrastructure.py`](../../../back/src/conco/geolocation/infrastructure.py) | `UsigAddressContextProvider` |
+| Error de dominio | [`back/src/conco/geolocation/domain.py`](../../../back/src/conco/geolocation/domain.py) | `AddressContextError` |
 
 ### `GET /geolocation/address-context`
 
@@ -120,7 +122,7 @@ Se validan solo los rangos generales: un recuadro de CABA duplicaría lo que USI
 | `USIG_DOCS_URL` | `http://usig.buenosaires.gob.ar/apis/` (URL que se cita como fuente) |
 | `USIG_TIMEOUT_SECONDS` | `10.0` |
 
-Definidas en [`back/src/conco/config.py`](../../back/src/conco/config.py).
+Definidas en [`back/src/conco/config.py`](../../../back/src/conco/config.py).
 
 ## 7. Tests y probe
 
@@ -145,6 +147,6 @@ uv run python scripts/probes/usig.py --coords -34.604792 -58.401981   # latitud 
 
 - Documentación: <http://usig.buenosaires.gob.ar/apis/>
 - Servicio: <https://ws.usig.buenosaires.gob.ar/datos_utiles>
-- Seguimiento: [usig-integration](../../odd/tasks/usig-integration.md)
+- Seguimiento: [usig-integration](../../../odd/tasks/usig-integration.md)
 
 Fecha de verificación: 2026-10-31.

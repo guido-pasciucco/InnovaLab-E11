@@ -1,8 +1,8 @@
-# APIs candidatas
+# Pendientes — APIs candidatas
 
 APIs probadas con llamadas reales que **todavía no están integradas** en CONCO. Cada documento registra qué devuelve la API, cómo se comportó y para qué podría servir, para decidir si se integra.
 
-Cuando una candidata se integra, su documento pasa a [`../`](../README.md) con la estructura completa de 9 secciones.
+Cuando una candidata se integra, su documento pasa a [`../en-pr/`](../en-pr/) mientras el PR esté abierto, y a [`../implementadas/`](../implementadas/) cuando se mergea a `main`.
 
 | API | Proveedor | Para qué podría servir | Verificada | Documento |
 |---|---|---|---|---|
@@ -30,7 +30,7 @@ Dirección ──Georef──▶ punto ──Catastro──▶ SMP ──Ciudad 
 rubro + mixtura ──Ciudad 3D (cuadro de usos)──▶ permitido / condiciones
 ```
 
-Las dos usan el mismo servidor que [USIG EPOK](../usig-epok.md) (`epok.buenosaires.gob.ar`) y comparten su filtro por User-Agent. Ninguna tiene documentación pública: las rutas salen del código del visor Ciudad 3D.
+Las dos usan el mismo servidor que [USIG EPOK](../en-pr/usig-epok.md) (`epok.buenosaires.gob.ar`) y comparten su filtro por User-Agent. Ninguna tiene documentación pública: las rutas salen del código del visor Ciudad 3D.
 
 ## Lo que sigue sin resolver
 
