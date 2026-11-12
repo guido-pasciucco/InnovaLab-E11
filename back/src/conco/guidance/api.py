@@ -68,11 +68,15 @@ def get_procedure_catalog() -> ProcedureCatalog:
 
 
 def get_activity_directory(request: Request) -> ActivityDirectory:
-    """Elige qué directorio de actividades se usa; los tests lo reemplazan por uno falso."""
-    return PostgresActivityDirectory(
-        FastEmbedTextEmbedder(),
-        pool=getattr(request.app.state, "activity_pool", None),
-    )
+    """Directorio compartido que usa el pool de Postgres de la app; los tests lo reemplazan."""
+    directory = getattr(request.app.state, "activity_directory", None)
+    if directory is None:
+        directory = PostgresActivityDirectory(
+            FastEmbedTextEmbedder(),
+            pool=getattr(request.app.state, "db_pool", None),
+        )
+        request.app.state.activity_directory = directory
+    return directory
 
 
 @router.get("/activities", response_model=ActivitySuggestionsResponse)

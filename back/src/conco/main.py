@@ -31,12 +31,18 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # con 503 hasta que la base vuelva, igual que antes de tener pool.
     pool: AsyncConnectionPool | None = None
     try:
-        candidate = AsyncConnectionPool(settings.database_url, min_size=1, max_size=10, open=False)
+        candidate = AsyncConnectionPool(
+            settings.database_url,
+            min_size=1,
+            max_size=10,
+            timeout=settings.database_pool_timeout_seconds,
+            open=False,
+        )
         await candidate.open()
         pool = candidate
     except (psycopg.Error, PoolTimeout) as exc:
         logger.error("No se pudo abrir el pool de base de datos: %s", exc)
-    app.state.activity_pool = pool
+    app.state.db_pool = pool
     warm_up = asyncio.create_task(asyncio.to_thread(FastEmbedTextEmbedder().warm_up))
     warm_up.add_done_callback(_log_warmup_failure)
     try:

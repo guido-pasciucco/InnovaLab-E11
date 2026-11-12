@@ -20,6 +20,8 @@ class Settings(BaseSettings):
 
     # Postgres con pgvector; por defecto, el Supabase local de back/supabase.
     database_url: str = "postgresql://postgres:postgres@127.0.0.1:55322/postgres"
+    # Tiempo máximo que una búsqueda espera una conexión del pool antes de fallar.
+    database_pool_timeout_seconds: float = 10.0
     # Modelo multilingüe que convierte texto en vectores. Si se cambia, hay que volver a
     # cargar los datos: los vectores de modelos distintos no se pueden comparar.
     embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
