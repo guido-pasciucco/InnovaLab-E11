@@ -4,7 +4,6 @@ import httpx
 import pytest
 import respx
 
-from conco.config import settings
 from conco.guidance.embeddings import (
     CloudflareTextEmbedder,
     EmbeddingProviderError,
@@ -107,22 +106,5 @@ def test_embed_lanza_si_el_endpoint_sigue_fallando() -> None:
         make_embedder().embed(["verduleria"])
 
 
-def test_create_embedder_elige_cloudflare_por_defecto() -> None:
+def test_create_embedder_construye_cloudflare() -> None:
     assert isinstance(create_embedder(), CloudflareTextEmbedder)
-
-
-def test_create_embedder_respeta_fastembed(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(settings, "embedding_provider", "fastembed")
-
-    from conco.guidance.embeddings import FastEmbedTextEmbedder
-
-    assert isinstance(create_embedder(), FastEmbedTextEmbedder)
-
-
-def test_create_embedder_rechaza_proveedores_desconocidos(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setattr(settings, "embedding_provider", "bogus")
-
-    with pytest.raises(EmbeddingProviderError, match="bogus"):
-        create_embedder()
