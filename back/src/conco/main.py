@@ -9,6 +9,7 @@ import psycopg
 from psycopg_pool import AsyncConnectionPool, PoolTimeout
 
 from conco.config import settings
+from conco.consultation.api import router as consultation_router
 from conco.geolocation.api import router as geolocation_router
 from conco.guidance.api import router as guidance_router
 from conco.guidance.embeddings import create_embedder
@@ -71,6 +72,7 @@ app.add_middleware(
 
 app.include_router(geolocation_router)
 app.include_router(guidance_router)
+app.include_router(consultation_router)
 
 
 @app.get("/health", tags=["Estado"])

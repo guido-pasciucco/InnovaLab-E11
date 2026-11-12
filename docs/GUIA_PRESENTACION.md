@@ -15,14 +15,13 @@ La persona escribe qué quiere hacer y dónde. CONCO **ubica la dirección con d
 | 2 · Análisis | Pantalla de «interpretando tu consulta» | ⚠️ Demostración | Espera simulada; no hay análisis real |
 | 3 · Orientación (con actividad elegida) | Trámites oficiales, cuándo aplica cada uno, resumen, enlace y fuente | ✅ Real | API de trámites de la Ciudad + relación curada |
 | 3 · Preguntas de contexto | «¿Vas a contratar personal?», «¿menos de 200 m²?»… descartan trámites en vivo | ✅ Real | Condiciones de la relación curada |
-| 3 · Orientación (sin actividad elegida) | Tres pasos genéricos | ⚠️ Demostración | Datos fijos del frontend |
-| 3 · Fuentes | «Trámites del Gobierno de la Ciudad», con licencia | ✅ Real | API de trámites de la Ciudad |
-| 3 · Fuentes | «Guía oficial de habilitaciones (fuente piloto)» y dos datasets piloto | ⚠️ Demostración | Datos fijos del frontend |
+| 3 · Orientación (sin actividad elegida) | Pasos genéricos de orientación | ✅ Real (genérico) | Backend: pasos base sin actividad curada |
+| 3 · Fuentes | «Trámites del Gobierno de la Ciudad», con licencia | ✅ Real | Backend: catálogo curado con URL oficial |
 | 4 · Mapa | Marcador en la dirección elegida | ✅ Real | Coordenadas de Georef |
 | 4 · Mapa | Capas territoriales (zonificación, etc.) | ❌ No existe | Ninguna fuente integrada |
-| 5 · Asistente | Respuesta a preguntas | ⚠️ Demostración | Texto fijo; no hay IA conectada |
+| 5 · Asistente | Respuesta a preguntas | ⚠️ Sin IA | El backend responde con los trámites curados de la actividad, sin conclusiones nuevas |
 
-> Para la demo, el frontend tiene que usar los datos simulados de la consulta (`VITE_USE_MOCK_API` sin definir o distinto de `false`). El backend todavía no tiene `/consultations`: con `false`, el envío falla.
+> Actualización 2026-11-13: el backend ya implementa `POST /consultations` y `POST /consultations/{id}/follow-up` (sin IA, catálogo curado, fuentes oficiales citadas). Para que la demo use el backend real, setear `VITE_USE_MOCK_API=false` en Vercel y redeployar; con `true` la web sigue usando la maqueta rotulada.
 
 ## Cómo funciona la búsqueda por detrás
 
