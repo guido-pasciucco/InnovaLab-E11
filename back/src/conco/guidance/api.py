@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, status
 from pydantic import BaseModel
 
 from conco.guidance.activity_directory import PostgresActivityDirectory
@@ -67,9 +67,16 @@ def get_procedure_catalog() -> ProcedureCatalog:
     return CabaProcedureCatalog()
 
 
-def get_activity_directory() -> ActivityDirectory:
-    """Elige qué directorio de actividades se usa; los tests lo reemplazan por uno falso."""
-    return PostgresActivityDirectory(FastEmbedTextEmbedder())
+def get_activity_directory(request: Request) -> ActivityDirectory:
+    """Directorio compartido que usa el pool de Postgres de la app; los tests lo reemplazan."""
+    directory = getattr(request.app.state, "activity_directory", None)
+    if directory is None:
+        directory = PostgresActivityDirectory(
+            FastEmbedTextEmbedder(),
+            pool=getattr(request.app.state, "db_pool", None),
+        )
+        request.app.state.activity_directory = directory
+    return directory
 
 
 @router.get("/activities", response_model=ActivitySuggestionsResponse)

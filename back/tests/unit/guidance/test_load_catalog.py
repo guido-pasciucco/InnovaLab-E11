@@ -1,12 +1,20 @@
 import json
+from datetime import datetime, timezone
 from pathlib import Path
+from uuid import UUID
 
 import pytest
 from pydantic import ValidationError
 
 from conco.guidance.activity_directory import PostgresActivityDirectory, to_pgvector
 from conco.guidance.domain import ActivityDirectoryError
-from conco.guidance.load_catalog import read_curated_catalog
+from conco.guidance.load_catalog import read_curated_catalog, referenced_procedures
+from conco.integrations.caba_tramites.models import (
+    CabaProcedure,
+    CabaProcedureAttributes,
+    CabaPath,
+    CabaText,
+)
 
 HABILITACION_ID = "338718b4-a2a0-44af-baa4-083f5d834b12"
 
@@ -34,6 +42,36 @@ def test_curated_file_in_repo_is_valid() -> None:
     assert all(procedure.note for a in catalog.activities for procedure in a.procedures)
 
 
+def test_repo_catalog_has_the_nine_agreed_activities() -> None:
+    catalog = read_curated_catalog()
+
+    assert {activity.slug for activity in catalog.activities} == {
+        "cafeteria",
+        "restaurante",
+        "kiosco",
+        "peluqueria",
+        "comercio-minorista",
+        "foodtruck",
+        "carniceria",
+        "hotel",
+        "optica",
+    }
+
+
+CAA_ID = "fc321f1e-badb-4439-be4e-5d4fbfc963ac"
+HUMEDOS_ID = "1304fa97-1f5f-48d7-b867-d30ca2f78689"
+
+
+def test_caa_is_tronco_comun_and_hummedos_lives_in_carniceria() -> None:
+    catalog = read_curated_catalog()
+
+    by_slug = {activity.slug: {procedure.id for procedure in activity.procedures} for activity in catalog.activities}
+
+    assert all(UUID(CAA_ID) in ids for ids in by_slug.values()), "CAA debe ser tronco común en las 9 actividades"
+    assert UUID(HUMEDOS_ID) in by_slug["carniceria"], "húmedos debe estar en carnicería"
+    assert UUID(HUMEDOS_ID) not in by_slug["restaurante"], "húmedos debe salir de restaurante"
+
+
 def test_aliases_are_name_plus_synonyms_without_duplicates(tmp_path: Path) -> None:
     activity = _activity("cafeteria", [HABILITACION_ID])
     activity.update(name="Cafetería", synonyms=["café", "Cafetería", "coffee shop"])
@@ -57,6 +95,31 @@ def test_rejects_repeated_procedure_in_one_activity(tmp_path: Path) -> None:
 
     with pytest.raises(ValidationError, match="repite un trámite"):
         read_curated_catalog(path)
+
+
+def _procedure(procedure_id: str) -> CabaProcedure:
+    return CabaProcedure(
+        id=UUID(procedure_id),
+        attributes=CabaProcedureAttributes(
+            title="Trámite",
+            path=CabaPath(alias="/tramite"),
+            changed=datetime(2026, 11, 1, tzinfo=timezone.utc),
+            body=CabaText(value="Resumen", format="plain_text"),
+        ),
+    )
+
+
+def test_referenced_procedures_keeps_only_what_the_curated_catalog_references(
+    tmp_path: Path,
+) -> None:
+    keep = HABILITACION_ID
+    drop = "00000000-0000-0000-0000-000000000000"
+    activity = _activity("kiosco", [keep])
+    catalog = read_curated_catalog(_write_catalog(tmp_path, [activity]))
+
+    kept = referenced_procedures([_procedure(keep), _procedure(drop)], catalog)
+
+    assert [str(procedure.id) for procedure in kept] == [keep]
 
 
 def test_to_pgvector_formats_a_vector_literal() -> None:

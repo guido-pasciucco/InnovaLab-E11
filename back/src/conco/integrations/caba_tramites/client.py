@@ -97,6 +97,9 @@ async def search_procedures(query: str, limit: int = 10) -> CabaProceduresRespon
 
 
 LIST_PAGE_SIZE = 50
+# Tope de seguridad: ~10.000 trámites. Si la API ignora el offset y repite páginas,
+# el recorrido corta acá en vez de quedar en un bucle infinito.
+MAX_LIST_PAGES = 200
 
 
 def list_params(offset: int) -> dict[str, str | int]:
@@ -115,13 +118,14 @@ async def list_procedures() -> list[CabaProcedure]:
     procedures: list[CabaProcedure] = []
     try:
         async with _client() as client:
-            while True:
+            for _ in range(MAX_LIST_PAGES):
                 response = await client.get(PROCEDURES_PATH, params=list_params(len(procedures)))
                 response.raise_for_status()
                 page = CabaProceduresResponse.model_validate_json(response.content).procedures
                 procedures.extend(page)
                 if len(page) < LIST_PAGE_SIZE:
                     return procedures
+            raise CabaTramitesError("La API de trámites no terminó de paginar el catálogo.")
     except httpx.HTTPError as exc:
         raise CabaTramitesError(f"No se pudo consultar la API de trámites: {exc}") from exc
     except ValidationError as exc:

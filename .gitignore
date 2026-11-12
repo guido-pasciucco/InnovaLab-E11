@@ -1,1 +1,18 @@
+# Secrets y entornos locales (los .gitignore de back/ y front/ cubren los suyos)
+.env
+.env.*
+!.env.example
 
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+
+# SO / editores
+.DS_Store
+*.log

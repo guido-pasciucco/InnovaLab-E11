@@ -28,7 +28,7 @@ La persona escribe qué quiere hacer y dónde. CONCO **ubica la dirección con d
 
 **Preparación (una vez, con `load_catalog`):**
 
-1. Se traen de la API de la Ciudad los 868 trámites publicados y se guardan en Postgres.
+1. Se traen de la API de la Ciudad los trámites publicados y se guarda en Postgres únicamente los que la lista curada referencia (los ~870 publicados son demasiados; la app solo muestra los del curado).
 2. Se lee la lista curada (`activities.json`): cada actividad con sus sinónimos y sus trámites, con una nota de cuándo aplica cada uno.
 3. Un modelo de embeddings convierte cada nombre y sinónimo de actividad («peluquería», «barbería», «estética»…) en un vector de 384 números que representa su **significado**. Los vectores se guardan en la base (pgvector).
 
@@ -92,7 +92,7 @@ Evitar en vivo: `abrir un maxikiosco` y `local de zapatillas` (sugieren Restaura
 - **No tiene documentación pública.** Es el JSON:API del sitio Drupal de buenosaires.gob.ar: puede cambiar sin aviso. Si cambia, la API de CONCO responde un error controlado, pero la búsqueda deja de funcionar hasta adaptarla.
 - **Solo busca por texto en el título**: «caf» devuelve 0 resultados. Por eso hizo falta la relación curada.
 - **Ningún trámite menciona actividades.** «Habilitación de actividad económica» sirve igual para una cafetería que para una peluquería.
-- **Copia local.** Los trámites que se muestran con cada actividad salen de una copia en la base, que se actualiza al correr la carga (868 trámites publicados). Si la Ciudad cambia un trámite, la copia queda vieja hasta la próxima carga; la pantalla no muestra la fecha de actualización, aunque la API la devuelve.
+- **Copia local.** Los trámites que se muestran con cada actividad salen de una copia en la base, que se actualiza al correr la carga (sólo los trámites que el curado referencia; hoy 18). Si la Ciudad cambia un trámite del curado, la copia queda vieja hasta la próxima carga; la pantalla no muestra la fecha de actualización, aunque la API la devuelve.
 - **Licencia:** Creative Commons Reconocimiento 2.5 Argentina; por eso se cita la fuente.
 
 ### Infraestructura
@@ -125,7 +125,7 @@ Desde `front/`:
 npm run dev
 ```
 
-- [ ] La carga terminó con «Cargados 868 trámites y 6 actividades».
+- [ ] La carga terminó con «Cargados N trámites referenciados y 9 actividades».
 - [ ] Esperar unos segundos después de levantar el backend para que cargue el modelo.
 - [ ] Probar una vez cada consulta del guion antes de entrar.
 - [ ] Con internet: Georef y la Ciudad se consultan en vivo.
