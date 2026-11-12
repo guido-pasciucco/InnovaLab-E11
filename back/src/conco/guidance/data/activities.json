@@ -90,6 +90,11 @@
           "applies_when": {
             "protected_building": true
           }
+        },
+        {
+          "id": "fc321f1e-badb-4439-be4e-5d4fbfc963ac",
+          "title": "Impacto Ambiental: Certificado de Aptitud Ambiental (CAA)",
+          "note": "Si la actividad está alcanzada por la evaluación de impacto ambiental (toda actividad se categoriza como SRE o CRE, Ley 123)."
         }
       ]
     },
@@ -138,11 +143,6 @@
           "id": "c5e44825-3fc3-4abe-86cf-ec8dfa68f7fc",
           "title": "Inscripción al Curso de Manipulación de Alimentos",
           "note": "Para quienes manipulan alimentos en el local."
-        },
-        {
-          "id": "1304fa97-1f5f-48d7-b867-d30ca2f78689",
-          "title": "Inscripción en el Registro de Generadores Especiales de Residuos Sólidos Urbanos para Fracción Húmedos",
-          "note": "Si el local genera grandes volúmenes de residuos húmedos."
         },
         {
           "id": "266d2abd-ffd7-4407-ba10-2499509c3ea0",
@@ -201,7 +201,7 @@
         {
           "id": "338718b4-a2a0-44af-baa4-083f5d834b12",
           "title": "Habilitación de actividad económica",
-          "note": "Para abrir el local con una habilitación nueva; requiere evaluación técnica.",
+          "note": "Para abrir el local con una habilitación nueva; requiere evaluación técnica. Si además vendés alimentos envasados, alcanza con que los productos estén aprobados y rotulados según el Código Alimentario Argentino (sin curso de manipulación si no hay manipulación ni fraccionamiento).",
           "applies_when": {
             "takes_over_existing": false
           }
@@ -259,6 +259,11 @@
           "applies_when": {
             "protected_building": true
           }
+        },
+        {
+          "id": "fc321f1e-badb-4439-be4e-5d4fbfc963ac",
+          "title": "Impacto Ambiental: Certificado de Aptitud Ambiental (CAA)",
+          "note": "Si la actividad está alcanzada por la evaluación de impacto ambiental (toda actividad se categoriza como SRE o CRE, Ley 123)."
         }
       ]
     },
@@ -275,7 +280,7 @@
         {
           "id": "338718b4-a2a0-44af-baa4-083f5d834b12",
           "title": "Habilitación de actividad económica",
-          "note": "Para abrir el local con una habilitación nueva; requiere evaluación técnica.",
+          "note": "Para abrir el local con una habilitación nueva; requiere evaluación técnica. Además, condiciones higiénicas: esterilización del instrumental, ventilación y productos cosméticos con registro ANMAT.",
           "applies_when": {
             "takes_over_existing": false
           }
@@ -333,6 +338,11 @@
           "applies_when": {
             "protected_building": true
           }
+        },
+        {
+          "id": "fc321f1e-badb-4439-be4e-5d4fbfc963ac",
+          "title": "Impacto Ambiental: Certificado de Aptitud Ambiental (CAA)",
+          "note": "Si la actividad está alcanzada por la evaluación de impacto ambiental (toda actividad se categoriza como SRE o CRE, Ley 123)."
         }
       ]
     },
@@ -414,6 +424,11 @@
           "applies_when": {
             "protected_building": true
           }
+        },
+        {
+          "id": "fc321f1e-badb-4439-be4e-5d4fbfc963ac",
+          "title": "Impacto Ambiental: Certificado de Aptitud Ambiental (CAA)",
+          "note": "Si la actividad está alcanzada por la evaluación de impacto ambiental (toda actividad se categoriza como SRE o CRE, Ley 123)."
         }
       ]
     },
@@ -462,6 +477,277 @@
           "applies_when": {
             "has_employees": true
           }
+        },
+        {
+          "id": "fc321f1e-badb-4439-be4e-5d4fbfc963ac",
+          "title": "Impacto Ambiental: Certificado de Aptitud Ambiental (CAA)",
+          "note": "Si la actividad está alcanzada por la evaluación de impacto ambiental (toda actividad se categoriza como SRE o CRE, Ley 123)."
+        }
+      ]
+    },
+    {
+      "slug": "carniceria",
+      "name": "Carnicería",
+      "synonyms": [
+        "carne",
+        "venta de carne",
+        "frigorífico",
+        "carnicería y fiambrería",
+        "carnes"
+      ],
+      "procedures": [
+        {
+          "id": "338718b4-a2a0-44af-baa4-083f5d834b12",
+          "title": "Habilitación de actividad económica",
+          "note": "Para abrir el local con una habilitación nueva; requiere evaluación técnica. Además, la carnicería suele exigir proveedores habilitados por SENASA, cadena de frío para cámaras y exhibidoras, y libreta sanitaria del personal que manipula carne (requerimientos, no trámites: ver docs/habilitacion-caba/TRAMITES_Y_REQUERIMIENTOS.md § Carnicerías).",
+          "applies_when": {
+            "takes_over_existing": false
+          }
+        },
+        {
+          "id": "15e0394b-c7b5-4f93-bc25-ee012d695aec",
+          "title": "Habilitación de actividad económica exprés",
+          "note": "Alternativa si el local tiene menos de 200 m² y cumple los requisitos de ubicación y uso.",
+          "applies_when": {
+            "under_200_m2": true,
+            "takes_over_existing": false
+          }
+        },
+        {
+          "id": "db771727-8bcb-4cac-8349-02439dfeb258",
+          "title": "Transmisión de autorización de actividad económica",
+          "note": "Si continuás un local ya habilitado: en lugar de una habilitación nueva, se transfiere la del titular anterior.",
+          "applies_when": {
+            "takes_over_existing": true
+          }
+        },
+        {
+          "id": "750ed713-e172-4d06-9a8f-d9505aafe2f4",
+          "title": "Ingresos Brutos/Contribuyentes locales - Alta",
+          "note": "Para inscribirte como contribuyente de la Ciudad antes de empezar a facturar."
+        },
+        {
+          "id": "c5e44825-3fc3-4abe-86cf-ec8dfa68f7fc",
+          "title": "Inscripción al Curso de Manipulación de Alimentos",
+          "note": "Para quienes manipulan carne en el local."
+        },
+        {
+          "id": "119c61aa-b66e-41c5-80ec-f80571455577",
+          "title": "Consulta de usos - Visado de anuncio publicitario (frontal, saliente) marquesina y/o toldos",
+          "note": "Si vas a poner un cartel, una marquesina o un toldo.",
+          "applies_when": {
+            "signage": true
+          }
+        },
+        {
+          "id": "1fb7a579-8fc2-4216-b113-684cc272f7f1",
+          "title": "Inscripción en el Registro de Empleadores",
+          "note": "Si vas a contratar personal.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "181ce79d-1986-49bb-80fc-db30752765f5",
+          "title": "Solicitud de rúbrica de documentación laboral",
+          "note": "Si contratás personal, para rubricar los libros laborales.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "eb207120-23e2-42c1-9be6-e26a47370031",
+          "title": "Consulta obligatoria para inmuebles en APH o catalogados",
+          "note": "Si el inmueble está en un área de protección histórica o está catalogado.",
+          "applies_when": {
+            "protected_building": true
+          }
+        },
+        {
+          "id": "fc321f1e-badb-4439-be4e-5d4fbfc963ac",
+          "title": "Impacto Ambiental: Certificado de Aptitud Ambiental (CAA)",
+          "note": "Si la actividad está alcanzada por la evaluación de impacto ambiental (toda actividad se categoriza como SRE o CRE, Ley 123)."
+        },
+        {
+          "id": "1304fa97-1f5f-48d7-b867-d30ca2f78689",
+          "title": "Inscripción en el Registro de Generadores Especiales de Residuos Sólidos Urbanos para Fracción Húmedos",
+          "note": "Si el local genera grandes volúmenes de residuos húmedos (carne, vísceras)."
+        }
+      ]
+    },
+    {
+      "slug": "hotel",
+      "name": "Hotel",
+      "synonyms": [
+        "hostel",
+        "alojamiento turístico",
+        "alojamiento",
+        "b&b",
+        "pensión",
+        "hospedaje"
+      ],
+      "procedures": [
+        {
+          "id": "338718b4-a2a0-44af-baa4-083f5d834b12",
+          "title": "Habilitación de actividad económica",
+          "note": "Para abrir el hotel con una habilitación nueva; requiere evaluación técnica. Además, los alojamientos turísticos suelen exigir inscripción en el Registro de Alojamientos Turísticos (Ley 4.631) y autoprotección de mayor complejidad por ser edificios donde la gente duerme (Ley 5920) — ver docs/habilitacion-caba/TRAMITES_Y_REQUERIMIENTOS.md § Alojamientos turísticos.",
+          "applies_when": {
+            "takes_over_existing": false
+          }
+        },
+        {
+          "id": "15e0394b-c7b5-4f93-bc25-ee012d695aec",
+          "title": "Habilitación de actividad económica exprés",
+          "note": "Alternativa si el local tiene menos de 200 m² y cumple los requisitos de ubicación y uso.",
+          "applies_when": {
+            "under_200_m2": true,
+            "takes_over_existing": false
+          }
+        },
+        {
+          "id": "db771727-8bcb-4cac-8349-02439dfeb258",
+          "title": "Transmisión de autorización de actividad económica",
+          "note": "Si continuás un local ya habilitado: en lugar de una habilitación nueva, se transfiere la del titular anterior.",
+          "applies_when": {
+            "takes_over_existing": true
+          }
+        },
+        {
+          "id": "750ed713-e172-4d06-9a8f-d9505aafe2f4",
+          "title": "Ingresos Brutos/Contribuyentes locales - Alta",
+          "note": "Para inscribirte como contribuyente de la Ciudad antes de empezar a facturar."
+        },
+        {
+          "id": "e459e8d6-684d-4441-9aaf-a1c19c98453b",
+          "title": "Inscripción en el Registro de Prestadores Turísticos",
+          "note": "Para inscribirte en el Registro de Prestadores Turísticos del Ente de Turismo de la Ciudad; trámite del régimen de la Ley 4.631 para alojamientos turísticos (hoteles, hostels, B&B y pensiones)."
+        },
+        {
+          "id": "b8a8c54e-c743-48ce-853d-e5bece3bc904",
+          "title": "Solicitud de rúbrica del libro de pasajeros para alojamientos turísticos",
+          "note": "Para llevar el libro de pasajeros exigido por la Ley 4.631, ante la solicitud de autoridades competentes."
+        },
+        {
+          "id": "266d2abd-ffd7-4407-ba10-2499509c3ea0",
+          "title": "Exclusión del Registro de Generadores Especiales de Residuos Sólidos Urbanos para Locales Gastronómicos y Hoteleros",
+          "note": "Si el hotel genera pocos residuos, para quedar fuera del registro de grandes generadores."
+        },
+        {
+          "id": "119c61aa-b66e-41c5-80ec-f80571455577",
+          "title": "Consulta de usos - Visado de anuncio publicitario (frontal, saliente) marquesina y/o toldos",
+          "note": "Si vas a poner un cartel, una marquesina o un toldo.",
+          "applies_when": {
+            "signage": true
+          }
+        },
+        {
+          "id": "1fb7a579-8fc2-4216-b113-684cc272f7f1",
+          "title": "Inscripción en el Registro de Empleadores",
+          "note": "Si vas a contratar personal.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "181ce79d-1986-49bb-80fc-db30752765f5",
+          "title": "Solicitud de rúbrica de documentación laboral",
+          "note": "Si contratás personal, para rubricar los libros laborales.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "eb207120-23e2-42c1-9be6-e26a47370031",
+          "title": "Consulta obligatoria para inmuebles en APH o catalogados",
+          "note": "Si el inmueble está en un área de protección histórica o está catalogado.",
+          "applies_when": {
+            "protected_building": true
+          }
+        },
+        {
+          "id": "fc321f1e-badb-4439-be4e-5d4fbfc963ac",
+          "title": "Impacto Ambiental: Certificado de Aptitud Ambiental (CAA)",
+          "note": "Si la actividad está alcanzada por la evaluación de impacto ambiental (toda actividad se categoriza como SRE o CRE, Ley 123)."
+        }
+      ]
+    },
+    {
+      "slug": "optica",
+      "name": "Óptica",
+      "synonyms": [
+        "anteojos",
+        "lentes",
+        "óptica comercial",
+        "lentes de contacto",
+        "gafas"
+      ],
+      "procedures": [
+        {
+          "id": "338718b4-a2a0-44af-baa4-083f5d834b12",
+          "title": "Habilitación de actividad económica",
+          "note": "Para abrir la óptica con una habilitación nueva; requiere evaluación técnica. Además, la habilitación sanitaria del Ministerio de Salud (Ley 7.314, regente óptico matriculado presente durante el horario de atención) es un trámite aparte ante otro organismo y no está publicada en esta API — ver docs/habilitacion-caba/TRAMITES_Y_REQUERIMIENTOS.md § Ópticas.",
+          "applies_when": {
+            "takes_over_existing": false
+          }
+        },
+        {
+          "id": "15e0394b-c7b5-4f93-bc25-ee012d695aec",
+          "title": "Habilitación de actividad económica exprés",
+          "note": "Alternativa si el local tiene menos de 200 m² y cumple los requisitos de ubicación y uso.",
+          "applies_when": {
+            "under_200_m2": true,
+            "takes_over_existing": false
+          }
+        },
+        {
+          "id": "db771727-8bcb-4cac-8349-02439dfeb258",
+          "title": "Transmisión de autorización de actividad económica",
+          "note": "Si continuás un local ya habilitado: en lugar de una habilitación nueva, se transfiere la del titular anterior.",
+          "applies_when": {
+            "takes_over_existing": true
+          }
+        },
+        {
+          "id": "750ed713-e172-4d06-9a8f-d9505aafe2f4",
+          "title": "Ingresos Brutos/Contribuyentes locales - Alta",
+          "note": "Para inscribirte como contribuyente de la Ciudad antes de empezar a facturar."
+        },
+        {
+          "id": "119c61aa-b66e-41c5-80ec-f80571455577",
+          "title": "Consulta de usos - Visado de anuncio publicitario (frontal, saliente) marquesina y/o toldos",
+          "note": "Si vas a poner un cartel, una marquesina o un toldo.",
+          "applies_when": {
+            "signage": true
+          }
+        },
+        {
+          "id": "1fb7a579-8fc2-4216-b113-684cc272f7f1",
+          "title": "Inscripción en el Registro de Empleadores",
+          "note": "Si vas a contratar personal.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "181ce79d-1986-49bb-80fc-db30752765f5",
+          "title": "Solicitud de rúbrica de documentación laboral",
+          "note": "Si contratás personal, para rubricar los libros laborales.",
+          "applies_when": {
+            "has_employees": true
+          }
+        },
+        {
+          "id": "eb207120-23e2-42c1-9be6-e26a47370031",
+          "title": "Consulta obligatoria para inmuebles en APH o catalogados",
+          "note": "Si el inmueble está en un área de protección histórica o está catalogado.",
+          "applies_when": {
+            "protected_building": true
+          }
+        },
+        {
+          "id": "fc321f1e-badb-4439-be4e-5d4fbfc963ac",
+          "title": "Impacto Ambiental: Certificado de Aptitud Ambiental (CAA)",
+          "note": "Si la actividad está alcanzada por la evaluación de impacto ambiental (toda actividad se categoriza como SRE o CRE, Ley 123)."
         }
       ]
     }

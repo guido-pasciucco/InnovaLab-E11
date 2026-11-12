@@ -20,6 +20,7 @@ from conco.guidance.domain import ContextAnswers
 from conco.guidance.embeddings import FastEmbedTextEmbedder
 from conco.guidance.infrastructure import to_procedure
 from conco.integrations.caba_tramites.client import list_procedures
+from conco.integrations.caba_tramites.models import CabaProcedure
 
 ACTIVITIES_FILE = Path(__file__).parent / "data" / "activities.json"
 
@@ -74,6 +75,17 @@ class CuratedCatalog(BaseModel):
         return {p.id for activity in self.activities for p in activity.procedures}
 
 
+def referenced_procedures(
+    caba_procedures: list[CabaProcedure], catalog: CuratedCatalog
+) -> list[CabaProcedure]:
+    """Deja solo los trámites publicados que el catálogo curado referencia.
+
+    La Ciudad publica cientos; la app solo muestra los del curado.
+    """
+    wanted = catalog.procedure_ids()
+    return [procedure for procedure in caba_procedures if procedure.id in wanted]
+
+
 def read_curated_catalog(path: Path = ACTIVITIES_FILE) -> CuratedCatalog:
     """Lee y valida el archivo curado de actividades."""
     return CuratedCatalog.model_validate(json.loads(path.read_text(encoding="utf-8")))
@@ -81,16 +93,18 @@ def read_curated_catalog(path: Path = ACTIVITIES_FILE) -> CuratedCatalog:
 
 def load(database_url: str) -> None:
     started = time.perf_counter()
-    caba_procedures = asyncio.run(list_procedures())
-    print(f"Trámites publicados: {len(caba_procedures)} ({time.perf_counter() - started:.1f}s)")
+    published = asyncio.run(list_procedures())
+    print(f"Trámites publicados: {len(published)} ({time.perf_counter() - started:.1f}s)")
 
     catalog = read_curated_catalog()
-    missing = catalog.procedure_ids() - {procedure.id for procedure in caba_procedures}
+    missing = catalog.procedure_ids() - {procedure.id for procedure in published}
     if missing:
         raise SystemExit(
             "El archivo curado menciona trámites que la Ciudad ya no publica: "
             f"{sorted(str(procedure_id) for procedure_id in missing)}"
         )
+    caba_procedures = referenced_procedures(published, catalog)
+    print(f"Trámites referenciados por el curado: {len(caba_procedures)}")
 
     started = time.perf_counter()
     embedder = FastEmbedTextEmbedder()
@@ -145,8 +159,8 @@ def load(database_url: str) -> None:
             ],
         )
     print(
-        f"Cargados {len(procedure_rows)} trámites y {len(catalog.activities)} actividades "
-        f"con {len(aliases)} alias."
+        f"Cargados {len(procedure_rows)} trámites referenciados y {len(catalog.activities)} actividades "
+        f"con {len(aliases)} alias (de {len(published)} publicados)."
     )
 
 

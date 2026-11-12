@@ -249,7 +249,7 @@ npx supabase start -x gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgres
 uv run python -m conco.guidance.load_catalog
 ```
 
-`supabase start` aplica las migraciones de `supabase/migrations/`. `load_catalog` trae los 868 trámites publicados, valida el archivo curado y vectoriza los alias; se vuelve a correr cada vez que cambia `activities.json` o para actualizar los trámites. `npx supabase db reset` borra la base y vuelve a aplicar las migraciones (después hay que volver a cargar los datos).
+`supabase start` aplica las migraciones de `supabase/migrations/`. `load_catalog` trae los trámites publicados de la Ciudad, valida que el archivo curado solo mencione trámites existentes, guarda únicamente los referenciados (hoy 18 de ~870) y vectoriza los alias; se vuelve a correr cada vez que cambia `activities.json` o para actualizar los trámites. `npx supabase db reset` borra la base y vuelve a aplicar las migraciones (después hay que volver a cargar los datos).
 
 | Variable | Valor por defecto |
 |---|---|
