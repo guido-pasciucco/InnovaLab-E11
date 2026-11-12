@@ -12,7 +12,7 @@ Servicio de catastro de USIG (Gobierno de la Ciudad). Dado un punto, devuelve la
 | URL base | `https://epok.buenosaires.gob.ar` |
 | Endpoint | `GET /catastro/parcela/` |
 | Documentación oficial | No se encontró documentación pública del endpoint |
-| Acceso | Sin clave de acceso. **Requiere un User-Agent distinto al de curl**: con el de curl la conexión se corta sin respuesta (igual que [EPOK](../usig-epok.md)) |
+| Acceso | Sin clave de acceso. **Requiere un User-Agent distinto al de curl**: con el de curl la conexión se corta sin respuesta (igual que [EPOK](../en-pr/usig-epok.md)) |
 | Licencia | Sin licencia explícita. Se asume CC BY 2.5 AR, como el resto de los datos de la Ciudad. El campo `fuente` de la respuesta indica `AGIP (2008)` |
 | Latencia observada | ~0,05–0,09 s |
 | Estabilidad y riesgos | Responde `200` con `Content-Type: text/javascript` aunque el cuerpo es JSON. Los datos del edificio vienen de AGIP (2008) y pueden estar desactualizados |

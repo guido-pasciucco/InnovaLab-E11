@@ -1,5 +1,7 @@
 # Trámites de la Ciudad de Buenos Aires (Drupal JSON:API)
 
+> **Estado:** integrada, mergeada a main (PR #65).
+
 Catálogo oficial de trámites del Gobierno de la Ciudad, publicado por el JSON:API del sitio Drupal `buenosaires.gob.ar` (recurso `node/tramites_obelisco`). CONCO lo usa para buscar trámites por nombre y mostrar requisitos, pasos, organismo responsable y el enlace oficial para iniciarlos.
 
 ## 1. Ficha
@@ -21,8 +23,8 @@ Catálogo oficial de trámites del Gobierno de la Ciudad, publicado por el JSON:
 
 | Uso | MVP | Reglas |
 |---|---|---|
-| Buscar trámites oficiales por texto en el título | Ítem 2: orientación general sobre procedimientos | [RN-04](../REGLAS_DE_NEGOCIO.md) (orientación, no determinación legal), [RN-07](../REGLAS_DE_NEGOCIO.md) (verificar con el organismo) |
-| Mostrar requisitos, pasos, organismo y enlace para iniciar | Ítems 2 y 3: enlaces a fuentes oficiales | [RN-05](../REGLAS_DE_NEGOCIO.md) (cada trámite lleva su `official_url`), [RN-06](../REGLAS_DE_NEGOCIO.md) (CONCO no inicia el trámite: solo enlaza) |
+| Buscar trámites oficiales por texto en el título | Ítem 2: orientación general sobre procedimientos | [RN-04](../../REGLAS_DE_NEGOCIO.md) (orientación, no determinación legal), [RN-07](../../REGLAS_DE_NEGOCIO.md) (verificar con el organismo) |
+| Mostrar requisitos, pasos, organismo y enlace para iniciar | Ítems 2 y 3: enlaces a fuentes oficiales | [RN-05](../../REGLAS_DE_NEGOCIO.md) (cada trámite lleva su `official_url`), [RN-06](../../REGLAS_DE_NEGOCIO.md) (CONCO no inicia el trámite: solo enlaza) |
 
 ## 3. Endpoints que llama CONCO
 
@@ -135,11 +137,11 @@ Error real (`back/tests/fixtures/caba_tramites/error_400_filtro_invalido.json`, 
 
 | Capa | Ubicación | Qué hace |
 |---|---|---|
-| Cliente | [`back/src/conco/integrations/caba_tramites/client.py`](../../back/src/conco/integrations/caba_tramites/client.py) | `search_procedures(query, limit)` y `get_procedure(procedure_id)`; resuelve el grafo de párrafos |
-| Modelos | [`back/src/conco/integrations/caba_tramites/models.py`](../../back/src/conco/integrations/caba_tramites/models.py) | Un modelo por tipo de párrafo usado |
+| Cliente | [`back/src/conco/integrations/caba_tramites/client.py`](../../../back/src/conco/integrations/caba_tramites/client.py) | `search_procedures(query, limit)` y `get_procedure(procedure_id)`; resuelve el grafo de párrafos |
+| Modelos | [`back/src/conco/integrations/caba_tramites/models.py`](../../../back/src/conco/integrations/caba_tramites/models.py) | Un modelo por tipo de párrafo usado |
 | Error | `CabaTramitesError` | Error HTTP, timeout o respuesta inesperada |
-| Adaptador | [`back/src/conco/guidance/infrastructure.py`](../../back/src/conco/guidance/infrastructure.py) | `CabaProcedureCatalog`: HTML → texto plano; URL oficial = `https://buenosaires.gob.ar` + `path.alias` |
-| Error de dominio | [`back/src/conco/guidance/domain.py`](../../back/src/conco/guidance/domain.py) | `ProcedureSearchError` |
+| Adaptador | [`back/src/conco/guidance/infrastructure.py`](../../../back/src/conco/guidance/infrastructure.py) | `CabaProcedureCatalog`: HTML → texto plano; URL oficial = `https://buenosaires.gob.ar` + `path.alias` |
+| Error de dominio | [`back/src/conco/guidance/domain.py`](../../../back/src/conco/guidance/domain.py) | `ProcedureSearchError` |
 
 ### `GET /guidance/procedures`
 
@@ -169,7 +171,7 @@ Error real (`back/tests/fixtures/caba_tramites/error_400_filtro_invalido.json`, 
 | `CABA_TRAMITES_SITE_URL` | `https://buenosaires.gob.ar` |
 | `CABA_TRAMITES_TIMEOUT_SECONDS` | `10.0` |
 
-Definidas en [`back/src/conco/config.py`](../../back/src/conco/config.py).
+Definidas en [`back/src/conco/config.py`](../../../back/src/conco/config.py).
 
 ## 7. Tests y probe
 
@@ -195,6 +197,6 @@ uv run python scripts/probes/caba_tramites.py --id 338718b4-a2a0-44af-baa4-083f5
 - Catálogo: <https://buenosaires.gob.ar/gobierno/tramites>
 - JSON:API: <https://buenosaires.gob.ar/jsonapi/node/tramites_obelisco>
 - Especificación JSON:API 1.1: <https://jsonapi.org/format/1.1/>
-- Seguimiento: [caba-tramites-integration](../../odd/tasks/caba-tramites-integration.md)
+- Seguimiento: [caba-tramites-integration](../../../odd/tasks/caba-tramites-integration.md)
 
 Fecha de verificación: 2026-10-31.

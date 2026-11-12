@@ -12,7 +12,7 @@ Servicio de USIG que publica los datos del Código Urbanístico por parcela: dis
 | URL base | `https://epok.buenosaires.gob.ar/cur3d` |
 | Endpoints probados | `GET /mixtura_usos/`, `/categorias/`, `/cuadrosdeuso/rubros/`, `/cuadrosdeuso/referencias/`, `/seccion_edificabilidad/`, `/afectaciones/` |
 | Documentación oficial | No hay documentación pública. Las rutas salen del código del visor (ver sección 5) |
-| Acceso | Sin clave de acceso. Mismo servidor que [EPOK](../usig-epok.md): con el User-Agent por defecto de curl la conexión se corta; con cualquier otro (o ninguno) responde |
+| Acceso | Sin clave de acceso. Mismo servidor que [EPOK](../en-pr/usig-epok.md): con el User-Agent por defecto de curl la conexión se corta; con cualquier otro (o ninguno) responde |
 | Licencia | Sin licencia explícita. Se asume CC BY 2.5 AR, como el resto de los datos de la Ciudad |
 | Latencia observada | `seccion_edificabilidad` ~2 s; `mixtura_usos` ~0,6 s; `afectaciones` ~0,4 s; `cuadrosdeuso/*` ~0,05–0,08 s |
 | Estabilidad y riesgos | Sin documentación: los campos y las rutas pueden cambiar sin aviso. Un SMP inexistente responde `200` con un objeto `error`, no con `404`. Las rutas sin barra final responden `301` |

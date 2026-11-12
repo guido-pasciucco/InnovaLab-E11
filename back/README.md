@@ -4,7 +4,7 @@ API de "CONCO", Sistema Inteligente de Gestión, Consultas, Comerciales, Para Em
 
 El backend es el único punto que consume APIs externas. El frontend se comunica solamente con esta API.
 
-> **Estado:** estructura planificada. Este documento describe cómo se organizará el backend para integrar la primera API externa (Georef). El código actual en `app/` será reemplazado por esta estructura.
+> **Estado:** vigente. La API expone geolocalización y orientación sobre trámites y actividades; este documento describe cómo está organizada y cómo se integra cada API externa.
 
 ## Responsabilidades
 
@@ -24,7 +24,17 @@ El backend es el único punto que consume APIs externas. El frontend se comunica
 | uv | Gestión de dependencias y entorno virtual |
 | httpx | Cliente HTTP para consumir APIs externas |
 
-## Estructura planificada (mínima)
+## Dependencias
+
+Las dependencias se declaran en `pyproject.toml` (con rangos) y uv las fija en `uv.lock` (versiones exactas, incluidas las transitivas). `.venv/` no se sube al repo: cada persona crea su entorno con `uv sync` desde `back/`.
+
+Reglas del equipo:
+
+- **Siempre usar el entorno virtual.** Ubuntu bloquea instalarlo globalmente (`externally-managed-environment`); uv lo maneja solo.
+- **Agregar una dependencia:** `uv add "<paquete>>=X.Y,<Z.0"` (rango con tope). Actualiza `pyproject.toml` y `uv.lock`; subí ambos.
+- **No usar `pip install`**: instala paquetes que no quedan registrados en `uv.lock`.
+
+## Estructura
 
 ```
 back/
@@ -41,7 +51,7 @@ back/
 │       ├── guidance/           # funcionalidad: orientación sobre trámites oficiales
 │       │   ├── domain.py       # trámites, actividades y los puertos ProcedureCatalog, ActivityDirectory y TextEmbedder
 │       │   ├── infrastructure.py # adaptador que usa la API de trámites de la Ciudad y pasa el HTML a texto
-│       │   ├── embeddings.py   # adaptador que corre el modelo de embeddings dentro de la API
+│       │   ├── embeddings.py   # adaptador del puerto TextEmbedder (Cloudflare Workers AI, bge-m3)
 │       │   ├── activity_directory.py # adaptador que busca actividades en Postgres con pgvector
 │       │   ├── load_catalog.py # comando que carga trámites y actividades en la base
 │       │   ├── data/activities.json # relación curada actividad → trámites (borrador)
@@ -104,6 +114,34 @@ Cada carpeta con código Python dentro de `src/` incluye un archivo `__init__.py
 | `tests/integration/<api>/` | Comprueba que la API real siga respondiendo como se espera | Correrse por defecto (`uv run pytest -m integration`) |
 
 **Regla principal:** solo los archivos dentro de `integrations/<api>/` conocen los detalles de esa API (URLs, parámetros y formato de respuesta).
+
+## Cómo está organizado el código (hexagonal)
+
+El backend sigue arquitectura hexagonal (Ports & Adapters). La frontera entre lo que el sistema **expone** y lo que **consume** se ve en la estructura de carpetas:
+
+| Lado | Dónde | Qué es |
+|---|---|---|
+| Entrada (driving) — **API propia** | `src/conco/<funcionalidad>/api.py` | Endpoints que CONCO expone al frontend. Un router de FastAPI por funcionalidad. |
+| Núcleo | `src/conco/<funcionalidad>/domain.py` | Modelos propios y el puerto (`Protocol`) que la funcionalidad necesita. No conoce HTTP ni APIs externas. |
+| Frontera (adaptador) | `src/conco/<funcionalidad>/infrastructure.py` | Implementa el puerto usando una integración y traduce sus datos al dominio (*anti-corruption layer*). |
+| Salida (driven) — **APIs externas** | `src/conco/integrations/<api>/` | Clientes HTTP y modelos crudos de cada API de terceros. Sin lógica de negocio. |
+
+```
+api.py  →  domain.py (puerto)  ←  infrastructure.py  →  integrations/<api>/
+(propia)                          (traduce)              (externa)
+```
+
+Reglas de dependencia:
+
+1. **`api.py` nunca importa de `integrations/`.** Depende del puerto de `domain.py`; el adaptador concreto se inyecta con `Depends`.
+2. **`domain.py` no importa de ningún otro módulo del proyecto.** Es el centro; todo lo demás depende de él.
+3. **Solo `infrastructure.py` importa de `integrations/`.** Es el único punto de contacto entre la API propia y una externa.
+4. **`integrations/<api>/` no importa de ninguna funcionalidad.** Una integración no sabe quién la usa.
+5. **Los modelos externos no cruzan la frontera.** Un `GeorefAddress` nunca sale en una respuesta de la API propia; se convierte a `Address` en `infrastructure.py`.
+
+Para saber de qué lado está un archivo: si está dentro de `integrations/`, habla con una API externa; si está dentro de una carpeta de funcionalidad, es parte de la API propia.
+
+Los tests están separados en dos capas —unitarios sin internet (`tests/unit/`, con `respx` + fixtures) e integración con internet (`tests/integration/`, opt-in vía `pytest -m integration`)—. El detalle completo está en [docs/testing.md](docs/testing.md).
 
 ## Primera API: Georef
 
@@ -317,6 +355,16 @@ Cada API se integra y se prueba por separado, en este orden:
 5. Guardar respuestas reales en `tests/fixtures/<api>/` y escribir los tests en `tests/unit/<api>/` y `tests/integration/<api>/`.
 
 Primero se observa la respuesta y después se modela. No se escriben modelos a partir de suposiciones.
+
+### Errores que ya cometimos (y cómo evitarlos)
+
+| Error | Cómo evitarlo |
+|---|---|
+| Elegir la API sin entender su contexto | Entender primero la API (qué devuelve, límites, licencia) y decidir en equipo |
+| `uv add <paquete>` sin rango deja la versión sin tope | Usar `uv add "<paquete>>=X.Y,<Z.0"` |
+| Confundir `src/conco/integrations/` (APIs externas) con `tests/integration/` (tipo de test) | Los tests van en `tests/unit/<api>/` o `tests/integration/<api>/` |
+| `response.json()` deja escapar un error cuando la API devuelve HTML | Validar con `model_validate_json(response.content)` |
+| La rama nueva rastrea la rama base y el push va a otro PR | `git branch --unset-upstream` + `git push -u origin <rama>` |
 
 ## Convenciones
 

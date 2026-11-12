@@ -4,7 +4,7 @@
 
 ## La idea
 
-Usar el dataset de [habilitaciones aprobadas](../apis/candidatas/habilitaciones-aprobadas.md), los locales que la AGC habilitó en la Ciudad desde 2015, para darle a la persona tres datos que hoy ninguna API ofrece.
+Usar el dataset de [habilitaciones aprobadas](../apis/pendientes/habilitaciones-aprobadas.md), los locales que la AGC habilitó en la Ciudad desde 2015, para darle a la persona tres datos que hoy ninguna API ofrece.
 
 ## Para qué sirve
 
@@ -16,7 +16,7 @@ Usar el dataset de [habilitaciones aprobadas](../apis/candidatas/habilitaciones-
 
 1. **Ingesta (periódica, offline):** descargar los CSV por año, leerlos con un parser de CSV (los comentarios tienen saltos de línea) y guardar rubro, comuna y comentarios. Agrupar por `razon_social` + `domicilio`, porque cada observación es una fila.
 2. **Rubro:** relacionar la actividad con el rubro de la AGC, con la misma [búsqueda semántica](busqueda-semantica-tramites.md) que se piensa usar para los trámites.
-3. **Conteo por comuna:** cantidad de locales distintos del rubro en la comuna que devuelve [USIG datos útiles](../apis/usig-datos-utiles.md).
+3. **Conteo por comuna:** cantidad de locales distintos del rubro en la comuna que devuelve [USIG datos útiles](../apis/en-pr/usig-datos-utiles.md).
 4. **Observaciones frecuentes:** agrupar comentarios parecidos por rubro (por artículo citado o por similitud de texto) y mostrar los más repetidos.
 
 ## Qué hay que tener en cuenta
@@ -24,5 +24,5 @@ Usar el dataset de [habilitaciones aprobadas](../apis/candidatas/habilitaciones-
 - **No es una determinación legal** ([RN-04](../REGLAS_DE_NEGOCIO.md)): las observaciones se presentan como «suele pedirse», citando la fuente ([RN-05](../REGLAS_DE_NEGOCIO.md)).
 - **Datos personales:** `razon_social` puede ser el nombre de una persona. No mostrarlo; alcanzan el rubro, la comuna y los comentarios.
 - **Comentarios en texto libre:** abreviados y con referencias a artículos («ART. 4.6.6.2 DEL CE»). Agruparlos bien es el trabajo más difícil.
-- **Rubros distintos entre fuentes:** los de la AGC no coinciden con los de [Ciudad 3D](../apis/candidatas/ciudad-3d.md) ni con el [CLAE](../apis/candidatas/cep-xxi-clae.md).
+- **Rubros distintos entre fuentes:** los de la AGC no coinciden con los de [Ciudad 3D](../apis/pendientes/ciudad-3d.md) ni con el [CLAE](../apis/pendientes/cep-xxi-clae.md).
 - **Volumen:** 2025 tiene unas 145.000 filas; todos los años juntos conviene tenerlos en una base, no en memoria.

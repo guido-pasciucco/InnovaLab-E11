@@ -1,5 +1,7 @@
 # Boletín Oficial de la Ciudad de Buenos Aires
 
+> **Estado:** en PR #67 (abierto; cadena 06/09) — todavía no está en main.
+
 API REST del Boletín Oficial de la Ciudad, donde se publica cada norma de CABA. CONCO la usa para mostrar una ley o un decreto (resumen, organismo, fecha, edición del Boletín y PDF) como **referencia** de la base normativa de un trámite.
 
 ## 1. Ficha
@@ -20,7 +22,7 @@ API REST del Boletín Oficial de la Ciudad, donde se publica cada norma de CABA.
 
 | Uso | MVP | Reglas |
 |---|---|---|
-| Mostrar una ley o un decreto de la Ciudad con enlace al documento oficial (por ejemplo, Ley 6101 y Decreto 40/2019 de habilitaciones) | Ítem 3: enlaces a fuentes oficiales | [RN-05](../REGLAS_DE_NEGOCIO.md) (respaldo con fuente oficial), [RN-04](../REGLAS_DE_NEGOCIO.md) (la norma es una referencia: CONCO no interpreta su alcance ni decide si se aplica a un caso) |
+| Mostrar una ley o un decreto de la Ciudad con enlace al documento oficial (por ejemplo, Ley 6101 y Decreto 40/2019 de habilitaciones) | Ítem 3: enlaces a fuentes oficiales | [RN-05](../../REGLAS_DE_NEGOCIO.md) (respaldo con fuente oficial), [RN-04](../../REGLAS_DE_NEGOCIO.md) (la norma es una referencia: CONCO no interpreta su alcance ni decide si se aplica a un caso) |
 
 ## 3. Endpoints que llama CONCO
 
@@ -92,11 +94,11 @@ No hay criterio de búsqueda válido seleccionado
 
 | Capa | Ubicación | Qué hace |
 |---|---|---|
-| Cliente | [`back/src/conco/integrations/boletin_oficial/client.py`](../../back/src/conco/integrations/boletin_oficial/client.py) | `find_norms(norm_type, number, year)`; `BoletinOficialNormType` (Ley, Decreto) y `NORM_TYPE_IDS` |
-| Modelos | [`back/src/conco/integrations/boletin_oficial/models.py`](../../back/src/conco/integrations/boletin_oficial/models.py) | `BoletinOficialResults`, `BoletinOficialNorm`; reescriben los enlaces a `https://` |
+| Cliente | [`back/src/conco/integrations/boletin_oficial/client.py`](../../../back/src/conco/integrations/boletin_oficial/client.py) | `find_norms(norm_type, number, year)`; `BoletinOficialNormType` (Ley, Decreto) y `NORM_TYPE_IDS` |
+| Modelos | [`back/src/conco/integrations/boletin_oficial/models.py`](../../../back/src/conco/integrations/boletin_oficial/models.py) | `BoletinOficialResults`, `BoletinOficialNorm`; reescriben los enlaces a `https://` |
 | Error | `BoletinOficialError` | HTML, cuerpo inesperado, error HTTP o timeout |
-| Adaptador | [`back/src/conco/guidance/infrastructure.py`](../../back/src/conco/guidance/infrastructure.py) | `BoletinOficialRegulationRegistry` |
-| Error de dominio | [`back/src/conco/guidance/domain.py`](../../back/src/conco/guidance/domain.py) | `RegulationLookupError` |
+| Adaptador | [`back/src/conco/guidance/infrastructure.py`](../../../back/src/conco/guidance/infrastructure.py) | `BoletinOficialRegulationRegistry` |
+| Error de dominio | [`back/src/conco/guidance/domain.py`](../../../back/src/conco/guidance/domain.py) | `RegulationLookupError` |
 
 ### `GET /guidance/regulations/{regulation_type}/{number}/{year}`
 
@@ -121,7 +123,7 @@ No hay criterio de búsqueda válido seleccionado
 | `BOLETIN_OFICIAL_SITE_URL` | `https://boletinoficial.buenosaires.gob.ar` |
 | `BOLETIN_OFICIAL_TIMEOUT_SECONDS` | `10.0` |
 
-Definidas en [`back/src/conco/config.py`](../../back/src/conco/config.py).
+Definidas en [`back/src/conco/config.py`](../../../back/src/conco/config.py).
 
 ## 7. Tests y probe
 
@@ -147,6 +149,6 @@ uv run python scripts/probes/boletin_oficial.py decreto 40 2019
 
 - Documentación: <https://api-restboletinoficial.buenosaires.gob.ar/api/doc/>
 - Sitio: <https://boletinoficial.buenosaires.gob.ar>
-- Seguimiento: [boletin-oficial-integration](../../odd/tasks/boletin-oficial-integration.md)
+- Seguimiento: [boletin-oficial-integration](../../../odd/tasks/boletin-oficial-integration.md)
 
 Fecha de verificación: 2026-10-31.

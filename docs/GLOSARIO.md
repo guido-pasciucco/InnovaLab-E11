@@ -231,7 +231,7 @@ Código compuesto de identificación catastral de una parcela en CABA: `sección
 Niveles de la división catastral de CABA: la ciudad tiene 99 secciones y ~12.192 manzanas. Cada manzana agrupa parcelas; cada sección agrupa manzanas. Juntas con la parcela forman el SMP.
 
 ### Dirección → punto → SMP → distrito
-Cadena de consultas para pasar de una dirección escrita a los datos urbanísticos de su parcela: la dirección se geocodifica a coordenadas (Georef), el punto se resuelve a una parcela con USIG Catastro (obtiene el SMP) y el SMP se consulta en Ciudad 3D (obtiene distrito, catalogación y afectaciones). Ver [`apis/candidatas/README.md`](apis/candidatas/README.md).
+Cadena de consultas para pasar de una dirección escrita a los datos urbanísticos de su parcela: la dirección se geocodifica a coordenadas (Georef), el punto se resuelve a una parcela con USIG Catastro (obtiene el SMP) y el SMP se consulta en Ciudad 3D (obtiene distrito, catalogación y afectaciones). Ver [`apis/pendientes/README.md`](apis/pendientes/README.md).
 
 ---
 

@@ -4,15 +4,33 @@ Referencia de cada API externa que consume el backend de CONCO: qué es, para qu
 
 > El backend es el único punto que consume APIs externas. El frontend solo habla con la API de CONCO.
 
-## APIs integradas
+## Layout
+
+Los documentos están agrupados por estado de la integración:
+
+- **`implementadas/`** — mergeadas a `main`: la API está en producción de desarrollo.
+- **`en-pr/`** — con un PR abierto: el código y el doc existen pero todavía no están en `main`.
+- **`pendientes/`** — candidatas probadas con llamadas reales, todavía no integradas. Incluye su propio [README](pendientes/README.md) con el estado de cada una.
+
+`APIS_CON_REGISTRO.md` (APIs que requieren token o registro) queda en la raíz de `docs/apis/`.
+
+## Implementadas (en `main`)
 
 | API | Proveedor | Para qué la usa CONCO | Endpoints de CONCO | Acceso | Licencia | Documento |
 |---|---|---|---|---|---|---|
-| Georef | Gobierno Nacional (datos.gob.ar) | Dirección → coordenadas aproximadas; verificar que un punto esté en CABA | `GET /geolocation/addresses`, `GET /geolocation/location-check` | Sin clave | CC BY 4.0 | [georef.md](georef.md) |
-| Trámites CABA (JSON:API) | Gobierno de la Ciudad (buenosaires.gob.ar) | Buscar trámites oficiales y mostrar requisitos, pasos, organismo y enlace para iniciarlos | `GET /guidance/procedures`, `GET /guidance/procedures/{procedure_id}` | Sin clave | CC BY 2.5 AR | [tramites-caba.md](tramites-caba.md) |
-| USIG datos útiles | USIG, Gobierno de la Ciudad | Barrio, comuna y código postal de una dirección o un punto de CABA | `GET /geolocation/address-context`, `GET /geolocation/address-context/by-coordinates` | Sin clave | CC BY 2.5 AR | [usig-datos-utiles.md](usig-datos-utiles.md) |
-| USIG EPOK | USIG, Gobierno de la Ciudad | Sedes y subsedes comunales más cercanas a un punto | `GET /geolocation/nearby-offices` | Sin clave (requiere User-Agent propio) | Sin licencia explícita; se asume CC BY 2.5 AR | [usig-epok.md](usig-epok.md) |
-| Boletín Oficial CABA | Boletín Oficial, Gobierno de la Ciudad | Mostrar una ley o un decreto de la Ciudad como respaldo de un trámite | `GET /guidance/regulations/{regulation_type}/{number}/{year}` | Sin clave | Sin licencia explícita; normas de acceso público | [boletin-oficial-caba.md](boletin-oficial-caba.md) |
+| Georef | Gobierno Nacional (datos.gob.ar) | Dirección → coordenadas aproximadas; verificar que un punto esté en CABA | `GET /geolocation/addresses` | Sin clave | CC BY 4.0 | [implementadas/georef.md](implementadas/georef.md) |
+| Trámites CABA (JSON:API) | Gobierno de la Ciudad (buenosaires.gob.ar) | Buscar trámites oficiales y mostrar requisitos, pasos, organismo y enlace para iniciarlos | `GET /guidance/procedures`, `GET /guidance/procedures/{procedure_id}` | Sin clave | CC BY 2.5 AR | [implementadas/tramites-caba.md](implementadas/tramites-caba.md) |
+
+> `GET /geolocation/location-check` (reverse geocoding con Georef) está documentado en [implementadas/georef.md](implementadas/georef.md) pero todavía no está en `main`: ver [en-pr/](#en-pr-abiertos-todavía-no-en-main).
+
+## En PR (abiertos, todavía no en `main`)
+
+| API | Proveedor | Para qué la usa CONCO | Endpoints de CONCO | PR | Documento |
+|---|---|---|---|---|---|
+| USIG datos útiles | USIG, Gobierno de la Ciudad | Barrio, comuna y código postal de una dirección o un punto de CABA | `GET /geolocation/address-context`, `GET /geolocation/address-context/by-coordinates` | #66 | [en-pr/usig-datos-utiles.md](en-pr/usig-datos-utiles.md) |
+| Boletín Oficial CABA | Boletín Oficial, Gobierno de la Ciudad | Mostrar una ley o un decreto de la Ciudad como respaldo de un trámite | `GET /guidance/regulations/{regulation_type}/{number}/{year}` | #67 | [en-pr/boletin-oficial-caba.md](en-pr/boletin-oficial-caba.md) |
+| USIG EPOK | USIG, Gobierno de la Ciudad | Sedes y subsedes comunales más cercanas a un punto | `GET /geolocation/nearby-offices` | #68 | [en-pr/usig-epok.md](en-pr/usig-epok.md) |
+| Georef `location-check` | Gobierno Nacional (datos.gob.ar) | Verificar que un punto esté en CABA (reverse geocoding) | `GET /geolocation/location-check` | #69 | [implementadas/georef.md](implementadas/georef.md) |
 
 ## Cómo leer cada documento
 
@@ -41,17 +59,14 @@ Convenciones comunes a todas las integraciones:
 
 | Documento | Para qué |
 |---|---|
-| [`../GUIA_INTEGRACION_APIS.md`](../GUIA_INTEGRACION_APIS.md) | Flujo paso a paso para integrar una API nueva |
-| [`../APIS_CON_REGISTRO.md`](../APIS_CON_REGISTRO.md) | APIs que requieren token o registro (candidatas a futuro) |
-| [`../../back/README.md`](../../back/README.md) | Estructura del backend y uso de cada endpoint |
+| [`APIS_CON_REGISTRO.md`](APIS_CON_REGISTRO.md) | APIs que requieren token o registro (candidatas a futuro) |
+| [`../../back/README.md`](../../back/README.md) | Estructura del backend, uso de cada endpoint y cómo incorporar una API nueva |
 | [`../REGLAS_DE_NEGOCIO.md`](../REGLAS_DE_NEGOCIO.md) | Reglas RN-01 a RN-08 |
 | [`../MVP_SCOPE.md`](../MVP_SCOPE.md) | Alcance incluido y excluido del MVP |
 
-> Al momento de escribir este documento, `GUIA_INTEGRACION_APIS.md` y `APIS_CON_REGISTRO.md` existen en la copia local pero todavía no están versionados en el repositorio.
+## Pendientes (candidatas en evaluación)
 
-## Candidatas en evaluación
-
-APIs probadas que todavía no están integradas: [`candidatas/`](candidatas/README.md) (USIG Catastro, Ciudad 3D, habilitaciones aprobadas de la AGC, diccionario CLAE de CEP XXI, OpenStreetMap y Mapa de Oportunidades Comerciales).
+APIs probadas que todavía no están integradas: [`pendientes/README.md`](pendientes/README.md) (USIG Catastro, Ciudad 3D, habilitaciones aprobadas de la AGC, diccionario CLAE de CEP XXI, OpenStreetMap y Mapa de Oportunidades Comerciales). APIs que requieren token o registro: [APIS_CON_REGISTRO.md](APIS_CON_REGISTRO.md).
 
 ## Candidatas descartadas
 
@@ -59,9 +74,9 @@ Se evaluaron con llamadas reales el 2026-10-31 (PR #53 y PR #57 de `guido-pasciu
 
 | Candidata | Motivo del descarte |
 |---|---|
-| BA Data (CKAN de `data.buenosaires.gob.ar`) | Bloquea las consultas del servidor con un desafío anti-bots y sus datos son descargas masivas (requieren base de datos). **Corrección del 2026-11-05:** `package_show` y `package_list` sí responden JSON y los archivos se descargan desde `cdn.buenosaires.gob.ar`; solo `package_search` sigue bloqueado. Ver [habilitaciones aprobadas](candidatas/habilitaciones-aprobadas.md) |
+| BA Data (CKAN de `data.buenosaires.gob.ar`) | Bloquea las consultas del servidor con un desafío anti-bots y sus datos son descargas masivas (requieren base de datos). **Corrección del 2026-11-05:** `package_show` y `package_list` sí responden JSON y los archivos se descargan desde `cdn.buenosaires.gob.ar`; solo `package_search` sigue bloqueado. Ver [habilitaciones aprobadas](pendientes/habilitaciones-aprobadas.md) |
 | datos.gob.ar (CKAN de Nación) | Sin resultados útiles para trámites de CABA |
-| CLAE / nomenclador de actividades | No es consultable en vivo y es una clasificación fiscal nacional. Como descarga sí sirve: ver [CEP XXI](candidatas/cep-xxi-clae.md) |
+| CLAE / nomenclador de actividades | No es consultable en vivo y es una clasificación fiscal nacional. Como descarga sí sirve: ver [CEP XXI](pendientes/cep-xxi-clae.md) |
 | Guía de trámites de argentina.gob.ar | No expone una API pública |
 | USIG `normalizar` | Georef ya cubre la normalización y las coordenadas |
 | JSON:API de la Ciudad, `node/sedes` | Los horarios son de relleno (`00:00 a 00:00`) |
@@ -85,7 +100,7 @@ Búsqueda de fuentes para relacionar la actividad con su rubro y sus trámites. 
 | JSON:API de buenosaires.gob.ar para rubros | No hay tipos de contenido de rubros; `taxonomy_term/tematicas` está vacío y `search_page` pide autorización |
 | Nomenclador NAES de AGIP y tabla NAES ↔ CLAE (Comisión Arbitral) | Solo PDF o Excel publicados por resolución (RG 19/2025), sin buscador |
 | Rubros de la AGC por Ley 6101 y cuadro de asimilación (Decreto 87/19) | Solo PDF y normativa, sin buscador público |
-| MOC en vivo | Plataforma discontinuada; quedan los [CSV históricos](candidatas/mapa-oportunidades-comerciales.md) |
+| MOC en vivo | Plataforma discontinuada; quedan los [CSV históricos](pendientes/mapa-oportunidades-comerciales.md) |
 | `cdn.buenosaires.gob.ar` como directorio | `403` al listar; los archivos sueltos sí se descargan |
 | `hub.tumidata.org` (copia de habilitaciones) | No respondió |
 | datos.jus.gob.ar (IGJ, Registro Nacional de Sociedades) | Permite consultas, pero solo hay una muestra de sociedades sin columna de actividad |

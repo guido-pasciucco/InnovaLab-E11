@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-11-12
 **Estado:** Vigente
-**Contexto relacionado:** [RN-05](../REGLAS_DE_NEGOCIO.md), [APIS_CON_REGISTRO.md](../APIS_CON_REGISTRO.md), [apis/README.md](../apis/README.md)
+**Contexto relacionado:** [RN-05](../REGLAS_DE_NEGOCIO.md), [apis/APIS_CON_REGISTRO.md](../apis/APIS_CON_REGISTRO.md), [apis/README.md](../apis/README.md)
 
 ## Contexto
 
@@ -11,7 +11,7 @@ CONCO consume APIs externas de gobierno y proveedores. Al relevar el ecosistema 
 ## Decisión
 
 - **Fase actual: solo APIs oficiales, públicas y sin clave.** Las 5 integradas (Georef, Trámites CABA, USIG datos útiles, USIG EPOK, Boletín Oficial CABA) no requieren autenticación.
-- **Las APIs con credenciales se documentan pero no se integran**: relevadas con fecha, requerimiento y costo en `APIS_CON_REGISTRO.md`, cada una con la razón por la que queda para después.
+- **Las APIs con credenciales se documentan pero no se integran**: relevadas con fecha, requerimiento y costo en `apis/APIS_CON_REGISTRO.md`, cada una con la razón por la que queda para después.
 - **Candidatas descartadas quedan registradas con motivo**: ~23 APIs evaluadas con llamadas reales y descartadas con razón concreta en `apis/README.md`, para no re-evaluarlas.
 - **Si alguna se integra a futuro**: credenciales en `.env` (nunca en código), `SecretStr` de Pydantic, tests sin credenciales reales.
 
@@ -56,10 +56,10 @@ Cada descarte quedó documentado con evidencia de llamadas reales (anti-bots de 
 
 - Validación de RN-01 (si se aprueba IA → Claude API entra en evaluación).
 - Si Georef muestra fallas en producción → OpenCage/Mapbox como respaldo.
-- Si el producto crece más allá del caso piloto (transporte, padrón, etc.) → revisar `APIS_CON_REGISTRO.md`.
+- Si el producto crece más allá del caso piloto (transporte, padrón, etc.) → revisar `apis/APIS_CON_REGISTRO.md`.
 
 ## Referencias
 
-- Decisión de fase: `docs/APIS_CON_REGISTRO.md` (relevamiento 2026-10-31)
+- Decisión de fase: `docs/apis/APIS_CON_REGISTRO.md` (relevamiento 2026-10-31)
 - Descartes con evidencia: `docs/apis/README.md` (secciones "Candidatas descartadas")
 - Integradas: `docs/apis/README.md` tabla de APIs + `docs/apis/*.md`
