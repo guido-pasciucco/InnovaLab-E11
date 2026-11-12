@@ -5,7 +5,7 @@ import type {
 import { mockConsultation, mockFollowUp } from './mock';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api';
-const USE_MOCK = import.meta.env.VITE_USE_MOCK_API !== 'false';
+const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === 'true';
 
 export class ApiError extends Error {
   constructor(public readonly status: number, message: string) {
