@@ -16,3 +16,10 @@ dist/
 # SO / editores
 .DS_Store
 *.log
+
+# Configuración local de agentes (MCP de Render; sin secretos en el archivo, pero de uso local)
+opencode.json
+
+# Configuración local de VS Code
+.vscode/
+
