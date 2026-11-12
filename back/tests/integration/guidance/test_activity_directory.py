@@ -1,7 +1,8 @@
 import pytest
 
+from conco.config import settings
 from conco.guidance.activity_directory import PostgresActivityDirectory
-from conco.guidance.embeddings import FastEmbedTextEmbedder
+from conco.guidance.embeddings import CloudflareTextEmbedder
 
 pytestmark = [pytest.mark.database, pytest.mark.anyio]
 
@@ -10,7 +11,9 @@ HABILITACION_ID = "338718b4-a2a0-44af-baa4-083f5d834b12"
 
 @pytest.fixture(scope="module")
 def directory() -> PostgresActivityDirectory:
-    return PostgresActivityDirectory(FastEmbedTextEmbedder())
+    if not (settings.embedding_api_key and settings.cloudflare_account_id):
+        pytest.skip("Requiere EMBEDDING_API_KEY y CLOUDFLARE_ACCOUNT_ID (back/.env)")
+    return PostgresActivityDirectory(CloudflareTextEmbedder())
 
 
 async def test_synonym_suggests_its_activity_first(directory: PostgresActivityDirectory) -> None:

@@ -1,8 +1,8 @@
+"""Embeddings de la búsqueda de actividades vía Cloudflare Workers AI."""
+
 import time
-from functools import cache
 
 import httpx
-from fastembed import TextEmbedding
 
 from conco.config import settings
 
@@ -11,31 +11,6 @@ _TIMEOUT = httpx.Timeout(connect=5.0, read=10.0, write=10.0, pool=5.0)
 
 class EmbeddingProviderError(Exception):
     """El proveedor de embeddings no está configurado o no respondió; la búsqueda no está disponible."""
-
-
-@cache
-def _load_model(model_name: str) -> TextEmbedding:
-    """Carga el modelo una sola vez por proceso: la primera vez lo descarga (~220 MB)."""
-    return TextEmbedding(model_name=model_name)
-
-
-class FastEmbedTextEmbedder:
-    """Adaptador: corre el modelo de embeddings dentro del mismo proceso de la API (ONNX)."""
-
-    def __init__(self, model_name: str | None = None) -> None:
-        self._model_name = model_name or settings.embedding_model
-
-    @property
-    def model_name(self) -> str:
-        return self._model_name
-
-    def warm_up(self) -> None:
-        """Carga el modelo antes de la primera búsqueda, para que no tarde la primera respuesta."""
-        _load_model(self._model_name)
-
-    def embed(self, texts: list[str]) -> list[list[float]]:
-        model = _load_model(self._model_name)
-        return [vector.tolist() for vector in model.embed(texts)]
 
 
 class CloudflareTextEmbedder:
@@ -132,11 +107,6 @@ class CloudflareTextEmbedder:
         return [vector for vector in vectors if vector is not None]
 
 
-def create_embedder() -> "FastEmbedTextEmbedder | CloudflareTextEmbedder":
-    """Crea el embedder según settings.embedding_provider ("fastembed" o "cloudflare")."""
-    provider = settings.embedding_provider.strip().lower()
-    if provider == "cloudflare":
-        return CloudflareTextEmbedder()
-    if provider == "fastembed":
-        return FastEmbedTextEmbedder()
-    raise EmbeddingProviderError(f"EMBEDDING_PROVIDER desconocido: {settings.embedding_provider!r}")
+def create_embedder() -> CloudflareTextEmbedder:
+    """Punto único de construcción del embedder: Cloudflare Workers AI (ADR-005)."""
+    return CloudflareTextEmbedder()

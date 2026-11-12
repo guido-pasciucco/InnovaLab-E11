@@ -15,8 +15,8 @@ Investigación completa: búsqueda profunda comparando Gemini (free tier con cl�
 
 ## Decisión
 
-- Los alias de actividad se vectorizan con **`@cf/baai/bge-m3`** servido por **Cloudflare Workers AI**, por HTTP a la ruta OpenAI-compatible `…/ai/v1/embeddings` (httpx directo, sin dependencias nuevas), con `EMBEDDING_PROVIDER=cloudflare` por defecto.
-- `fastembed` queda disponible como rollback (`EMBEDDING_PROVIDER=fastembed`), solo compatible con la columna `vector(384)` previa.
+- Los alias de actividad se vectorizan con **`@cf/baai/bge-m3`** servido por **Cloudflare Workers AI**, por HTTP a la ruta OpenAI-compatible `…/ai/v1/embeddings` (httpx directo, sin dependencias nuevas).
+- **Actualización (2026-11-13):** `fastembed` se eliminó del árbol principal (dependencia, código, tests y docs) por decisión del equipo — la búsqueda usa únicamente Cloudflare Workers AI. No hay ruta dual soportada; el rollback documentado es revertir el commit + aplicar la migración `vector(384)` + re-correr `load_catalog`.
 - Migración `20261113000000_activity_aliases_vector_1024.sql`: drop del índice HNSW, drop/recreate de la columna `vector(384)` → `vector(1024)`, `truncate` de `activity_aliases` (datos derivados) y recreación del índice. `vector(n)` de pgvector exige typmod exacto; no se puede alterar in-place.
 - `load_catalog` reconstruye los alias vía el proveedor elegido (transacción atómica igual que antes).
 - `ACTIVITY_MIN_SIMILARITY`: **0.5 → 0.55**. El 0.5 estaba calibrado para MiniLM; con bge-m3, los matches correctos más débiles del eval set rozan 0.56 y los negativos se quedan en ≤0.53. Calibrado con ~26 queries + 3 negativas (2026-11-12); es un piso frágil: recalibrar con más datos en producción.
