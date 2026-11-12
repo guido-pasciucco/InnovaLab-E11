@@ -11,7 +11,7 @@ from psycopg_pool import AsyncConnectionPool, PoolTimeout
 from conco.config import settings
 from conco.geolocation.api import router as geolocation_router
 from conco.guidance.api import router as guidance_router
-from conco.guidance.embeddings import FastEmbedTextEmbedder
+from conco.guidance.embeddings import create_embedder
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except (psycopg.Error, PoolTimeout) as exc:
         logger.error("No se pudo abrir el pool de base de datos: %s", exc)
     app.state.db_pool = pool
-    warm_up = asyncio.create_task(asyncio.to_thread(FastEmbedTextEmbedder().warm_up))
+    warm_up = asyncio.create_task(asyncio.to_thread(create_embedder().warm_up))
     warm_up.add_done_callback(_log_warmup_failure)
     try:
         yield

@@ -19,7 +19,8 @@ uv run python -m conco.guidance.load_catalog
 ```
 
 - El primer `supabase start` aplica las migraciones y expone Postgres en `127.0.0.1:55322`.
-- `load_catalog` descarga los trámites de buenosaires.gob.ar y vectoriza las actividades (~600 MB de RAM en la API al usar el modelo de embeddings; la primera vez descarga ~220 MB del modelo).
+- `load_catalog` descarga los trámites de buenosaires.gob.ar y vectoriza las actividades vía Cloudflare Workers AI (~53 alias en menos de un segundo; no descarga modelos ni necesita RAM extra en la API). Requiere `EMBEDDING_API_KEY` y `CLOUDFLARE_ACCOUNT_ID` en `back/.env`.
+- Si tu base local viene de antes, `npx supabase migration up` aplica la migración `20261113000000` (columna `vector(384)` → `vector(1024)`, trunca los alias) y después corrés `load_catalog`.
 - Si cambiás `src/conco/guidance/data/activities.json`, volvé a correr `load_catalog`.
 - Sin esta base, el backend levanta igual pero `/guidance/activities` responde `503`.
 
@@ -33,7 +34,7 @@ make run           # = uv run uvicorn conco.main:app --reload
 
 - API en `http://127.0.0.1:8000`
 - Documentación interactiva: `http://127.0.0.1:8000/docs`
-- Configuración en `back/.env` (ya existe; plantilla en `.env.example`). No requiere claves: Georef y la API de trámites de CABA son públicas.
+- Configuración en `back/.env` (ya existe; plantilla en `.env.example`). Georef y la API de trámites de CABA son públicas; la búsqueda de actividades sí necesita un token de Cloudflare (`EMBEDDING_API_KEY` + `CLOUDFLARE_ACCOUNT_ID`).
 
 ## 3. Frontend
 

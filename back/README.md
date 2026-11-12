@@ -234,11 +234,12 @@ uv run python scripts/probes/caba_tramites.py --id 338718b4-a2a0-44af-baa4-083f5
 
 La API de trámites solo busca por texto en el título y ningún trámite menciona actividades: «cafetería» no encuentra «Habilitación de actividad económica». Por eso la relación entre actividades y trámites es **curada**: `src/conco/guidance/data/activities.json` dice, para cada actividad, qué trámites suelen aplicar y en qué caso. Es un **borrador** que tiene que revisar alguien que conozca el tema (RN-04).
 
-Para entender lo que escribe la persona se usan **embeddings**: un modelo multilingüe convierte cada nombre y sinónimo de actividad en un vector de 384 números, y la consulta se compara por similitud coseno. Así, «quiero poner una barbería» sugiere «Peluquería» aunque no compartan palabras.
+Para entender lo que escribe la persona se usan **embeddings**: un modelo multilingüe convierte cada nombre y sinónimo de actividad en un vector de 1024 números, y la consulta se compara por similitud coseno. Así, «quiero poner una barbería» sugiere «Peluquería» aunque no compartan palabras.
 
-- El modelo (`paraphrase-multilingual-MiniLM-L12-v2`, ONNX con `fastembed`) corre **dentro de la API**, detrás del puerto `TextEmbedder`. Se carga en segundo plano al arrancar y ocupa unos 600 MB de RAM. La primera vez se descarga (~220 MB).
+- El modelo (`@cf/baai/bge-m3`, multilingüe, MIT) corre en **Cloudflare Workers AI**, detrás del puerto `TextEmbedder`. Se llama por HTTP (ruta OpenAI-compatible) con un preflight barato al arrancar; no descarga pesos ni ocupa RAM significativa en la API. El token necesita permisos Workers AI Read+Edit (`EMBEDDING_API_KEY` + `CLOUDFLARE_ACCOUNT_ID` en `back/.env`).
+- Alternativa local sin red: `EMBEDDING_PROVIDER=fastembed` (MiniLM-L12-v2, vector de 384; solo compatible con la columna `vector(384)` previa a la migración `20261113000000`).
 - Los datos viven en Postgres con la extensión pgvector. En desarrollo se usa el Supabase local de `back/supabase/` (solo la base de datos, puerto `55322`).
-- Por debajo de `ACTIVITY_MIN_SIMILARITY` (0.5) no se sugiere nada. Con palabras cortas o poco comunes el modelo puede dar similitudes altas sin sentido, por eso el frontend muestra las sugerencias para que la persona elija, en vez de elegir solo.
+- Por debajo de `ACTIVITY_MIN_SIMILARITY` (0.55) no se sugiere nada. Con palabras cortas o poco comunes el modelo puede dar similitudes altas sin sentido, por eso el frontend muestra las sugerencias para que la persona elija, en vez de elegir solo.
 
 ### Levantar la base y cargar los datos
 
@@ -249,13 +250,24 @@ npx supabase start -x gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgres
 uv run python -m conco.guidance.load_catalog
 ```
 
-`supabase start` aplica las migraciones de `supabase/migrations/`. `load_catalog` trae los trámites publicados de la Ciudad, valida que el archivo curado solo mencione trámites existentes, guarda únicamente los referenciados (hoy 18 de ~870) y vectoriza los alias; se vuelve a correr cada vez que cambia `activities.json` o para actualizar los trámites. `npx supabase db reset` borra la base y vuelve a aplicar las migraciones (después hay que volver a cargar los datos).
+`supabase start` aplica las migraciones de `supabase/migrations/`. La migración `20261113000000_activity_aliases_vector_1024.sql` reemplaza la columna `vector(384)` por `vector(1024)` y **trunca `activity_aliases`**: una base existente necesita esta ruta, no solo `load_catalog`:
+
+```bash
+npx supabase migration up   # aplica la migración (vacía los alias)
+uv run python -m conco.guidance.load_catalog
+```
+
+`load_catalog` trae los trámites publicados de la Ciudad, valida que el archivo curado solo mencione trámites existentes, guarda únicamente los referenciados (hoy 18 de ~870) y vectoriza los alias vía Cloudflare (~53 alias en menos de un segundo, sin descargar modelos); se vuelve a correr cada vez que cambia `activities.json` o para actualizar los trámites. `npx supabase db reset` borra la base y vuelve a aplicar las migraciones (después hay que volver a cargar los datos).
 
 | Variable | Valor por defecto |
 |---|---|
 | `DATABASE_URL` | `postgresql://postgres:postgres@127.0.0.1:55322/postgres` |
-| `EMBEDDING_MODEL` | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (si cambia, hay que volver a cargar los datos) |
-| `ACTIVITY_MIN_SIMILARITY` | `0.5` |
+| `EMBEDDING_PROVIDER` | `cloudflare` (`fastembed` para la ruta local) |
+| `EMBEDDING_API_KEY` | — (token de Cloudflare, permisos Workers AI Read+Edit) |
+| `CLOUDFLARE_ACCOUNT_ID` | — |
+| `CLOUDFLARE_EMBEDDING_MODEL` | `@cf/baai/bge-m3` (si cambia, hay que volver a cargar los datos) |
+| `EMBEDDING_MODEL` | `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (solo `fastembed`) |
+| `ACTIVITY_MIN_SIMILARITY` | `0.55` |
 
 ### `GET /guidance/activities`
 

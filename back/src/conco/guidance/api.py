@@ -20,7 +20,7 @@ from conco.guidance.domain import (
     Source,
     apply_context,
 )
-from conco.guidance.embeddings import FastEmbedTextEmbedder
+from conco.guidance.embeddings import create_embedder
 from conco.guidance.infrastructure import CabaProcedureCatalog
 
 router = APIRouter(prefix="/guidance", tags=["Orientación"])
@@ -72,7 +72,7 @@ def get_activity_directory(request: Request) -> ActivityDirectory:
     directory = getattr(request.app.state, "activity_directory", None)
     if directory is None:
         directory = PostgresActivityDirectory(
-            FastEmbedTextEmbedder(),
+            create_embedder(),
             pool=getattr(request.app.state, "db_pool", None),
         )
         request.app.state.activity_directory = directory

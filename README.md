@@ -31,6 +31,6 @@ Guía completa con troubleshooting: [GUIA_LEVANTAR.md](GUIA_LEVANTAR.md).
 
 ## Stack
 
-- **Backend:** FastAPI, Pydantic, httpx, fastembed + pgvector, Postgres (Supabase local), `uv`.
+- **Backend:** FastAPI, Pydantic, httpx, Cloudflare Workers AI (embeddings) + pgvector, Postgres (Supabase local), `uv`.
 - **Frontend:** React 18, TypeScript, Vite, Leaflet.
 - **Fuentes de datos:** Georef (direcciones), API JSON:API de trámites de la Ciudad de Buenos Aires.

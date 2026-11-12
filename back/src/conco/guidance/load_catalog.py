@@ -17,7 +17,7 @@ from pydantic import BaseModel, ConfigDict, model_validator
 from conco.config import settings
 from conco.guidance.activity_directory import to_pgvector
 from conco.guidance.domain import ContextAnswers
-from conco.guidance.embeddings import FastEmbedTextEmbedder
+from conco.guidance.embeddings import create_embedder
 from conco.guidance.infrastructure import to_procedure
 from conco.integrations.caba_tramites.client import list_procedures
 from conco.integrations.caba_tramites.models import CabaProcedure
@@ -107,7 +107,7 @@ def load(database_url: str) -> None:
     print(f"Trámites referenciados por el curado: {len(caba_procedures)}")
 
     started = time.perf_counter()
-    embedder = FastEmbedTextEmbedder()
+    embedder = create_embedder()
     aliases = [(activity.slug, alias) for activity in catalog.activities for alias in activity.aliases]
     vectors = embedder.embed([alias for _, alias in aliases])
     print(f"Alias vectorizados: {len(aliases)} ({time.perf_counter() - started:.1f}s)")
