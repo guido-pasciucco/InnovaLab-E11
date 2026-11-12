@@ -56,6 +56,10 @@ back/
 │       │   ├── load_catalog.py # comando que carga trámites y actividades en la base
 │       │   ├── data/activities.json # relación curada actividad → trámites (borrador)
 │       │   └── api.py          # endpoints GET /guidance/procedures y /guidance/activities
+│       ├── consultation/       # funcionalidad: consulta integral (sin IA, catálogo curado)
+│       │   ├── domain.py       # modelos del contrato camelCase que espera el frontend
+│       │   ├── service.py      # compone la consulta desde actividades, trámites y Georef
+│       │   └── api.py          # endpoints POST /consultations y POST /consultations/{id}/follow-up
 │       └── integrations/       # un paquete por cada API externa
 │           ├── georef/
 │           │   ├── client.py   # única ubicación de las llamadas HTTP a Georef
@@ -294,7 +298,15 @@ npx supabase migration up   # aplica la migración (vacía los alias)
 uv run python -m conco.guidance.load_catalog
 ```
 
-`load_catalog` trae los trámites publicados de la Ciudad, valida que el archivo curado solo mencione trámites existentes, guarda únicamente los referenciados (hoy 18 de ~870) y vectoriza los alias vía Cloudflare (~53 alias en menos de un segundo, sin descargar modelos); se vuelve a correr cada vez que cambia `activities.json` o para actualizar los trámites. `npx supabase db reset` borra la base y vuelve a aplicar las migraciones (después hay que volver a cargar los datos).
+`load_catalog` trae los trámites publicados de la Ciudad, valida que el archivo curado solo mencione trámites existentes, guarda únicamente los referenciados (hoy 18 de ~870), vectoriza los alias vía Cloudflare (~53 alias en menos de un segundo, sin descargar modelos) y escribe también los requerimientos oficiales de esos trámites (`procedure_requirements`); se vuelve a correr cada vez que cambia `activities.json` o para actualizar los trámites. `npx supabase db reset` borra la base y vuelve a aplicar las migraciones (después hay que volver a cargar los datos).
+
+Para refrescar **solo** los requerimientos (sin re-correr todo el catálogo), con la base cargada:
+
+```bash
+uv run python -m conco.guidance.load_requirements
+```
+
+Lee los `id` presentes en `public.procedures`, pide el detalle oficial de cada uno y reescribe `procedure_requirements` en una sola transacción; si algún trámite ya no existe en la fuente, no toca la base. Si el objetivo es mantenimiento de rutina de los datos, conviene re-correr `load_catalog` completo; `load_requirements` es el camino corto cuando solo interesan esos textos.
 
 | Variable | Valor por defecto |
 |---|---|
@@ -342,6 +354,42 @@ Las condiciones de cada trámite están en `applies_when` dentro de `src/conco/g
 | `200` | La consulta funcionó |
 | `404` | La actividad no existe (solo los trámites) |
 | `422` | Los parámetros no cumplen la validación (el `slug` va en minúsculas, con números y guiones; las respuestas, `true` o `false`; no se aceptan preguntas desconocidas) |
+| `503` | La base de datos no está disponible |
+
+## Endpoints de consulta integral
+
+Responden con la forma camelCase que espera el frontend (el resto de la API habla snake_case). No usan IA: la respuesta se compone con las mismas piezas curadas que los endpoints de orientación (actividad → trámites oficiales → Georef) y siempre cita fuentes.
+
+### `POST /consultations`
+
+Orientación general para una actividad declarada libremente y una dirección (opcional, verificada contra Georef si no se pasó `point`).
+
+Request: `{"activity": "quiero poner una barbería", "address": "Corrientes 2500", "point": {"lat": -34.6, "lng": -58.38} | null, "activitySlug": "peluqueria" | null}` (`422` ante validación).
+
+- Con `activitySlug` se usa esa actividad curada; sin él, se sugiere la actividad más parecida al texto (mismo umbral `ACTIVITY_MIN_SIMILARITY`).
+- Si `point` no viene, la dirección se geocodifica con Georef y se agrega la fuente `georef`; si Georef falla, la consulta responde igual y lo aclara en `limitations`.
+- `consultationId` es opaco e idempotente; solo codifica el slug de la actividad (no guarda la dirección ni datos personales).
+
+Respuesta (`200`): `{"consultationId", "interpretedActivity", "normalizedAddress", "point" | null, "summary", "steps": [{"id", "title", "description", "documents": [...], "sourceIds": [...]}], "territorialFeatures": [], "sources": [...], "limitations": [...]}`.
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` | La consulta funcionó |
+| `422` | Los parámetros no cumplen la validación (`activitySlug` en minúsculas/números/guiones) |
+| `503` | La base de datos no está disponible |
+
+### `POST /consultations/{consultationId}/follow-up`
+
+Respuesta acotada a la consulta ya realizada: **no genera conclusiones nuevas ni usa IA**. Devuelve los trámites del catálogo curado para la actividad interpretada (con su URL oficial) y, si no se reconoce ninguna, la indicación de buscar en la fuente oficial.
+
+Request: `{"question": "¿Necesito contador?"}` (máx. 500 caracteres).
+
+Respuesta (`200`): `{"answer": "...", "sourceIds": ["caba-tramites"], "limitations": [...]}`.
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` | La pregunta fue recibida y respondida |
+| `400` | `consultationId` inválido o manipulado |
 | `503` | La base de datos no está disponible |
 
 ## Cómo incorporar una API nueva
