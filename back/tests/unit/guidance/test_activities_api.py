@@ -14,6 +14,8 @@ from conco.guidance.domain import (
     ApplicableProcedure,
     ContextAnswers,
     Procedure,
+    Requirement,
+    RequirementOrigin,
     Source,
 )
 from conco.main import app
@@ -88,6 +90,10 @@ EMPLEADORES_JSON = {
     "note": "Si vas a contratar personal.",
     "status": "may_apply",
 }
+REQUIREMENTS_NOTE_TEXT = (
+    "Fuente oficial: páginas de los trámites. Es una orientación general; "
+    "verificá siempre con el organismo."
+)
 ACTIVITY_PROCEDURES_JSON = {
     "activity": {"slug": "peluqueria", "name": "Peluquería"},
     "questions": [
@@ -96,6 +102,32 @@ ACTIVITY_PROCEDURES_JSON = {
     "procedures": [HABILITACION_JSON, EMPLEADORES_JSON],
     "excluded_count": 0,
     "source": SOURCE_JSON,
+    "requirements": [],
+    "requirements_note": REQUIREMENTS_NOTE_TEXT,
+}
+REQUIREMENT = Requirement(
+    id="req-0123456789ab",
+    text="DNI del titular",
+    heading="Documentación",
+    origins=[
+        RequirementOrigin(
+            procedure_id=UUID("338718b4-a2a0-44af-baa4-083f5d834b12"),
+            procedure_title="Habilitación de actividad económica",
+            official_url="https://buenosaires.gob.ar/tramites/habilitacion-de-actividad-economica",
+        )
+    ],
+)
+REQUIREMENT_JSON = {
+    "id": "req-0123456789ab",
+    "text": "DNI del titular",
+    "heading": "Documentación",
+    "origins": [
+        {
+            "procedure_id": "338718b4-a2a0-44af-baa4-083f5d834b12",
+            "procedure_title": "Habilitación de actividad económica",
+            "official_url": "https://buenosaires.gob.ar/tramites/habilitacion-de-actividad-economica",
+        }
+    ],
 }
 UNAVAILABLE_JSON = {
     "detail": "La búsqueda de actividades no está disponible. Intentá de nuevo más tarde."
@@ -126,11 +158,22 @@ class FakeActivityDirectory:
 
 
 class FakeProcedureCatalog:
-    """Solo aporta la fuente oficial que se cita en la respuesta."""
+    """Solo aporta la fuente oficial; anota cualquier llamada a la API de la Ciudad."""
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[object, ...]] = []
 
     @property
     def source(self) -> Source:
         return SOURCE
+
+    async def search(self, query: str, limit: int) -> list[Procedure]:
+        self.calls.append(("search", query, limit))
+        return []
+
+    async def get(self, procedure_id: UUID) -> Procedure | None:
+        self.calls.append(("get", procedure_id))
+        return None
 
 
 @pytest.fixture
@@ -139,9 +182,16 @@ def directory() -> FakeActivityDirectory:
 
 
 @pytest.fixture
-def client(directory: FakeActivityDirectory) -> Iterator[TestClient]:
+def catalog() -> FakeProcedureCatalog:
+    return FakeProcedureCatalog()
+
+
+@pytest.fixture
+def client(
+    directory: FakeActivityDirectory, catalog: FakeProcedureCatalog
+) -> Iterator[TestClient]:
     app.dependency_overrides[get_activity_directory] = lambda: directory
-    app.dependency_overrides[get_procedure_catalog] = FakeProcedureCatalog
+    app.dependency_overrides[get_procedure_catalog] = lambda: catalog
     yield TestClient(app)
     app.dependency_overrides.clear()
 
@@ -281,3 +331,59 @@ def test_procedures_rejects_invalid_answers(
 
     assert response.status_code == 422
     assert directory.procedures_calls == []
+
+
+def test_procedures_response_includes_requirements_and_exact_note(
+    client: TestClient, directory: FakeActivityDirectory
+) -> None:
+    directory.procedures = ACTIVITY_PROCEDURES.model_copy(update={"requirements": [REQUIREMENT]})
+
+    response = client.get(PROCEDURES_URL)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["requirements"] == [REQUIREMENT_JSON]
+    assert body["requirements_note"] == (
+        "Fuente oficial: páginas de los trámites. Es una orientación general; "
+        "verificá siempre con el organismo."
+    )
+
+
+def test_procedures_keeps_requirements_when_all_procedures_are_filtered_out(
+    client: TestClient, directory: FakeActivityDirectory
+) -> None:
+    conditional = ACTIVITY_PROCEDURES.procedures[1]
+    directory.procedures = ActivityProcedures(
+        activity=ACTIVITY_PROCEDURES.activity,
+        procedures=[conditional],
+        requirements=[REQUIREMENT],
+    )
+
+    response = client.get(PROCEDURES_URL, params={"has_employees": "false"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["procedures"] == []
+    assert body["excluded_count"] == 1
+    assert body["requirements"] == [REQUIREMENT_JSON]
+
+
+def test_procedures_preserves_existing_fields_and_does_not_call_the_city_api(
+    client: TestClient,
+    directory: FakeActivityDirectory,
+    catalog: FakeProcedureCatalog,
+) -> None:
+    response = client.get(PROCEDURES_URL)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["activity"] == ACTIVITY_PROCEDURES_JSON["activity"]
+    assert body["questions"] == ACTIVITY_PROCEDURES_JSON["questions"]
+    assert body["procedures"] == ACTIVITY_PROCEDURES_JSON["procedures"]
+    assert body["excluded_count"] == ACTIVITY_PROCEDURES_JSON["excluded_count"]
+    assert body["source"] == SOURCE_JSON
+    assert catalog.calls == []
+
+    filtered = client.get(PROCEDURES_URL, params={"has_employees": "false"}).json()
+    assert filtered["procedures"] == [HABILITACION_JSON]
+    assert filtered["excluded_count"] == 1

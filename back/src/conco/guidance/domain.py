@@ -4,6 +4,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+REQUIREMENTS_NOTE = (
+    "Fuente oficial: páginas de los trámites. Es una orientación general; "
+    "verificá siempre con el organismo."
+)
+
 
 class Source(BaseModel):
     """Fuente oficial de la que proviene la información (RN-05)."""
@@ -34,6 +39,27 @@ class ProcedureDetail(Procedure):
     steps: list[str]
     responsible_office: str | None
     start_url: str | None
+
+
+class RequirementOrigin(BaseModel):
+    """Official procedure a consolidated requirement comes from (RN-05)."""
+
+    model_config = ConfigDict(frozen=True)
+
+    procedure_id: UUID
+    procedure_title: str
+    official_url: str
+
+
+class Requirement(BaseModel):
+    """Official requirement consolidated across the procedures that publish it."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: str
+    text: str
+    heading: str | None
+    origins: list[RequirementOrigin]
 
 
 class ProcedureSearchError(Exception):
@@ -122,6 +148,8 @@ class ActivityProcedures(BaseModel):
 
     activity: Activity
     procedures: list[ApplicableProcedure]
+    requirements: list[Requirement] = Field(default_factory=list)
+    requirements_note: str = REQUIREMENTS_NOTE
 
 
 class ContextQuestion(BaseModel):
@@ -156,6 +184,8 @@ class ContextualProcedures(BaseModel):
     questions: list[ContextQuestion]
     procedures: list[ContextualProcedure]
     excluded_count: int
+    requirements: list[Requirement] = Field(default_factory=list)
+    requirements_note: str = REQUIREMENTS_NOTE
 
 
 def apply_context(result: ActivityProcedures, answers: ContextAnswers) -> ContextualProcedures:
@@ -186,6 +216,8 @@ def apply_context(result: ActivityProcedures, answers: ContextAnswers) -> Contex
         questions=questions,
         procedures=procedures,
         excluded_count=len(result.procedures) - len(procedures),
+        requirements=result.requirements,
+        requirements_note=result.requirements_note,
     )
 
 

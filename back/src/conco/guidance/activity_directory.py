@@ -15,6 +15,7 @@ from conco.guidance.domain import (
     Procedure,
     TextEmbedder,
 )
+from conco.guidance.requirements import build_requirements
 
 # Mejor alias de cada actividad, para que una actividad con muchos sinónimos no ocupe todo
 # el ranking. `<=>` es la distancia coseno de pgvector: 1 - distancia = similitud.
@@ -41,6 +42,17 @@ _PROCEDURES_SQL = """
     join public.procedures p on p.id = ap.procedure_id
     where ap.activity_slug = %s
     order by ap.position
+"""
+
+# Requisitos de todos los trámites de la actividad (no solo los que pasan el filtro de
+# contexto), con el título y la URL oficiales de cada trámite de origen.
+_REQUIREMENTS_SQL = """
+    select p.id, p.title, p.url, pr.heading, pr.text
+    from public.activity_procedures ap
+    join public.procedures p on p.id = ap.procedure_id
+    join public.procedure_requirements pr on pr.procedure_id = p.id
+    where ap.activity_slug = %s
+    order by ap.position, pr.position
 """
 
 
@@ -91,8 +103,10 @@ class PostgresActivityDirectory:
             return None
         [(activity_slug, name)] = activity_rows
         procedure_rows = await self._fetch(_PROCEDURES_SQL, [slug])
+        requirement_rows = await self._fetch(_REQUIREMENTS_SQL, [slug])
         return ActivityProcedures(
             activity=Activity(slug=activity_slug, name=name),
+            requirements=build_requirements(requirement_rows),
             procedures=[
                 ApplicableProcedure(
                     procedure=Procedure(
