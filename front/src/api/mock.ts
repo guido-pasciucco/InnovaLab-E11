@@ -1,4 +1,10 @@
-import type { ConsultationRequest, ConsultationResponse, FollowUpRequest, FollowUpResponse } from '../types';
+import type { ConsultationRequest, ConsultationResponse, FollowUpRequest, FollowUpResponse, SourceReference } from '../types';
+
+const sources: SourceReference[] = [
+  { id: 'src-procedures', title: 'Guía oficial de habilitaciones (fuente piloto)', publisher: 'Organismo oficial — reemplazar por fuente validada', url: 'https://buenosaires.gob.ar/', note: 'Referencia de demostración; no usar como asesoramiento oficial.' },
+  { id: 'src-territory', title: 'Datos territoriales (capa piloto)', publisher: 'Fuente territorial — reemplazar por dataset seleccionado', url: 'https://data.buenosaires.gob.ar/', note: 'Capa ilustrativa, no representa una validación de zonificación.' },
+  { id: 'src-context', title: 'Contexto del área (dataset piloto)', publisher: 'Fuente contextual — reemplazar por dataset seleccionado', url: 'https://data.buenosaires.gob.ar/', note: 'Datos de muestra para probar la experiencia.' },
+];
 
 export async function mockConsultation(payload: ConsultationRequest): Promise<ConsultationResponse> {
   await new Promise(resolve => setTimeout(resolve, 450));
@@ -9,12 +15,12 @@ export async function mockConsultation(payload: ConsultationRequest): Promise<Co
     point: payload.point === undefined ? { lat: -34.6042, lng: -58.3816 } : payload.point,
     summary: 'Esta respuesta es una maqueta funcional. Antes de tomar decisiones, verificá los requisitos vigentes en las fuentes oficiales vinculadas.',
     steps: [
-      { id:'step-1', title:'Confirmá la clasificación de la actividad', description:'Verificá cómo se encuadra la actividad declarada y qué régimen de habilitación corresponde.', documents:['Descripción precisa de la actividad'], sourceIds:[] },
-      { id:'step-2', title:'Validá las condiciones del domicilio', description:'Consultá las condiciones territoriales aplicables al inmueble. La capa del mapa de esta demo es ilustrativa.', documents:['Dirección completa'], sourceIds:[] },
-      { id:'step-3', title:'Reuní la documentación exigida', description:'Contrastá el listado definitivo de documentación con el trámite oficial vigente.', documents:['Documentación personal y del inmueble, según trámite'], sourceIds:[] },
+      { id:'step-1', title:'Confirmá la clasificación de la actividad', description:'Verificá cómo se encuadra la actividad declarada y qué régimen de habilitación corresponde.', documents:['Descripción precisa de la actividad'], sourceIds:['src-procedures'] },
+      { id:'step-2', title:'Validá las condiciones del domicilio', description:'Consultá las condiciones territoriales aplicables al inmueble. La capa del mapa de esta demo es ilustrativa.', documents:['Dirección completa'], sourceIds:['src-territory'] },
+      { id:'step-3', title:'Reuní la documentación exigida', description:'Contrastá el listado definitivo de documentación con el trámite oficial vigente.', documents:['Documentación personal y del inmueble, según trámite'], sourceIds:['src-procedures'] },
     ],
     territorialFeatures: [],
-    sources: [],
+    sources,
     limitations: ['Datos de demostración: no constituyen una respuesta oficial.', 'El backend debe validar dirección, actividad, fecha de actualización y reglas de correlación.'],
   };
 }
@@ -23,7 +29,7 @@ export async function mockFollowUp(payload: FollowUpRequest): Promise<FollowUpRe
   await new Promise(resolve => setTimeout(resolve, 300));
   return {
     answer: `La consulta "${payload.question}" necesita verificarse contra los datos oficiales integrados. En esta versión de demostración no se genera una conclusión nueva.`,
-    sourceIds: [],
+    sourceIds: ['src-procedures'],
     limitations: ['Respuesta simulada; el modelo de IA aún no está conectado.'],
   };
 }

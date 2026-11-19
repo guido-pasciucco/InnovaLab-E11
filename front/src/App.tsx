@@ -411,6 +411,10 @@ export default function App() {
                 </div>
               )}
               <p className="small-note">La respuesta depende de las integraciones disponibles. No reemplaza la consulta ante organismos oficiales.</p>
+              <section className="chat-how">
+                <h2>Cómo responde</h2>
+                <p>Usa la información de la consulta y las fuentes oficiales conectadas. Si no hay una fuente que responda, te lo dice en lugar de inventar una respuesta.</p>
+              </section>
             </div>
             <div className="orientation-actions"><button className="secondary" type="button" onClick={() => setStep(4)}>← Volver al mapa</button><button className="primary" type="button" onClick={startOver}>Nueva consulta →</button></div>
           </section>
@@ -418,8 +422,48 @@ export default function App() {
       </main>
 
       <footer className="footer">
-        <img src="/conco-logo.png" alt="Conco" className="footer-logo" />
-        <p>Orientación inicial para emprendedores</p><span>Tu idea, un próximo paso.</span>
+        <div className="footer__inner">
+          <div className="footer__brand">
+            <p>Consultá qué necesitás para habilitar tu comercio en la Ciudad de Buenos Aires, con información de fuentes oficiales.</p>
+            <h2>Seguinos</h2>
+            <div className="social">
+              <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+              <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+              <a href="#" aria-label="X"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"/></svg></a>
+            </div>
+          </div>
+          <nav className="footer__col" aria-label="Consultas">
+            <h2>Consultas</h2>
+            <a href="#" onClick={e => { e.preventDefault(); startOver(); }}>Habilitación de comercios</a>
+            <a href="#" onClick={e => { e.preventDefault(); result ? setStep(3) : startOver(); }}>Trámites y requisitos</a>
+            <a href="#" onClick={e => { e.preventDefault(); result ? setStep(4) : startOver(); }}>Mapa de la Ciudad</a>
+            <a href="#" onClick={e => e.preventDefault()}>Preguntas frecuentes</a>
+          </nav>
+          <nav className="footer__col" aria-label="Ayuda">
+            <h2>Ayuda</h2>
+            <a href="#" onClick={e => e.preventDefault()}>Cómo funciona</a>
+            <a href="#" onClick={e => { e.preventDefault(); result ? setStep(3) : startOver(); }}>Fuentes oficiales</a>
+            <a href="#" onClick={e => e.preventDefault()}>Centro de ayuda</a>
+            <a href="#" onClick={e => e.preventDefault()}>Accesibilidad</a>
+          </nav>
+          <div className="footer__col">
+            <h2>Contacto</h2>
+            <span>[Teléfono de atención]</span>
+            <span>[Correo de contacto]</span>
+            <span>[Horario de atención]</span>
+          </div>
+        </div>
+        <div className="footer__bar">
+          <span>© 2026 ConCo — Orientación inicial para emprendedores</span>
+          <a href="#" onClick={e => e.preventDefault()}>Términos y condiciones</a>
+          <a href="#" onClick={e => e.preventDefault()}>Política de privacidad</a>
+          <a href="#" onClick={e => e.preventDefault()}>Datos abiertos</a>
+        </div>
+        <div className="footer__logo-wrap">
+          <button className="brand" type="button" onClick={startOver} aria-label="Volver al inicio de Conco">
+            <img src="/conco-logo.png" alt="Conco" className="footer__logo" />
+          </button>
+        </div>
       </footer>
     </div>
   );
