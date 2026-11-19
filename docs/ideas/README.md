@@ -10,3 +10,4 @@ Ideas para mejorar CONCO que todavía no están planificadas. Cada idea tiene su
 | [Guardar en caché las búsquedas de direcciones](cache-busquedas-direcciones.md) | Para más adelante |
 | [Relacionar la actividad con los trámites usando búsqueda semántica](busqueda-semantica-tramites.md) | Para más adelante (depende de RN-01) |
 | [Aprovechar las habilitaciones aprobadas de la AGC](aprovechar-habilitaciones-aprobadas.md) | Para más adelante (después del MVP) |
+| [Versionado de catálogos e ingesta incremental](catalogo-versionado-incremental.md) | Para más adelante |
