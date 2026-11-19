@@ -202,8 +202,29 @@ h1,h2,h3 { font-family:"Manrope", sans-serif; }
   .map-page .map-panel { padding:15px; }
   .map { height:380px; }
   .page-heading h1 { font-size:30px; }
-  .guidance-card,.source-panel { padding:18px; }
+  .guidance-card,.source-panel,.requirements-panel,.official-sources-panel { padding:18px; }
 }
+/* Requirements checklist + real official sources (S4). */
+.requirements-panel,.official-sources-panel { padding:22px; }
+.requirements-list { display:grid; gap:2px; margin:0 0 16px; padding:0; list-style:none; }
+.requirement-item { padding:12px 0; border-top:1px solid #E8EEF1; }
+.requirement-item:first-child { padding-top:0; border-top:0; }
+.requirement-check { display:flex; align-items:flex-start; gap:10px; color:var(--ink); font-size:12px; line-height:1.6; cursor:pointer; }
+.requirement-check input { width:16px; height:16px; flex:0 0 16px; margin-top:1px; accent-color:var(--blue); }
+.requirement-text { display:grid; gap:3px; overflow-wrap:anywhere; }
+.requirement-heading { color:var(--blue); font-size:11px; font-weight:700; }
+.requirement-origins { display:grid; gap:4px; margin:8px 0 0 26px; }
+.requirement-origins a { color:var(--blue); font-size:11px; font-weight:600; text-decoration:none; overflow-wrap:anywhere; }
+.requirement-origins a:hover { text-decoration:underline; }
+.requirements-progress { margin-top:0; }
+.requirements-note { margin-top:14px; }
+.official-sources-list { display:grid; gap:2px; margin:0; padding:0; list-style:none; }
+.official-source { display:grid; gap:3px; padding:10px 0; border-top:1px solid #E8EEF1; }
+.official-source:first-child { padding-top:0; border-top:0; }
+.official-source a { color:var(--blue); font-size:12px; font-weight:600; text-decoration:none; overflow-wrap:anywhere; }
+.official-source a:hover { text-decoration:underline; }
+.official-source-license { color:var(--text-muted); font-size:10px; }
+
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; transition-duration:.01ms !important; }
 }
