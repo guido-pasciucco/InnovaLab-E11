@@ -2,6 +2,7 @@ import pytest
 
 from conco.config import settings
 from conco.guidance.activity_directory import PostgresActivityDirectory
+from conco.guidance.domain import REQUIREMENTS_NOTE
 from conco.guidance.embeddings import CloudflareTextEmbedder
 
 pytestmark = [pytest.mark.database, pytest.mark.anyio]
@@ -46,3 +47,19 @@ async def test_procedures_carry_their_conditions(directory: PostgresActivityDire
     assert result is not None
     conditions = {str(p.procedure.id): p.applies_when.answered() for p in result.procedures}
     assert conditions[HABILITACION_ID] == {"takes_over_existing": False}
+
+
+async def test_procedures_expose_consolidated_requirements(directory: PostgresActivityDirectory) -> None:
+    result = await directory.procedures_for("cafeteria")
+
+    assert result is not None
+    assert result.requirements
+    assert result.requirements_note == REQUIREMENTS_NOTE
+    published_ids = {str(procedure.procedure.id) for procedure in result.procedures}
+    for requirement in result.requirements:
+        assert requirement.id.startswith("req-")
+        assert requirement.text.strip()
+        assert requirement.origins
+        for origin in requirement.origins:
+            assert str(origin.procedure_id) in published_ids
+            assert origin.official_url.startswith("https://buenosaires.gob.ar/")

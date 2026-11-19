@@ -1,0 +1,46 @@
+# Feature: requirements checklist (official requisitos per procedure)
+
+- **Branch:** `feat/requirements-checklist` from `main`. Delivery: `single-pr` (owner decision: "todo en un solo PR"); work-unit commits around 400 authored lines. Runners: `uv run pytest` from `back/` (baseline 2026-11-19: 130 passed, 11 deselected), front `npm run typecheck` + `npm run build` (no test runner in `front/package.json`). RDD: off (decided globally) at 2026-11-19.
+- **Locator:** `odd/tasks/requirements-checklist.md` · Engram topic `odd/requirements-checklist/tasks`
+
+## Specs
+
+- **S1** — Persistence (done in a previous session, uncommitted at start): "Los requerimientos se **migran a la base de datos**, relacionados con los trámites existentes (FK a `procedures`), como el resto del catálogo cargado por el loader." Migration `20261112000001_procedure_requirements.sql` plus `20261112000002_procedure_requirements_heading.sql`: "Los encabezados (`field_texto`) se guardan como su propia columna `heading`, separados del cuerpo; los cuerpos quedan como texto plano de una sola línea." Local backfill 2026-11-12: 193 ítems para 18 trámites (152 con heading). `load_catalog` writes them in the same transaction (`truncate ... cascade`); `load_requirements` refreshes only that table and fails listing ids the City no longer publishes. Unit tests: `back/tests/unit/guidance/test_load_requirements.py`.
+
+- **S2** — Product decisions closed with the owner (2026-11-12, verbatim from `docs/pendientes/requerimientos-checklist.md`): "Solo los requerimientos que publica la API oficial de la Ciudad; **sin** complemento curado del relevamiento en este ciclo." / "El panel mock «Fuentes consultadas» (`front/src/Componentes/SourceList.tsx`, alimentado por `front/src/api/mock.ts` con las 3 fuentes «piloto») se **reemplaza** por el checklist de requerimientos + una lista de fuentes reales. Ubicación: **al costado de los trámites** (la `side-column` actual, junto a «Lo que entendimos»)." / "Este documento es la referencia del diseño." Closed open questions: dedup only by normalized text (lowercase, no accents, no HTML, collapsed spaces; no curated synonym map in v1); manual `load_catalog` maintenance (no cron in this change); "todo en un solo PR"; panel name "Antes de empezar: lo que tenés que conseguir". Out of scope: curated supplement, per-rubro requirements, Ciudad 3D usage, UI for form of company.
+
+- **S3** — API: `GET /guidance/activities/{slug}/procedures` gains `requirements` and `requirements_note`. `requirements`: aggregated across **all** the activity's procedures (not only the context-filtered ones), deduplicated by normalized text, duplicates merged by summing `origins`; each item `{ id: "req-<hash>", text: string, heading: string | null, origins: [{ procedure_id, procedure_title, official_url }] }`; one item per non-empty body, preserving `position` order; `heading` from `field_texto` stays separate from the body. `requirements_note` exactly: "Fuente oficial: páginas de los trámites. Es una orientación general; verificá siempre con el organismo." Requirements are present even when `procedures` ends up empty after context filtering. No per-request call to the City API.
+
+- **S4** — Front: replace the mock «Fuentes consultadas» panel in the results side-column with (1) the "Antes de empezar: lo que tenés que conseguir" checklist — each item = text + "del trámite: {título} ↗" official link, own checkbox and independent progress, plus the requirements note; and (2) a slim list of real sources derived from the activity's procedures (title + official URL + "CC BY 2.5 AR", RN-05). Existing procedures checklist/progress stays unchanged. In mock mode (`VITE_USE_MOCK_API=true`) remove the 3 «piloto» sources from `front/src/api/mock.ts` and keep the demo honestly labelled in `summary`/`limitations`. Never render third-party HTML in the front; text only.
+
+- **S5** — Verification: one RED test per new rule, observed before implementation, then GREEN; one preservation test for the touched endpoint (existing fields, 404, 503 and context filtering unchanged). Back: `uv run pytest -q` from `back/` plus a differential check of the touched endpoint against the base commit in a `mktemp -d` scratch copy (compare stdout/stderr/exit code; additive response fields are the intended difference). Front has no test runner: declare the exception and run `npm run typecheck` + `npm run build` (plus a browser render check if one is available at closure). Keep all scratch state outside the worktree.
+
+- **S6** — Delivery: one PR, only when the user authorizes it; push, PR creation and merge are not part of this work. Work-unit commits on this branch with Conventional Commit messages, tests and docs alongside the behavior. RDD is off: no native review lifecycle; verification is writer self-check plus the parent's spot check.
+
+## Tasks
+
+| ID | Specs | Route | Status | Commit |
+|---|---|---|---|---|
+| T0 | S1, S2 | inline (parent) | done (foundation from previous session) | 72b636a |
+| T1 | S3, S5 | delegated direct (parallel writer, back) | done (RED → GREEN, preservation + differential) | 226352e |
+| T2 | S4, S5 | delegated direct (parallel writer, front) | done (no test runner; typecheck + build) | 731de14 |
+| T3 | S5, S6 | inline (parent) | done (seam check, commits, mirror, close) | — |
+
+- T0: migrations, loader extension, `load_requirements`, unit tests, design docs — already in the working tree at branch creation.
+- T1: domain models + directory query + response fields + tests. Reuse `PostgresActivityDirectory._fetch`, `apply_context`, existing `Source` and `Procedure` models; never re-implement the fetch/query helper.
+- T2: front types + checklist component + side-column wiring + mock cleanup + CSS. Reuse the existing checkbox/progress pattern and `toSourceReference`; never re-implement the API client.
+- T3: foundation commit + unit commits, seam check (`uv run pytest`, `npm run typecheck`, `npm run build`), feature doc/mirror updates, close.
+
+Risk: none — additive API fields and a requested UI replacement. No stored-data rewrite, no auth/permission change, no removed public field, no concurrency change. Backed by preservation tests and typecheck/build; RDD off means no native tier was consulted.
+
+## Log
+
+- **L1 (2026-11-19)** — "podriamoms proceder con odd"
+- **L2 (2026-11-12)** — "lo de front todavia no esta? podrias implmentarlo si todavia no esta?" — the outstanding front work this feature closes.
+- **L3 (2026-11-19)** — Reconciled the worktree against the design doc `docs/pendientes/requerimientos-checklist.md`: persistence/loader/tests/docs exist uncommitted; API exposure and front panel do not. No prior ODD doc covered this feature (`odd/tasks/` only holds georef, caba-tramites, geolocation and semantic-search features).
+- **L4 (2026-11-19)** — `gentle-ai review mode status` → off (global); no native review. Baseline `uv run pytest -q` → 130 passed, 11 deselected. Branch `feat/requirements-checklist` created from `main` carrying the uncommitted foundation.
+- **L5 (2026-11-19)** — Route decision: T1 and T2 are independent behaviors with disjoint edit surfaces (back vs front) and several files each, so the Writer trigger fires for both; launched together as bounded writers. The frozen API contract in S3/S4 lets them work without waiting on each other.
+- **L6 (2026-11-19)** — T0 committed as `72b636a` (migrations, loader, `load_requirements`, unit tests, design docs, this feature doc). Baseline before T1: `uv run pytest -q` → 130 passed, 11 deselected.
+- **L7 (2026-11-19)** — T1: RED observed as two collection `ImportError`s (`REQUIREMENTS_NOTE`, `Requirement`); GREEN focused run → 28 passed; full suite → 136 passed, 13 deselected. Dedup key = visible text → NFKD accent strip → lowercase → collapsed whitespace; id = `req-` + sha256[:12]. Second `_fetch` with `_REQUIREMENTS_SQL` keeps requirements through context filtering; no City API call per request. Differential against the base commit: exit codes 0/0, stderr identical, stdout differs only by the two additive keys. Committed as `226352e`. Parent spot check: `uv run pytest -q` → 136 passed, 13 deselected.
+- **L8 (2026-11-19)** — T2: front has no test runner, so the declared exception applies; `npm run typecheck` and `npm run build` pass (build: 84 modules, dist gitignored). Panel uses the verbatim title/note, independent checkbox state and per-origin official links; mock pilot sources and dangling `sourceIds` removed. `SourceList.tsx` is left on disk, no longer imported. Committed as `731de14`. Parent spot check: `npm run typecheck` pass.
+- **L9 (2026-11-19)** — Seam check: `uv run pytest -m database -q` → 6 passed, 143 deselected, so the new SQL runs against the local DB with the backfilled requirements. RDD off (global) → no native review lifecycle; writer self-check plus parent spot check only. Scratch `/tmp/opencode/reqcheck-diff.PloQ8m` (base copy + probe + captured output) removed by the parent. Pending, not blocking: browser render check not performed in this environment; mock mode without a running backend shows the panel title/empty state because `getActivityProcedures` is not stubbed. Push/PR/merge remain user decisions under ordinary repository policy.

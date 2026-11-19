@@ -1,7 +1,8 @@
 import { useMemo, useRef, useState, type FormEvent } from "react";
 import QueryForm from "./Componentes/QueryForm";
 import MapPanel from "./Componentes/MapPanel";
-import SourceList from "./Componentes/SourceList";
+import RequirementsChecklist from "./Componentes/RequirementsChecklist";
+import OfficialSources from "./Componentes/OfficialSources";
 import ContextQuestions from "./Componentes/ContextQuestions";
 import { getActivityProcedures, submitConsultation, submitFollowUp } from "./api/client";
 import type { ActivityProceduresResponse, ConsultationRequest, ConsultationResponse, ContextAnswers, SourceReference } from "./types";
@@ -36,6 +37,7 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [checked, setChecked] = useState<string[]>([]);
+  const [checkedRequirements, setCheckedRequirements] = useState<string[]>([]);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [assistantBusy, setAssistantBusy] = useState(false);
@@ -43,10 +45,10 @@ export default function App() {
   const guidanceCount = activityProcedures?.procedures.length ?? result?.steps.length ?? 0;
   const progress = useMemo(() => guidanceCount
     ? Math.round((checked.length / guidanceCount) * 100) : 0, [checked, guidanceCount]);
-  const sources = useMemo(() => [
-    ...(activityProcedures ? [toSourceReference(activityProcedures)] : []),
-    ...(result?.sources ?? []),
-  ], [activityProcedures, result]);
+  const officialSources = useMemo(
+    () => (activityProcedures ? [toSourceReference(activityProcedures)] : []),
+    [activityProcedures],
+  );
 
   async function handleSubmit(data: ConsultationRequest) {
     setQuery(data);
@@ -56,6 +58,7 @@ export default function App() {
     setContextAnswers({});
     setRefineError(false);
     setChecked([]);
+    setCheckedRequirements([]);
     setAnswer("");
     setError("");
     setStep(2);
@@ -107,6 +110,7 @@ export default function App() {
     setContextAnswers({});
     setRefineError(false);
     setChecked([]);
+    setCheckedRequirements([]);
     setQuestion("");
     setAnswer("");
     setError("");
@@ -271,7 +275,14 @@ export default function App() {
                   ? "Estos son trámites que suelen aplicar a esta actividad. Es una orientación general: verificá los requisitos con el organismo responsable."
                   : result.summary}</p>
               </section>
-              <SourceList sources={sources} />
+              <RequirementsChecklist
+                requirements={activityProcedures?.requirements ?? []}
+                note={activityProcedures?.requirements_note ?? ""}
+                checked={checkedRequirements}
+                onToggle={id => setCheckedRequirements(old =>
+                  old.includes(id) ? old.filter(checkedId => checkedId !== id) : [...old, id])}
+              />
+              <OfficialSources sources={officialSources} />
               {result.limitations.length > 0 && <div className="notice"><span className="notice-icon">i</span><div><strong>Tené en cuenta</strong><p>{result.limitations.join(" ")}</p></div></div>}
             </aside>
           </div>

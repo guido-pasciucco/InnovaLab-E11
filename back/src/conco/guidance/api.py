@@ -2,7 +2,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from conco.guidance.activity_directory import PostgresActivityDirectory
 from conco.guidance.domain import (
@@ -17,6 +17,8 @@ from conco.guidance.domain import (
     ProcedureCatalog,
     ProcedureDetail,
     ProcedureSearchError,
+    REQUIREMENTS_NOTE,
+    Requirement,
     Source,
     apply_context,
 )
@@ -60,6 +62,8 @@ class ActivityProceduresResponse(BaseModel):
     procedures: list[ContextualProcedure]
     excluded_count: int
     source: Source
+    requirements: list[Requirement] = Field(default_factory=list)
+    requirements_note: str = REQUIREMENTS_NOTE
 
 
 def get_procedure_catalog() -> ProcedureCatalog:

@@ -36,3 +36,17 @@ def test_unknown_procedure_endpoint_against_real_api_returns_404() -> None:
     response = client.get("/guidance/procedures/00000000-0000-0000-0000-000000000000")
 
     assert response.status_code == 404
+
+
+def test_activity_procedures_endpoint_against_real_data_exposes_requirements() -> None:
+    client = TestClient(app)
+
+    response = client.get("/guidance/activities/cafeteria/procedures")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["requirements"]
+    assert body["requirements_note"] == (
+        "Fuente oficial: páginas de los trámites. Es una orientación general; "
+        "verificá siempre con el organismo."
+    )

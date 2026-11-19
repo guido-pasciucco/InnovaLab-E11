@@ -19,7 +19,8 @@ from conco.guidance.activity_directory import to_pgvector
 from conco.guidance.domain import ContextAnswers
 from conco.guidance.embeddings import create_embedder
 from conco.guidance.infrastructure import to_procedure
-from conco.integrations.caba_tramites.client import list_procedures
+from conco.guidance.load_requirements import fetch_requirement_rows, replace_requirement_rows
+from conco.integrations.caba_tramites.client import get_procedure, list_procedures
 from conco.integrations.caba_tramites.models import CabaProcedure
 
 ACTIVITIES_FILE = Path(__file__).parent / "data" / "activities.json"
@@ -105,6 +106,11 @@ def load(database_url: str) -> None:
         )
     caba_procedures = referenced_procedures(published, catalog)
     print(f"Trámites referenciados por el curado: {len(caba_procedures)}")
+    # Requisitos de cada trámite referenciado (consistencia: la base siempre los tiene frescos).
+    requirement_rows = asyncio.run(
+        fetch_requirement_rows(get_procedure, [procedure.id for procedure in caba_procedures])
+    )
+    print(f"Requerimientos a cargar: {len(requirement_rows)} ítems.")
 
     started = time.perf_counter()
     embedder = create_embedder()
@@ -122,7 +128,8 @@ def load(database_url: str) -> None:
 
     # Una sola transacción: si algo falla, la base queda como estaba.
     with psycopg.connect(database_url) as conn, conn.cursor() as cursor:
-        cursor.execute("truncate public.procedures")
+        # cascade limpia los requerimientos heredados de la versión anterior
+        cursor.execute("truncate public.procedures cascade")
         cursor.execute("delete from public.activities")
         cursor.executemany(
             """
@@ -158,6 +165,7 @@ def load(database_url: str) -> None:
                 for position, procedure in enumerate(activity.procedures)
             ],
         )
+        replace_requirement_rows(cursor, requirement_rows)
     print(
         f"Cargados {len(procedure_rows)} trámites referenciados y {len(catalog.activities)} actividades "
         f"con {len(aliases)} alias (de {len(published)} publicados)."

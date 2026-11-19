@@ -86,6 +86,21 @@ export type OfficialProcedure = {
   last_updated: string;
 };
 
+/** Official procedure page that publishes a requirement (S3/S4). */
+export type RequirementOrigin = {
+  procedure_id: string;
+  procedure_title: string;
+  official_url: string;
+};
+
+/** Requirement aggregated across all procedures of an activity, deduplicated by normalized text (S3/S4). */
+export type Requirement = {
+  id: string;
+  text: string;
+  heading: string | null;
+  origins: RequirementOrigin[];
+};
+
 /** Context answers keyed by question id; a missing key means "not answered". */
 export type ContextAnswers = Record<string, boolean>;
 
@@ -103,4 +118,8 @@ export type ActivityProceduresResponse = {
   procedures: { procedure: OfficialProcedure; note: string; status: 'applies' | 'may_apply' }[];
   excluded_count: number;
   source: OfficialSource;
+  /** Aggregated requirements across all the activity's procedures, independent of context filtering. */
+  requirements: Requirement[];
+  /** Disclaimer shown verbatim in the requirements panel. */
+  requirements_note: string;
 };
