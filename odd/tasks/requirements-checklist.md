@@ -21,10 +21,10 @@
 
 | ID | Specs | Route | Status | Commit |
 |---|---|---|---|---|
-| T0 | S1, S2 | inline (parent) | done locally from a previous session; `uv run pytest` green | — |
-| T1 | S3, S5 | delegated direct (parallel writer, back) | pending | — |
-| T2 | S4, S5 | delegated direct (parallel writer, front) | pending | — |
-| T3 | S5, S6 | inline (parent) | pending | — |
+| T0 | S1, S2 | inline (parent) | done (foundation from previous session) | 72b636a |
+| T1 | S3, S5 | delegated direct (parallel writer, back) | done (RED → GREEN, preservation + differential) | 226352e |
+| T2 | S4, S5 | delegated direct (parallel writer, front) | done (no test runner; typecheck + build) | 731de14 |
+| T3 | S5, S6 | inline (parent) | done (seam check, commits, mirror, close) | — |
 
 - T0: migrations, loader extension, `load_requirements`, unit tests, design docs — already in the working tree at branch creation.
 - T1: domain models + directory query + response fields + tests. Reuse `PostgresActivityDirectory._fetch`, `apply_context`, existing `Source` and `Procedure` models; never re-implement the fetch/query helper.
@@ -40,3 +40,7 @@ Risk: none — additive API fields and a requested UI replacement. No stored-dat
 - **L3 (2026-11-19)** — Reconciled the worktree against the design doc `docs/pendientes/requerimientos-checklist.md`: persistence/loader/tests/docs exist uncommitted; API exposure and front panel do not. No prior ODD doc covered this feature (`odd/tasks/` only holds georef, caba-tramites, geolocation and semantic-search features).
 - **L4 (2026-11-19)** — `gentle-ai review mode status` → off (global); no native review. Baseline `uv run pytest -q` → 130 passed, 11 deselected. Branch `feat/requirements-checklist` created from `main` carrying the uncommitted foundation.
 - **L5 (2026-11-19)** — Route decision: T1 and T2 are independent behaviors with disjoint edit surfaces (back vs front) and several files each, so the Writer trigger fires for both; launched together as bounded writers. The frozen API contract in S3/S4 lets them work without waiting on each other.
+- **L6 (2026-11-19)** — T0 committed as `72b636a` (migrations, loader, `load_requirements`, unit tests, design docs, this feature doc). Baseline before T1: `uv run pytest -q` → 130 passed, 11 deselected.
+- **L7 (2026-11-19)** — T1: RED observed as two collection `ImportError`s (`REQUIREMENTS_NOTE`, `Requirement`); GREEN focused run → 28 passed; full suite → 136 passed, 13 deselected. Dedup key = visible text → NFKD accent strip → lowercase → collapsed whitespace; id = `req-` + sha256[:12]. Second `_fetch` with `_REQUIREMENTS_SQL` keeps requirements through context filtering; no City API call per request. Differential against the base commit: exit codes 0/0, stderr identical, stdout differs only by the two additive keys. Committed as `226352e`. Parent spot check: `uv run pytest -q` → 136 passed, 13 deselected.
+- **L8 (2026-11-19)** — T2: front has no test runner, so the declared exception applies; `npm run typecheck` and `npm run build` pass (build: 84 modules, dist gitignored). Panel uses the verbatim title/note, independent checkbox state and per-origin official links; mock pilot sources and dangling `sourceIds` removed. `SourceList.tsx` is left on disk, no longer imported. Committed as `731de14`. Parent spot check: `npm run typecheck` pass.
+- **L9 (2026-11-19)** — Seam check: `uv run pytest -m database -q` → 6 passed, 143 deselected, so the new SQL runs against the local DB with the backfilled requirements. RDD off (global) → no native review lifecycle; writer self-check plus parent spot check only. Scratch `/tmp/opencode/reqcheck-diff.PloQ8m` (base copy + probe + captured output) removed by the parent. Pending, not blocking: browser render check not performed in this environment; mock mode without a running backend shows the panel title/empty state because `getActivityProcedures` is not stubbed. Push/PR/merge remain user decisions under ordinary repository policy.
