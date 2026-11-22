@@ -110,6 +110,9 @@ export type ContextQuestion = {
   answer: boolean | null;
 };
 
+/** Procedure discarded by the context answers. */
+export type ExcludedProcedure = { id: string; title: string };
+
 /** Response of GET /guidance/activities/{slug}/procedures. */
 export type ActivityProceduresResponse = {
   activity: { slug: string; name: string };
@@ -117,6 +120,8 @@ export type ActivityProceduresResponse = {
   /** `applies`: no conditions or all met; `may_apply`: some condition is still unanswered. */
   procedures: { procedure: OfficialProcedure; note: string; status: 'applies' | 'may_apply' }[];
   excluded_count: number;
+  /** Discarded procedures in catalog order; missing when the API predates the field. */
+  excluded?: ExcludedProcedure[];
   source: OfficialSource;
   /** Aggregated requirements across all the activity's procedures, independent of context filtering. */
   requirements: Requirement[];

@@ -11,11 +11,13 @@ import { getActivityProcedures, submitConsultation, submitFollowUp } from "./api
 import { describeError } from "./api/errors";
 import { HOME_PATH, STEPS, isStepAvailable, pathOf, stepFromPath, type Step } from "./navigation/steps";
 import { clearConsultation, loadConsultation, saveConsultation } from "./session/currentConsultation";
+import { excludedNote } from "./text";
 import type { ActivityProceduresResponse, ConsultationRequest, ConsultationResponse, ContextAnswers, SourceReference } from "./types";
 
 /** Official site of the City's procedures, the source the guidance cites. */
 const OFFICIAL_PROCEDURES_URL = "https://buenosaires.gob.ar/gobierno/tramites";
 const OPEN_DATA_URL = "https://data.buenosaires.gob.ar/";
+const MAY_APPLY_HINT = "Este trámite depende de tus respuestas. Contestá las preguntas de arriba para saber si te aplica.";
 
 type ChatMessage = { role: "user" | "bot"; text: string; sourceIds?: string[] };
 
@@ -99,6 +101,8 @@ export default function App() {
     () => [...(result?.sources ?? []), ...officialSources],
     [result, officialSources],
   );
+  const discardedNote = activityProcedures
+    ? excludedNote(activityProcedures.excluded, activityProcedures.excluded_count) : null;
 
   async function handleSubmit(data: ConsultationRequest) {
     setQuery(data);
@@ -307,11 +311,7 @@ export default function App() {
                 <ContextQuestions questions={activityProcedures.questions} busy={refining} onAnswer={answerContext} />
               )}
               {refineError && <div className="notice"><span className="notice-icon">i</span><div><strong>No pudimos actualizar los trámites</strong><p>Seguimos mostrando la lista anterior. Probá responder de nuevo.</p></div></div>}
-              {activityProcedures && activityProcedures.excluded_count > 0 && (
-                <p className="excluded-note" aria-live="polite">
-                  Descartamos {activityProcedures.excluded_count} {activityProcedures.excluded_count === 1 ? "trámite" : "trámites"} según tus respuestas.
-                </p>
-              )}
+              {discardedNote && <p className="excluded-note" aria-live="polite">{discardedNote}</p>}
               <div className="guidance-list">
                 {activityProcedures ? activityProcedures.procedures.map(({ procedure, note, status }, index) => (
                   <article className="guidance-card" key={procedure.id}>
@@ -319,7 +319,10 @@ export default function App() {
                       <span className="guidance-number">{String(index + 1).padStart(2, "0")}</span>
                       {status === "applies"
                         ? <span className="guidance-tag">TRÁMITE OFICIAL</span>
-                        : <span className="guidance-tag guidance-tag--maybe">PUEDE APLICAR</span>}
+                        : <>
+                          <span className="guidance-tag guidance-tag--maybe">PUEDE APLICAR</span>
+                          <span className="guidance-tag-hint">{MAY_APPLY_HINT}</span>
+                        </>}
                     </div>
                     <h2>{procedure.title}</h2>
                     <p className="guidance-note"><strong>Cuándo aplica:</strong> {note}</p>
