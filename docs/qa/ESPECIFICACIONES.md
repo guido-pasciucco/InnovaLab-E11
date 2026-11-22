@@ -106,6 +106,29 @@ Cada entrada tiene: el punto en lenguaje simple, por qué importa, lo que pidió
 
 **Confirmado:** 22/11/2026 (el dueño indicó que "ya quedó lo de errores").
 
+### 4. Entender mejor los trámites "que pueden aplicar" (QA-07)
+
+**Cómo se entendió (ejemplo concreto):** en la pantalla de Orientación aparecen cinco preguntas —¿Vas a contratar personal?, ¿El local tiene menos de 200 m²?, ¿Vas a poner un cartel, marquesina o toldo?, ¿Está en un área de protección histórica?, ¿Continuás un local ya habilitado?— y abajo una lista de trámites. Algunos dicen **TRÁMITE OFICIAL** y otros **PUEDE APLICAR**. Al contestar *"Sí"* a *"¿Vas a contratar personal?"*, la lista cambia y aparece un aviso: *"Descartamos 2 trámites según tus respuestas"*. El problema es que nadie explica qué significa *PUEDE APLICAR*, ni **cuáles** eran esos 2 trámites, ni por qué desaparecieron. Parece magia.
+
+**Lo que ya existe** (no rehacer): las cinco preguntas se muestran, la etiqueta *PUEDE APLICAR* existe y el aviso dice **cuántos** trámites se descartaron.
+
+**Lo que pide cambiar:**
+
+1. Al lado de **PUEDE APLICAR**, un textito: *"Este trámite depende de tus respuestas. Contestá las preguntas de arriba para saber si te aplica."*
+2. En vez de *"Descartamos 2 trámites"*, decir **cuáles**: *"Descartamos: Habilitación exprés y Trámite de bajo impacto."*
+3. Que las respuestas **no se pierdan** al cambiar de sección ni al recargar la página. Hoy siguen ahí porque todo vive en el mismo componente, pero al meter rutas se pueden borrar: hay que definirlo.
+4. Que alguien que conoce el catálogo confirme que las reglas son correctas (por ejemplo, que contratar personal realmente haga aplicar cierto trámite).
+
+**Por qué importa:** si no se explica, la persona no sabe si tiene que hacer ese trámite o no, y ve cómo la lista cambia sin entender por qué.
+
+**Cómo sabremos que está listo:** contestando las cinco preguntas, la pantalla explica cada etiqueta, nombra los trámites descartados, y las respuestas siguen ahí después de navegar y recargar. Las reglas están aprobadas por el responsable del catálogo.
+
+**Lo que NO se hace:** cambiar las reglas del catálogo por cuenta propia; primero las confirma el responsable.
+
+**Contexto que lo aclaró:** el recorrido concreto con las cinco preguntas y el aviso de "Descartamos 2 trámites" sin nombres, que mostró exactamente dónde se queda corta la pantalla actual.
+
+**Confirmado:** 22/11/2026.
+
 ## Cómo se usa
 
 1. Te explico un pendiente, de a uno, en lenguaje simple y con el mismo detalle que vas a ver acá.
