@@ -33,7 +33,7 @@
 | T4 | S5, S6, S4.3 | inline (parent, `front/`) | done — vitest RED→GREEN; browser: guard, Enter on step, reload `/mapa`, Back, answers kept | f650bdb |
 | T5 | S4.1, S4.2 (front) | inline (parent, `front/`) | done — vitest RED→GREEN; browser: hint + "Descartamos: …" | 6ca7be2 |
 | T6 | S7, S8 | inline (parent, `front/`) | done — vitest RED→GREEN; browser: record, Ver, prefill, reload, clear, desktop card, mobile details | 5e623ae |
-| T7 | S1 note, S2, S4.4 docs; seam check; PR | inline (parent) | in progress | — |
+| T7 | S1 note, S2, S4.4 docs; seam check; PR | inline (parent) | done — seam check green; independent verifier: no blockers | ac3e9a0 |
 
 - Route evidence: Writer trigger (a) holds for T1 vs. the front work — disjoint edit surfaces (`back/` vs `front/`), each several minutes and 100+ lines, launched together. Front tasks share `App.tsx`, so they run inline in sequence.
 - T1 contract the front relies on: error body `{ "code", "request_id", "detail" }` for own errors; header `X-Request-ID` on every response and exposed by CORS; `excluded: [{ id, title }]` added next to `excluded_count`.
@@ -48,3 +48,4 @@
 - **L6 (2026-11-22)** — Footer entries without a destination (Centro de ayuda, Accesibilidad, Términos y condiciones, Política de privacidad, social icons) render as "(próximamente)" text instead of fake links; their destinations are an owner decision. "Fuentes oficiales" and "Datos abiertos" open the official sites.
 - **L7 (2026-11-22)** — Owner-side items that code cannot close: cron-job.org setup and the agreed cold-start number (S2), catalog rules approval (S4.4), Vercel deep-link check after deploy (S5). Documented in `docs/qa/NOTAS_DE_IMPLEMENTACION.md`. Pre-existing advisory: duplicate React keys in `RequirementsChecklist`.
 - **L8 (2026-11-22)** — Risk: item 5 (new front dependencies `react-router-dom`, `vitest`; new `front/vercel.json` deploy config). Backend contract changes (503, messages, added fields) were requested, so they do not count as item 3. One independent verifier runs at the feature's end.
+- **L9 (2026-11-22)** — Independent verifier: all S1–S9 met, no blockers; differential probe shows 422/`/health`/200 bodies identical to baseline except `X-Request-ID` and `excluded`. Fixed advisory: httpx INFO logs (outbound URLs with the user's search text) silenced to WARNING. Open advisories: generic 500 has no CORS header, so the browser reports it as 'Sin conexión' (pre-existing CORS gap); vitest needs Node >=22.12 on Vercel builds; steps 3–5 open once a result exists even if not visited; sessionStorage keeps the full current response (session only, per L3).

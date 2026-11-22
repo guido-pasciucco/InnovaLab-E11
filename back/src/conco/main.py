@@ -25,6 +25,8 @@ if not logging.getLogger().handlers:
     logging.basicConfig(
         level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
     )
+# httpx registra en INFO cada URL saliente, que incluye lo que la persona buscó: solo advertencias.
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
