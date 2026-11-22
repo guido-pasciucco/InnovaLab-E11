@@ -121,5 +121,7 @@ def test_search_error_returns_502(client: TestClient, finder: FakeAddressFinder)
 
     assert response.status_code == 502
     assert response.json() == {
-        "detail": "El servicio de direcciones no está disponible. Intentá de nuevo más tarde."
+        "code": "ADDRESSES_UNAVAILABLE",
+        "request_id": response.headers["x-request-id"],
+        "detail": "El servicio de direcciones no está disponible. Intentá de nuevo más tarde.",
     }

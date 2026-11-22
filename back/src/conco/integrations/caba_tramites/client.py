@@ -1,3 +1,5 @@
+import asyncio
+from collections.abc import Awaitable, Callable
 from uuid import UUID
 
 import httpx
@@ -59,6 +61,43 @@ class CabaTramitesError(Exception):
     """La API de trámites de la Ciudad no está disponible o devolvió una respuesta inesperada."""
 
 
+# Reintento acotado, solo para consultas de lectura: como máximo 2 intentos en total.
+MAX_ATTEMPTS = 2
+# Espera entre intentos; los tests la ponen en 0.
+RETRY_BACKOFF_SECONDS = 0.3
+TRANSIENT_STATUS_CODES = frozenset({502, 503, 504})
+
+
+class _RetryableResponse(Exception):
+    """Respuesta que conviene volver a pedir (por ejemplo, la redirección de INC-01)."""
+
+    def __init__(self, response: httpx.Response) -> None:
+        super().__init__(f"Respuesta reintentable: {response.status_code}")
+        self.response = response
+
+
+def _is_transient(error: Exception) -> bool:
+    """Timeouts, fallas de conexión y 502/503/504 son transitorios; el resto de los 4xx/5xx no."""
+    if isinstance(error, httpx.HTTPStatusError):
+        return error.response.status_code in TRANSIENT_STATUS_CODES
+    return isinstance(error, (httpx.TimeoutException, httpx.TransportError, _RetryableResponse))
+
+
+async def _with_retry[T](request: Callable[[], Awaitable[T]]) -> T:
+    """Ejecuta la consulta y la repite una vez si el error es transitorio.
+
+    Nunca reintenta otros 4xx ni respuestas que no validan: repetirlas daría el mismo error.
+    """
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        try:
+            return await request()
+        except Exception as error:
+            if attempt == MAX_ATTEMPTS or not _is_transient(error):
+                raise
+            await asyncio.sleep(RETRY_BACKOFF_SECONDS)
+    raise AssertionError("unreachable")
+
+
 def normalize_query(query: str) -> str:
     """Quita los espacios sobrantes de la búsqueda antes de enviarla."""
     return " ".join(query.split())
@@ -87,8 +126,12 @@ async def search_procedures(query: str, limit: int = 10) -> CabaProceduresRespon
     """Busca trámites publicados por texto en el título (sin distinguir mayúsculas ni acentos)."""
     try:
         async with _client() as client:
-            response = await client.get(PROCEDURES_PATH, params=search_params(query, limit))
-            response.raise_for_status()
+
+            async def request() -> httpx.Response:
+                response = await client.get(PROCEDURES_PATH, params=search_params(query, limit))
+                return response.raise_for_status()
+
+            response = await _with_retry(request)
             return CabaProceduresResponse.model_validate_json(response.content)
     except httpx.HTTPError as exc:
         raise CabaTramitesError(f"No se pudo consultar la API de trámites: {exc}") from exc
@@ -119,8 +162,13 @@ async def list_procedures() -> list[CabaProcedure]:
     try:
         async with _client() as client:
             for _ in range(MAX_LIST_PAGES):
-                response = await client.get(PROCEDURES_PATH, params=list_params(len(procedures)))
-                response.raise_for_status()
+                params = list_params(len(procedures))
+
+                async def request() -> httpx.Response:
+                    response = await client.get(PROCEDURES_PATH, params=params)
+                    return response.raise_for_status()
+
+                response = await _with_retry(request)
                 page = CabaProceduresResponse.model_validate_json(response.content).procedures
                 procedures.extend(page)
                 if len(page) < LIST_PAGE_SIZE:
@@ -136,13 +184,23 @@ async def get_procedure(procedure_id: UUID) -> CabaProcedureDetail | None:
     """Devuelve el detalle de un trámite, o None si no existe o no está publicado."""
     try:
         async with _client() as client:
-            response = await client.get(
-                f"{PROCEDURES_PATH}/{procedure_id}", params=DETAIL_PARAMS
-            )
-            # Un id inexistente o no publicado no devuelve 404: redirige a una página HTML.
-            if response.is_redirect:
+
+            async def request() -> httpx.Response:
+                response = await client.get(
+                    f"{PROCEDURES_PATH}/{procedure_id}", params=DETAIL_PARAMS
+                )
+                # Un id inexistente o no publicado no devuelve 404: redirige a una página HTML.
+                # INC-01: QA vio que la misma ficha publicada redirigió una vez y luego
+                # respondió 200, así que la redirección se reintenta una vez antes de darla
+                # por inexistente.
+                if response.is_redirect:
+                    raise _RetryableResponse(response)
+                return response.raise_for_status()
+
+            try:
+                response = await _with_retry(request)
+            except _RetryableResponse:
                 return None
-            response.raise_for_status()
             document = CabaProcedureDocument.model_validate_json(response.content)
             return _to_detail(document)
     except httpx.HTTPError as exc:

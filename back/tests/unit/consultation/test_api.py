@@ -242,7 +242,9 @@ def test_consultation_when_directory_is_down_returns_503(
 
     assert response.status_code == 503
     assert response.json() == {
-        "detail": "El servicio de consultas no está disponible. Intentá de nuevo más tarde."
+        "code": "CONSULTATIONS_UNAVAILABLE",
+        "request_id": response.headers["x-request-id"],
+        "detail": "El servicio de consultas no está disponible. Intentá de nuevo más tarde.",
     }
 
 
@@ -268,7 +270,11 @@ def test_follow_up_rejects_an_invalid_id(client: TestClient) -> None:
     )
 
     assert response.status_code == 400
-    assert response.json() == {"detail": "Identificador de consulta inválido."}
+    assert response.json() == {
+        "code": "INVALID_CONSULTATION_ID",
+        "request_id": response.headers["x-request-id"],
+        "detail": "Identificador de consulta inválido.",
+    }
 
 
 def test_follow_up_without_activity_gives_a_generic_answer(client: TestClient) -> None:

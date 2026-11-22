@@ -143,14 +143,19 @@ def test_search_invalid_query_returns_422_without_calling_the_catalog(
     assert catalog.search_calls == []
 
 
-def test_search_error_returns_502(client: TestClient, catalog: FakeProcedureCatalog) -> None:
+PROCEDURES_UNAVAILABLE_MESSAGE = "No pudimos consultar los trámites. Intentá de nuevo."
+
+
+def test_search_error_returns_503(client: TestClient, catalog: FakeProcedureCatalog) -> None:
     catalog.error = ProcedureSearchError("La API no responde")
 
     response = client.get(SEARCH_URL, params={"query": "habilitación"})
 
-    assert response.status_code == 502
+    assert response.status_code == 503
     assert response.json() == {
-        "detail": "El servicio de trámites no está disponible. Intentá de nuevo más tarde."
+        "code": "PROCEDURES_UNAVAILABLE",
+        "request_id": response.headers["x-request-id"],
+        "detail": PROCEDURES_UNAVAILABLE_MESSAGE,
     }
 
 
@@ -181,15 +186,24 @@ def test_detail_unknown_procedure_returns_404(
     response = client.get(DETAIL_URL)
 
     assert response.status_code == 404
-    assert response.json() == {"detail": "No se encontró el trámite solicitado."}
+    assert response.json() == {
+        "code": "PROCEDURE_NOT_FOUND",
+        "request_id": response.headers["x-request-id"],
+        "detail": "No encontramos ese trámite.",
+    }
 
 
-def test_detail_error_returns_502(client: TestClient, catalog: FakeProcedureCatalog) -> None:
+def test_detail_error_returns_503(client: TestClient, catalog: FakeProcedureCatalog) -> None:
     catalog.error = ProcedureSearchError("La API no responde")
 
     response = client.get(DETAIL_URL)
 
-    assert response.status_code == 502
+    assert response.status_code == 503
+    assert response.json() == {
+        "code": "PROCEDURES_UNAVAILABLE",
+        "request_id": response.headers["x-request-id"],
+        "detail": PROCEDURES_UNAVAILABLE_MESSAGE,
+    }
 
 
 def test_detail_invalid_id_returns_422_without_calling_the_catalog(

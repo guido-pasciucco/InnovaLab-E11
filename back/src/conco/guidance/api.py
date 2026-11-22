@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, status
+from fastapi import APIRouter, Depends, Path, Query, Request
 from pydantic import BaseModel, Field
 
 from conco.guidance.activity_directory import PostgresActivityDirectory
@@ -13,6 +13,7 @@ from conco.guidance.domain import (
     ContextAnswers,
     ContextQuestion,
     ContextualProcedure,
+    ExcludedProcedure,
     Procedure,
     ProcedureCatalog,
     ProcedureDetail,
@@ -23,15 +24,16 @@ from conco.guidance.domain import (
     apply_context,
 )
 from conco.guidance.embeddings import create_embedder
+from conco.errors import (
+    ActivitiesUnavailable,
+    ActivityNotFound,
+    ProcedureNotFound,
+    ProceduresLoading,
+    ProceduresUnavailable,
+)
 from conco.guidance.infrastructure import CabaProcedureCatalog
 
 router = APIRouter(prefix="/guidance", tags=["Orientación"])
-
-UNAVAILABLE_DETAIL = "El servicio de trámites no está disponible. Intentá de nuevo más tarde."
-ACTIVITIES_UNAVAILABLE_DETAIL = (
-    "La búsqueda de actividades no está disponible. Intentá de nuevo más tarde."
-)
-
 
 class ProcedureSearchResponse(BaseModel):
     """Trámites encontrados y la fuente oficial de la que provienen."""
@@ -61,6 +63,7 @@ class ActivityProceduresResponse(BaseModel):
     questions: list[ContextQuestion]
     procedures: list[ContextualProcedure]
     excluded_count: int
+    excluded: list[ExcludedProcedure] = Field(default_factory=list)
     source: Source
     requirements: list[Requirement] = Field(default_factory=list)
     requirements_note: str = REQUIREMENTS_NOTE
@@ -104,10 +107,7 @@ async def suggest_activities(
     try:
         activities = await directory.suggest(query, limit=limit)
     except ActivityDirectoryError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=ACTIVITIES_UNAVAILABLE_DETAIL,
-        ) from exc
+        raise ActivitiesUnavailable() from exc
     return ActivitySuggestionsResponse(activities=activities)
 
 
@@ -131,16 +131,12 @@ async def get_activity_procedures(
     """
     try:
         result = await directory.procedures_for(slug)
+        # Sin actividad puede ser que no exista o que el catálogo todavía no se cargó.
+        loaded = True if result is not None else await directory.catalog_ready()
     except ActivityDirectoryError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=ACTIVITIES_UNAVAILABLE_DETAIL,
-        ) from exc
+        raise ProceduresUnavailable() from exc
     if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No se encontró la actividad solicitada.",
-        )
+        raise ActivityNotFound() if loaded else ProceduresLoading()
     contextual = apply_context(result, answers)
     return ActivityProceduresResponse(**contextual.model_dump(), source=catalog.source)
 
@@ -166,9 +162,7 @@ async def search_procedures(
     try:
         procedures = await catalog.search(query, limit=limit)
     except ProcedureSearchError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY, detail=UNAVAILABLE_DETAIL
-        ) from exc
+        raise ProceduresUnavailable() from exc
     return ProcedureSearchResponse(procedures=procedures, source=catalog.source)
 
 
@@ -181,12 +175,7 @@ async def get_procedure(
     try:
         procedure = await catalog.get(procedure_id)
     except ProcedureSearchError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY, detail=UNAVAILABLE_DETAIL
-        ) from exc
+        raise ProceduresUnavailable() from exc
     if procedure is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No se encontró el trámite solicitado.",
-        )
+        raise ProcedureNotFound()
     return ProcedureDetailResponse(procedure=procedure, source=catalog.source)

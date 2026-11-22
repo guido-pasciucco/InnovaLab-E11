@@ -1,8 +1,9 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 
+from conco.errors import AddressesUnavailable
 from conco.geolocation.domain import Address, AddressFinder, AddressSearchError
 from conco.geolocation.infrastructure import GeorefAddressFinder
 
@@ -49,8 +50,5 @@ async def search_addresses(
     try:
         addresses = await finder.search(address, province=province, limit=limit)
     except AddressSearchError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="El servicio de direcciones no está disponible. Intentá de nuevo más tarde.",
-        ) from exc
+        raise AddressesUnavailable() from exc
     return AddressSearchResponse(addresses=addresses)

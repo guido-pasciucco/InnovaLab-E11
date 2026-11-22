@@ -34,6 +34,8 @@ _SUGGEST_SQL = """
     limit %(limit)s
 """
 
+_CATALOG_READY_SQL = "select exists(select 1 from public.activities)"
+
 _ACTIVITY_SQL = "select slug, name from public.activities where slug = %s"
 
 _PROCEDURES_SQL = """
@@ -122,6 +124,10 @@ class PostgresActivityDirectory:
                 for procedure_id, title, url, summary, changed_at, note, applies_when in procedure_rows
             ],
         )
+
+    async def catalog_ready(self) -> bool:
+        [(loaded,)] = await self._fetch(_CATALOG_READY_SQL, [])
+        return bool(loaded)
 
     async def _fetch(self, sql: str, params: object) -> list[tuple]:
         try:
