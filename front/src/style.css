@@ -357,3 +357,20 @@ button.step.active { cursor:default; }
 /* "Puede aplicar" explained next to its tag (QA-07). */
 .guidance-card__top { flex-wrap:wrap; }
 .guidance-tag-hint { flex:1 1 220px; color:var(--text-muted); font-size:11px; line-height:1.5; }
+
+/* Recent searches on the Consulta step (FE-03/FE-04): side card on desktop, collapsible on mobile. */
+.query-layout { display:grid; gap:18px; }
+.recent-searches { padding:20px; }
+.recent-searches h2,.recent-searches summary { margin:0 0 12px; color:var(--ink); font-family:"Manrope",sans-serif; font-size:15px; font-weight:700; }
+.recent-searches summary { margin:0; cursor:pointer; }
+.recent-searches[open] summary { margin-bottom:12px; }
+.recent-searches__list { display:grid; gap:2px; margin:0 0 8px; padding:0; list-style:none; }
+.recent-searches__item { display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:8px; padding:9px 0; border-top:1px solid #E8EEF1; }
+.recent-searches__item:first-child { border-top:0; }
+.recent-searches__label { max-width:100%; }
+.recent-searches__time { color:var(--text-muted); font-size:11px; white-space:nowrap; }
+.recent-searches__clear { width:100%; min-height:38px; margin-top:12px; padding:8px 14px; }
+@media (min-width:1100px) {
+  .hero--with-history { max-width:1120px; }
+  .query-layout--with-history { grid-template-columns:minmax(0,760px) minmax(280px,1fr); align-items:start; }
+}

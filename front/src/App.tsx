@@ -7,8 +7,11 @@ import OfficialSources from "./Componentes/OfficialSources";
 import ContextQuestions from "./Componentes/ContextQuestions";
 import AnalysisSources from "./Componentes/AnalysisSources";
 import ErrorBoundary from "./Componentes/ErrorBoundary";
+import RecentSearches from "./Componentes/RecentSearches";
 import { getActivityProcedures, submitConsultation, submitFollowUp } from "./api/client";
 import { describeError } from "./api/errors";
+import type { HistoryEntry } from "./history/searchHistory";
+import { useSearchHistory } from "./history/useSearchHistory";
 import { HOME_PATH, STEPS, isStepAvailable, pathOf, stepFromPath, type Step } from "./navigation/steps";
 import { clearConsultation, loadConsultation, saveConsultation } from "./session/currentConsultation";
 import { excludedNote } from "./text";
@@ -44,6 +47,12 @@ function toSourceReference(data: ActivityProceduresResponse): SourceReference {
   return { id: "caba-tramites", title: data.source.name, publisher: "Gobierno de la Ciudad de Buenos Aires", url: data.source.url, note: data.source.license };
 }
 
+/** Brief summary kept in the history: what the search found, not the whole response. */
+function historySummary(response: ConsultationResponse, procedures: ActivityProceduresResponse | null): string {
+  if (procedures) return `${procedures.activity.name}: ${procedures.procedures.length} trámites oficiales`;
+  return response.summary.length > 120 ? `${response.summary.slice(0, 117)}…` : response.summary;
+}
+
 function greeting(response: ConsultationResponse): ChatMessage {
   return { role: "bot", text: `Hola. Puedo ayudarte a revisar la orientación de tu consulta sobre ${response.interpretedActivity} en ${response.normalizedAddress}. ¿Qué te gustaría saber?` };
 }
@@ -70,6 +79,9 @@ export default function App() {
   const [question, setQuestion] = useState("");
   const [assistantBusy, setAssistantBusy] = useState(false);
   const chatLog = useRef<HTMLDivElement>(null);
+  const history = useSearchHistory();
+  // Values the form starts with after reopening a search from the history (and its remount key).
+  const [prefill, setPrefill] = useState<{ key: number; request: ConsultationRequest } | null>(null);
   const step = stepFromPath(location.pathname);
   const stepState = { analyzing: busy, hasResult: !!result };
 
@@ -126,6 +138,10 @@ export default function App() {
       setResult(response);
       setActivityProcedures(load.procedures);
       setProceduresError(load.error);
+      history.record({
+        activity: data.activity, address: data.address, activitySlug: data.activitySlug ?? null, point: data.point ?? null,
+        summary: historySummary(response, load.procedures), searchedAt: new Date().toISOString(),
+      });
       setMessages([greeting(response)]);
       goTo(3);
     } catch (err) {
@@ -159,8 +175,16 @@ export default function App() {
     }
   }
 
+  /** "Ver": fills the form with the saved search and runs it again, which also gives the assistant a fresh consultation. */
+  function openFromHistory(entry: HistoryEntry) {
+    const request: ConsultationRequest = { activity: entry.activity, address: entry.address, point: entry.point, activitySlug: entry.activitySlug };
+    setPrefill(current => ({ key: (current?.key ?? 0) + 1, request }));
+    void handleSubmit(request);
+  }
+
   function startOver() {
     goTo(1);
+    setPrefill(null);
     setQuery({ activity: "", address: "" });
     setResult(null);
     setActivityProcedures(null);
@@ -223,6 +247,8 @@ export default function App() {
         <span className="query-pill">{query.activity}</span>
         <span className="query-pill">{query.address}</span>
         <button className="text-button" onClick={() => goTo(1)} type="button">Editar consulta</button>
+        <button className="text-button" onClick={() => void handleSubmit(query)} type="button" disabled={busy}
+          title="Volver a consultar por si cambió algo">Actualizar</button>
       </div>
       <nav className="tabs" aria-label="Secciones de la consulta">
         {STEPS.slice(2).map(item => (
@@ -265,7 +291,7 @@ export default function App() {
       <main className={`main-content ${step >= 3 ? "main-content--wide" : ""}`}>
         <ErrorBoundary variant="section" resetKey={step}>
         {step === 1 && (
-          <section className="hero">
+          <section className={`hero ${history.entries.length ? "hero--with-history" : ""}`}>
             <p className="eyebrow">TU ACTIVIDAD · TU DIRECCIÓN · TU PRÓXIMO PASO</p>
             <h1>Contanos qué querés hacer <span>y dónde.</span></h1>
             <p className="hero-description">Indicá la actividad y la dirección. Conco organiza la información disponible para orientarte sobre los próximos pasos de tu emprendimiento.</p>
@@ -273,8 +299,13 @@ export default function App() {
               <span className="section-icon">01</span>
               <div><h2>Empecemos por tu idea</h2><p>Completá los datos para iniciar tu consulta.</p></div>
             </div>
-            <QueryForm busy={busy} onSubmit={handleSubmit} />
-            {error && <p className="error-message" role="alert">{error}</p>}
+            <div className={`query-layout ${history.entries.length ? "query-layout--with-history" : ""}`}>
+              <div>
+                <QueryForm key={prefill?.key ?? 0} initial={prefill?.request} busy={busy} onSubmit={handleSubmit} />
+                {error && <p className="error-message" role="alert">{error}</p>}
+              </div>
+              <RecentSearches entries={history.entries} busy={busy} onOpen={openFromHistory} onClear={history.clear} />
+            </div>
             <p className="security-note"><span className="security-dot" />Tus datos se utilizan para preparar esta consulta.</p>
             <div className="features" id="como-funciona">
               <article className="feature"><div className="feature__icon" /><div><h2>Varias fuentes, una respuesta</h2><p>Cruzamos trámites, normativa y datos territoriales al mismo tiempo.</p></div></article>

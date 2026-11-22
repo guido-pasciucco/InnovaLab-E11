@@ -5,17 +5,36 @@ import AddressAutocomplete from "./AddressAutocomplete";
 import type { ActivitySuggestion, Address, ConsultationRequest, GeoPoint } from "../types";
 import { TEXT_RULES, validateActivity, validateAddress } from "../validation";
 
-type Props = { onSubmit: (value: ConsultationRequest) => void; busy: boolean };
+type Props = {
+  onSubmit: (value: ConsultationRequest) => void;
+  busy: boolean;
+  /** Values to start with, e.g. a search reopened from the history. */
+  initial?: ConsultationRequest | null;
+};
 
 function toGeoPoint(coordinates: Address["coordinates"]): GeoPoint | null {
   return coordinates ? { lat: coordinates.latitude, lng: coordinates.longitude } : null;
 }
 
-export default function QueryForm({ onSubmit, busy }: Props) {
-  const [activity, setActivity] = useState("");
-  const [selectedActivity, setSelectedActivity] = useState<ActivitySuggestion | null>(null);
-  const [address, setAddress] = useState("");
-  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+/** A previous query counts as already picked from the lists, so it can be sent again as it was. */
+function initialActivity(initial: ConsultationRequest): ActivitySuggestion | null {
+  return initial.activitySlug
+    ? { slug: initial.activitySlug, name: initial.activity, matched_alias: initial.activity, similarity: 1 } : null;
+}
+
+function initialAddress(initial: ConsultationRequest): Address {
+  const point = initial.point ?? null;
+  return {
+    full_address: initial.address, street: null, number: null, department: null, locality: null, province: null,
+    coordinates: point ? { latitude: point.lat, longitude: point.lng } : null,
+  };
+}
+
+export default function QueryForm({ onSubmit, busy, initial = null }: Props) {
+  const [activity, setActivity] = useState(initial?.activity ?? "");
+  const [selectedActivity, setSelectedActivity] = useState<ActivitySuggestion | null>(initial ? initialActivity(initial) : null);
+  const [address, setAddress] = useState(initial?.address ?? "");
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(initial ? initialAddress(initial) : null);
   const [searchAvailable, setSearchAvailable] = useState(true);
   const [locating, setLocating] = useState(false);
   const [activityError, setActivityError] = useState("");
