@@ -5,12 +5,6 @@ import AddressAutocomplete from "./AddressAutocomplete";
 import type { ActivitySuggestion, Address, ConsultationRequest, GeoPoint } from "../types";
 
 type Props = { onSubmit: (value: ConsultationRequest) => void; busy: boolean };
-// Georef works best without the neighbourhood, so the examples only carry street and number.
-const examples = [
-  { label: "Cafetería", activity: "Abrir una cafetería", address: "Av. Cabildo 2040" },
-  { label: "Almacén", activity: "Abrir un almacén", address: "Av. Rivadavia 5200" },
-  { label: "Peluquería", activity: "Abrir una peluquería", address: "Av. Santa Fe 1800" },
-];
 
 function toGeoPoint(coordinates: Address["coordinates"]): GeoPoint | null {
   return coordinates ? { lat: coordinates.latitude, lng: coordinates.longitude } : null;
@@ -71,9 +65,6 @@ export default function QueryForm({ onSubmit, busy }: Props) {
       </div>
       {error && <p className="error-message" role="alert">{error}</p>}
       <button className="primary query-submit" type="submit" disabled={busy || locating}>{busy ? "Consultando…" : locating ? "Ubicando dirección…" : <>Consultar requisitos <span aria-hidden="true">→</span></>}</button>
-      <div className="examples"><span className="examples-title">Probá con un ejemplo</span><div className="example-chips">
-        {examples.map(item => <button key={item.label} type="button" className="chip" onClick={() => { setActivity(item.activity); setSelectedActivity(null); setAddress(item.address); setSelectedAddress(null); setError(""); }}>{item.label}</button>)}
-      </div></div>
       <p className="hint">La orientación es inicial y depende de las fuentes oficiales conectadas.</p>
     </form>
   );

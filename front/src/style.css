@@ -74,8 +74,6 @@ h1,h2,h3 { font-family:"Manrope", sans-serif; }
 .secondary { background:#fff; border-color:var(--blue); color:var(--blue); }
 .secondary:hover:not(:disabled) { background:#EAF1F5; }
 .query-submit { width:100%; margin-top:2px; }
-.examples { margin-top:23px; padding-top:18px; border-top:1px solid #E8EEF1; }
-.examples-title { color:var(--text-muted); font-size:12px; font-weight:600; }
 .example-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
 .chip { min-height:34px; padding:6px 12px; border:1px solid #AEBFC9; border-radius:20px; background:#fff; color:var(--ink); font-size:12px; }
 .chip:hover { border-color:var(--blue); background:#EDF4F7; }
