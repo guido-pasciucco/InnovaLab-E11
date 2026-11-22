@@ -25,6 +25,21 @@ Cada entrada tiene tres cosas:
 
 **Confirmado:** 22/11/2026.
 
+### 2. La primera búsqueda tarda demasiado (QA-02)
+
+**Cómo se entendió:** en una verificación anterior, la primera búsqueda de actividades tardó unos 23 segundos y la misma búsqueda repetida, poco más de 1 segundo. Es como un motor frío: cuesta arrancar y después anda bien. Importa porque esa primera espera es lo que ve alguien que recién entra: puede pensar que se trabó e irse. Lo esperable es saber por qué tarda y hasta cuánto tiempo damos por aceptable.
+
+**Contexto que lo aclaró:**
+
+- Tu observación de que el responsable parece ser Render, que es donde está publicada la API.
+- La confirmación de que el plan gratis duerme el servicio a los 15 minutos sin visitas y tarda cerca de 1 minuto en despertar; además, da 750 horas gratis por mes.
+- La solución que elegimos dentro de "todo gratis": un servicio gratuito (cron-job.org) que visite cada 10 minutos el endpoint `/health`, que ya existe y solo responde "estoy vivo" sin consultar nada más. UptimeRobot gratis quedó como alternativa que también avisa si la API cae.
+- Los dos recaudos que surgieron: no mandar el ping a una búsqueda porque molesta a las APIs externas, y no dejar otro servicio gratis de Render despierto porque se agotan las 750 horas del mes.
+
+**Aclaración:** la causa de Render es muy probable, pero no quedó confirmada. Antes de darla por segura hay que medir: esperar más de 15 minutos sin pedidos, llamar a `/health` y repetir enseguida.
+
+**Confirmado:** 22/11/2026.
+
 ## Cómo se usa
 
 1. Te explico un pendiente, de a uno, en lenguaje simple y sin detalles de implementación.
