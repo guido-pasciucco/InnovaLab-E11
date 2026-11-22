@@ -147,6 +147,27 @@ Cada entrada tiene: el punto en lenguaje simple, por qué importa, lo que pidió
 
 **Confirmado:** 22/11/2026 (el dueño indicó "dale" para registrar y continuar).
 
+### 6. Que se pueda hacer clic en los pasos (FE-02)
+
+**Cómo se entendió:** la barra de pasos —Consulta, Análisis, Orientación, Mapa, Asistente— es solo dibujo: son cajitas con números que no responden al clic (`front/src/App.tsx:206`). Los únicos botones que cambian de paso son los de abajo (*"Ver mapa →"*, *"← Volver a orientación"*) y las pestañitas chicas que aparecen cuando ya hay una consulta. Los enlaces del pie de página son falsos: parecen links, pero no llevan a ningún lado (`front/src/App.tsx:437-460`).
+
+**Por qué importa:** si el paso está a la vista, uno espera poder apretarlo. Hoy no pasa nada y da la sensación de que la interfaz está incompleta.
+
+**Lo que pide el cambio:** que las cajitas sean clickeables de verdad y lleven a su dirección. Depende de la especificación 5: primero las direcciones, después los clics. Los enlaces internos y del pie también deben llevar a un lugar real en vez de no hacer nada.
+
+**Reglas de habilitación:**
+
+- si todavía no se hizo la consulta, no tiene sentido ir a Orientación, Mapa o Asistente porque no hay nada que mostrar;
+- el paso en el que estás va marcado;
+- los pasos ya visitados se pueden apretar;
+- los que vienen después y aún no se pueden usar se ven, pero están deshabilitados.
+
+**Cómo sabremos que está listo:** se pueden recorrer los pasos apretando la barra; el teclado funciona (Tab y Enter); y un lector de pantalla anuncia en qué paso estás y cuáles no están disponibles.
+
+**Lo que NO se hace:** cambiar el diseño de la barra ni agregar pasos nuevos.
+
+**Confirmado:** 22/11/2026.
+
 ## Cómo se usa
 
 1. Te explico un pendiente, de a uno, en lenguaje simple y con el mismo detalle que vas a ver acá.
