@@ -207,6 +207,20 @@ Al apretar un registro se rellena el formulario con esa actividad y dirección y
 
 **Confirmado:** 22/11/2026.
 
+### 9. Sacar los ejemplos de la página principal (FE-05)
+
+**Cómo se entendió:** abajo del formulario de inicio aparece *"Probá con un ejemplo"* con tres chips —Cafetería, Almacén y Peluquería— que rellenan los campos solos con datos de prueba: actividad, dirección y la altura (`front/src/Componentes/QueryForm.tsx:7-12` y `:74`). Son datos de relleno que no aportan y pueden confundir: uno puede pensar que son resultados reales.
+
+**Lo que pide el cambio:** que ese bloque se saque.
+
+**Qué hay que tocar:** el arreglo `examples`, su comentario y el bloque JSX "Probá con un ejemplo". Los estilos `.examples` y `.examples-title` (`front/src/style.css:77-78`) quedan sin uso y también se eliminan. **No** eliminar `.example-chips` ni `.chip`: el asistente los usa para las preguntas sugeridas (`front/src/App.tsx:387-389`).
+
+**Cómo sabremos que está listo:** el formulario de inicio ya no muestra *"Probá con un ejemplo"* y los campos no se rellenan solos.
+
+**Lo que NO se hace:** tocar las preguntas sugeridas del asistente ni cambiar el formulario.
+
+**Confirmado:** 22/11/2026.
+
 ## Cómo se usa
 
 1. Te explico un pendiente, de a uno, en lenguaje simple y con el mismo detalle que vas a ver acá.
