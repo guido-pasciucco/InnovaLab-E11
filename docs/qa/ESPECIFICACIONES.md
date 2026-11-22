@@ -168,6 +168,29 @@ Cada entrada tiene: el punto en lenguaje simple, por qué importa, lo que pidió
 
 **Confirmado:** 22/11/2026.
 
+### 7. Ver las búsquedas anteriores en la misma pantalla (FE-03)
+
+**Cómo se entendió:** hoy, cuando se hace una consulta y después se quiere repetir o ver qué se buscó, no hay forma: la pantalla no guarda nada. Si se recarga o se aprieta *"Nueva consulta"*, se borra todo (`startOver()` en `front/src/App.tsx:123`). No hay `localStorage`, `sessionStorage` ni `indexedDB` en `front/src/`.
+
+**Lo que pide el cambio:** un panel **"Búsquedas recientes"** dentro del paso 1 (Consulta), abajo del formulario. En escritorio, una tarjetita al costado; en móvil, una sección plegable. No es una página nueva: está en la misma pantalla.
+
+```text
+Búsquedas recientes (3)                    [Limpiar]
+Peluquería · Av Corrientes 2500     hace 2 h   [Ver]
+Barbería · Córdoba 1234             ayer       [Ver]
+Cafetería · Corrientes 1500         12/11      [Ver]
+```
+
+Al apretar un registro se rellena el formulario con esa actividad y dirección y se abre el resultado. Un botón **"Actualizar"** permite volver a consultar por si cambió algo. Se muestran hasta 5 ítems; el resto queda detrás de *"Ver todas"*. Si no hay historial, el panel no se muestra.
+
+**Por qué ese formato y no otro:** se descartó un desplegable dentro del buscador (mezcla las sugerencias de la API con las búsquedas propias), una página `/historial` aparte (rompe el pedido de "misma pantalla") y una ventanita emergente (molesto para uso repetido). Se reutilizan los estilos que ya existen (`panel`, `query-pill`, `chip`, `secondary`).
+
+**Cómo sabremos que está listo:** se ven las búsquedas sin salir de la pantalla de consulta, se puede limpiar el historial y funciona igual en celular y computadora.
+
+**Lo que NO se hace todavía:** guardar las búsquedas de forma permanente para que sobrevivan a un recarque (es el siguiente ítem). Este punto depende de la especificación 5 para poder abrir el resultado.
+
+**Confirmado:** 22/11/2026.
+
 ## Cómo se usa
 
 1. Te explico un pendiente, de a uno, en lenguaje simple y con el mismo detalle que vas a ver acá.
