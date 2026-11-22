@@ -191,6 +191,22 @@ Al apretar un registro se rellena el formulario con esa actividad y dirección y
 
 **Confirmado:** 22/11/2026.
 
+### 8. Que el historial no se borre al recargar (FE-04)
+
+**Cómo se entendió:** hoy no se guarda nada: todo vive en la memoria de la página, así que al recargar el navegador se pierde.
+
+**Lo que pide el cambio:** guardar las búsquedas en el navegador (`localStorage`, con una clave tipo `conco.search-history.v1`) con lo justo para mostrarlas: actividad, dirección, fecha y un resumen breve. Tope de **10 búsquedas**; búsquedas repetidas **no se duplican** (se compara actividad + dirección normalizadas); botón **"Limpiar historial"**.
+
+**Privacidad:** se queda en el navegador, no se manda a ningún servidor ni a analytics, con una nota breve que lo diga. Opcional: sincronizar entre pestañas con el evento `storage`.
+
+**El punto delicado:** el asistente (paso 5) depende de un número que da el servidor al hacer la consulta (`submitFollowUp(result.consultationId, …)`, `front/src/App.tsx:150`). Al recargar, el número guardado alcanza para mostrar la orientación pero **no** para seguir haciendo preguntas. Antes de implementar *"Ver resultado"* hay que decidir: repetir la consulta al abrir un registro histórico para obtener un número nuevo, o persistir las consultas en el backend.
+
+**Cómo sabremos que está listo:** recargar la página y el historial sigue ahí; las búsquedas repetidas no se duplican; el botón limpiar funciona; y al abrir una búsqueda antigua está definido qué pasa con el asistente.
+
+**Lo que NO se hace:** guardar la respuesta completa ni el chat (sería mucho y quedaría desactualizado), ni enviar esos datos a ningún lado. Depende de la especificación 7.
+
+**Confirmado:** 22/11/2026.
+
 ## Cómo se usa
 
 1. Te explico un pendiente, de a uno, en lenguaje simple y con el mismo detalle que vas a ver acá.
