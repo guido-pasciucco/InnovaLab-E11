@@ -1,14 +1,24 @@
-import { useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import QueryForm from "./Componentes/QueryForm";
 import MapPanel from "./Componentes/MapPanel";
 import RequirementsChecklist from "./Componentes/RequirementsChecklist";
 import OfficialSources from "./Componentes/OfficialSources";
 import ContextQuestions from "./Componentes/ContextQuestions";
+import AnalysisSources from "./Componentes/AnalysisSources";
 import { getActivityProcedures, submitConsultation, submitFollowUp } from "./api/client";
 import type { ActivityProceduresResponse, ConsultationRequest, ConsultationResponse, ContextAnswers, SourceReference } from "./types";
 
 type Step = 1 | 2 | 3 | 4 | 5;
 const steps = ["Consulta", "Análisis", "Orientación", "Mapa", "Asistente"];
+
+type ChatMessage = { role: "user" | "bot"; text: string; sourceIds?: string[] };
+
+const SUGGESTED_QUESTIONS = [
+  "¿Qué documentos necesito?",
+  "¿Cuánto tarda la habilitación?",
+  "¿Necesito aptitud ambiental?",
+  "¿Está permitido el rubro en esta zona?",
+];
 
 /** Official procedures of the picked activity, or null when none was picked or they could not be loaded. */
 async function loadActivityProcedures(slug: string | null | undefined): Promise<ActivityProceduresResponse | null> {
@@ -38,9 +48,11 @@ export default function App() {
   const [error, setError] = useState("");
   const [checked, setChecked] = useState<string[]>([]);
   const [checkedRequirements, setCheckedRequirements] = useState<string[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [suggested, setSuggested] = useState<string[]>(SUGGESTED_QUESTIONS);
   const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
   const [assistantBusy, setAssistantBusy] = useState(false);
+  const chatLog = useRef<HTMLDivElement>(null);
 
   const guidanceCount = activityProcedures?.procedures.length ?? result?.steps.length ?? 0;
   const progress = useMemo(() => guidanceCount
@@ -48,6 +60,10 @@ export default function App() {
   const officialSources = useMemo(
     () => (activityProcedures ? [toSourceReference(activityProcedures)] : []),
     [activityProcedures],
+  );
+  const allSources = useMemo(
+    () => [...(result?.sources ?? []), ...officialSources],
+    [result, officialSources],
   );
 
   async function handleSubmit(data: ConsultationRequest) {
@@ -59,7 +75,9 @@ export default function App() {
     setRefineError(false);
     setChecked([]);
     setCheckedRequirements([]);
-    setAnswer("");
+    setMessages([]);
+    setSuggested(SUGGESTED_QUESTIONS);
+    setQuestion("");
     setError("");
     setStep(2);
     setBusy(true);
@@ -70,6 +88,7 @@ export default function App() {
       setResult(response);
       setActivityProcedures(procedures);
       setProceduresUnavailable(!!data.activitySlug && !procedures);
+      setMessages([{ role: "bot", text: `Hola. Puedo ayudarte a revisar la orientación de tu consulta sobre ${response.interpretedActivity} en ${response.normalizedAddress}. ¿Qué te gustaría saber?` }]);
       setStep(3);
     } catch (err) {
       setError(err instanceof Error ? err.message : "No pudimos procesar la consulta. Intentá nuevamente.");
@@ -111,24 +130,47 @@ export default function App() {
     setRefineError(false);
     setChecked([]);
     setCheckedRequirements([]);
+    setMessages([]);
+    setSuggested(SUGGESTED_QUESTIONS);
     setQuestion("");
-    setAnswer("");
     setError("");
   }
 
-  async function askAssistant(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!result || !question.trim() || assistantBusy) return;
+  useEffect(() => {
+    chatLog.current?.lastElementChild?.scrollIntoView({ block: "nearest" });
+  }, [messages, assistantBusy]);
+
+  async function askAssistant(text: string) {
+    const trimmed = text.trim();
+    if (!result || !trimmed || assistantBusy) return;
+    setMessages(current => [...current, { role: "user", text: trimmed }]);
+    setQuestion("");
     setAssistantBusy(true);
-    setAnswer("");
     try {
-      const response = await submitFollowUp(result.consultationId, { question: question.trim() });
-      setAnswer(response.answer);
+      const response = await submitFollowUp(result.consultationId, { question: trimmed });
+      setMessages(current => [...current, { role: "bot", text: response.answer, sourceIds: response.sourceIds }]);
     } catch (err) {
-      setAnswer(err instanceof Error ? err.message : "No se pudo enviar la pregunta.");
+      setMessages(current => [...current, { role: "bot", text: err instanceof Error ? err.message : "No se pudo enviar la pregunta." }]);
     } finally {
       setAssistantBusy(false);
     }
+  }
+
+  function askSuggestion(text: string) {
+    setSuggested(current => current.filter(item => item !== text));
+    void askAssistant(text);
+  }
+
+  function handleAskSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    void askAssistant(question);
+  }
+
+  function messageSources(sourceIds?: string[]): SourceReference[] {
+    if (!sourceIds?.length) return [];
+    return sourceIds
+      .map(id => allSources.find(source => source.id === id))
+      .filter((source): source is SourceReference => !!source);
   }
 
   const queryBar = step >= 3 && (
@@ -185,6 +227,11 @@ export default function App() {
             <QueryForm busy={busy} onSubmit={handleSubmit} />
             {error && <p className="error-message" role="alert">{error}</p>}
             <p className="security-note"><span className="security-dot" />Tus datos se utilizan para preparar esta consulta.</p>
+            <div className="features">
+              <article className="feature"><div className="feature__icon" /><div><h2>Varias fuentes, una respuesta</h2><p>Cruzamos trámites, normativa y datos territoriales al mismo tiempo.</p></div></article>
+              <article className="feature"><div className="feature__icon" /><div><h2>Cada dato con su fuente</h2><p>Vas a ver de dónde sale cada requisito y cada afirmación.</p></div></article>
+              <article className="feature"><div className="feature__icon" /><div><h2>Tu ubicación en el mapa</h2><p>Te mostramos la zona consultada con sus capas de información.</p></div></article>
+            </div>
           </section>
         )}
 
@@ -197,8 +244,7 @@ export default function App() {
               <article><span>ACTIVIDAD</span><strong>{query.activity}</strong></article>
               <article><span>UBICACIÓN</span><strong>{query.address}</strong></article>
             </div>
-            <div className="loading-line"><span /></div>
-            <p className="analysis-status">{busy ? "Consultando la información disponible…" : "Preparando resultados…"}</p>
+            <AnalysisSources running={busy} />
             <button className="secondary" type="button" onClick={() => setStep(1)} disabled={busy}>Volver a editar</button>
           </section>
         )}
@@ -312,15 +358,63 @@ export default function App() {
             </div>
             <div className="assistant-card panel">
               <div className="assistant-intro"><span className="assistant-avatar">C</span><div><strong>Asistente Conco</strong><span>Ayuda contextual sobre tu consulta</span></div></div>
-              <div className="assistant-message"><p>Hola. Puedo ayudarte a revisar la información de esta consulta. ¿Qué te gustaría saber?</p></div>
-              <form className="assistant-form" onSubmit={askAssistant}>
+              <div className="chat-log" ref={chatLog} aria-live="polite">
+                {messages.map((message, index) => message.role === "user" ? (
+                  <div className="chat-msg chat-msg--user" key={index}><p>{message.text}</p></div>
+                ) : (
+                  <article className="chat-msg chat-msg--bot" key={index}>
+                    <span className="chat-msg__who">Asistente Conco</span>
+                    <p>{message.text}</p>
+                    {messageSources(message.sourceIds).length > 0 && (
+                      <div className="chat-trace">
+                        <span className="chat-trace__label">Fuentes de esta respuesta</span>
+                        <ul>
+                          {messageSources(message.sourceIds).map(source => (
+                            <li key={source.id}>
+                              <a href={source.url} target="_blank" rel="noreferrer">{source.title} <span aria-hidden="true">↗</span></a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </article>
+                ))}
+                {assistantBusy && <p className="chat-typing">Buscando en las fuentes oficiales…</p>}
+              </div>
+              {suggested.length > 0 && (
+                <div className="suggest">
+                  <span className="hint">Preguntas de seguimiento</span>
+                  <div className="example-chips">
+                    {suggested.map(item => (
+                      <button key={item} type="button" className="chip" onClick={() => askSuggestion(item)}>{item}</button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <form className="assistant-form" onSubmit={handleAskSubmit}>
                 <label htmlFor="assistant-question">Tu pregunta</label>
-                <textarea id="assistant-question" value={question} onChange={e => setQuestion(e.target.value)}
-                  placeholder="Ej.: ¿Qué documentación debería revisar primero?" rows={3} required />
-                <button className="primary" type="submit" disabled={assistantBusy || !question.trim()}>{assistantBusy ? "Enviando…" : "Enviar pregunta →"}</button>
+                <input id="assistant-question" name="question" type="text" value={question}
+                  onChange={e => setQuestion(e.target.value)}
+                  placeholder="Escribí tu pregunta…" autoComplete="off" />
+                <button className="primary" type="submit" disabled={assistantBusy || !question.trim()}>{assistantBusy ? "Enviando…" : "Preguntar →"}</button>
               </form>
-              {answer && <div className="assistant-answer" aria-live="polite"><strong>Respuesta</strong><p>{answer}</p><small>Respuesta de demostración: verificá siempre los requisitos en las fuentes oficiales.</small></div>}
+              {allSources.length > 0 && (
+                <div className="chat-sources">
+                  <span className="hint">Fuentes disponibles</span>
+                  <ul>
+                    {allSources.map(source => (
+                      <li key={source.id}>
+                        <a href={source.url} target="_blank" rel="noreferrer">{source.title} <span aria-hidden="true">↗</span></a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <p className="small-note">La respuesta depende de las integraciones disponibles. No reemplaza la consulta ante organismos oficiales.</p>
+              <section className="chat-how">
+                <h2>Cómo responde</h2>
+                <p>Usa la información de la consulta y las fuentes oficiales conectadas. Si no hay una fuente que responda, te lo dice en lugar de inventar una respuesta.</p>
+              </section>
             </div>
             <div className="orientation-actions"><button className="secondary" type="button" onClick={() => setStep(4)}>← Volver al mapa</button><button className="primary" type="button" onClick={startOver}>Nueva consulta →</button></div>
           </section>
@@ -328,8 +422,48 @@ export default function App() {
       </main>
 
       <footer className="footer">
-        <img src="/conco-logo.png" alt="Conco" className="footer-logo" />
-        <p>Orientación inicial para emprendedores</p><span>Tu idea, un próximo paso.</span>
+        <div className="footer__inner">
+          <div className="footer__brand">
+            <p>Consultá qué necesitás para habilitar tu comercio en la Ciudad de Buenos Aires, con información de fuentes oficiales.</p>
+            <h2>Seguinos</h2>
+            <div className="social">
+              <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+              <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+              <a href="#" aria-label="X"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"/></svg></a>
+            </div>
+          </div>
+          <nav className="footer__col" aria-label="Consultas">
+            <h2>Consultas</h2>
+            <a href="#" onClick={e => { e.preventDefault(); startOver(); }}>Habilitación de comercios</a>
+            <a href="#" onClick={e => { e.preventDefault(); result ? setStep(3) : startOver(); }}>Trámites y requisitos</a>
+            <a href="#" onClick={e => { e.preventDefault(); result ? setStep(4) : startOver(); }}>Mapa de la Ciudad</a>
+            <a href="#" onClick={e => e.preventDefault()}>Preguntas frecuentes</a>
+          </nav>
+          <nav className="footer__col" aria-label="Ayuda">
+            <h2>Ayuda</h2>
+            <a href="#" onClick={e => e.preventDefault()}>Cómo funciona</a>
+            <a href="#" onClick={e => { e.preventDefault(); result ? setStep(3) : startOver(); }}>Fuentes oficiales</a>
+            <a href="#" onClick={e => e.preventDefault()}>Centro de ayuda</a>
+            <a href="#" onClick={e => e.preventDefault()}>Accesibilidad</a>
+          </nav>
+          <div className="footer__col">
+            <h2>Contacto</h2>
+            <span>[Teléfono de atención]</span>
+            <span>[Correo de contacto]</span>
+            <span>[Horario de atención]</span>
+          </div>
+        </div>
+        <div className="footer__bar">
+          <span>© 2026 ConCo — Orientación inicial para emprendedores</span>
+          <a href="#" onClick={e => e.preventDefault()}>Términos y condiciones</a>
+          <a href="#" onClick={e => e.preventDefault()}>Política de privacidad</a>
+          <a href="#" onClick={e => e.preventDefault()}>Datos abiertos</a>
+        </div>
+        <div className="footer__logo-wrap">
+          <button className="brand" type="button" onClick={startOver} aria-label="Volver al inicio de Conco">
+            <img src="/conco-logo.png" alt="Conco" className="footer__logo" />
+          </button>
+        </div>
       </footer>
     </div>
   );

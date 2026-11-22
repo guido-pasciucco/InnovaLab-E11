@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { geocodeAddressNominatim } from "../api/client";
 import ActivityAutocomplete from "./ActivityAutocomplete";
 import AddressAutocomplete from "./AddressAutocomplete";
 import type { ActivitySuggestion, Address, ConsultationRequest, GeoPoint } from "../types";
@@ -21,9 +22,10 @@ export default function QueryForm({ onSubmit, busy }: Props) {
   const [address, setAddress] = useState("");
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [searchAvailable, setSearchAvailable] = useState(true);
+  const [locating, setLocating] = useState(false);
   const [error, setError] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!activity.trim() || !address.trim()) {
       setError("Completá la actividad y la dirección para continuar.");
@@ -39,8 +41,15 @@ export default function QueryForm({ onSubmit, busy }: Props) {
       setError("Elegí una dirección de la lista de sugerencias.");
       return;
     }
-    setError("");
-    onSubmit({ activity: activity.trim(), address: address.trim(), point: null, activitySlug });
+    // Free text without backend geocoding: try Nominatim so the map still gets a point.
+    setLocating(true);
+    try {
+      const point = await geocodeAddressNominatim(address.trim());
+      setError("");
+      onSubmit({ activity: activity.trim(), address: address.trim(), point, activitySlug });
+    } finally {
+      setLocating(false);
+    }
   }
 
   return (
@@ -61,7 +70,7 @@ export default function QueryForm({ onSubmit, busy }: Props) {
         <span className="field-hint">Escribí calle y altura, sin el barrio, y elegí una opción de la lista. También podés usar «Corrientes y Callao» o «Corrientes entre Callao y Riobamba».</span>
       </div>
       {error && <p className="error-message" role="alert">{error}</p>}
-      <button className="primary query-submit" type="submit" disabled={busy}>{busy ? "Consultando…" : <>Consultar requisitos <span aria-hidden="true">→</span></>}</button>
+      <button className="primary query-submit" type="submit" disabled={busy || locating}>{busy ? "Consultando…" : locating ? "Ubicando dirección…" : <>Consultar requisitos <span aria-hidden="true">→</span></>}</button>
       <div className="examples"><span className="examples-title">Probá con un ejemplo</span><div className="example-chips">
         {examples.map(item => <button key={item.label} type="button" className="chip" onClick={() => { setActivity(item.activity); setSelectedActivity(null); setAddress(item.address); setSelectedAddress(null); setError(""); }}>{item.label}</button>)}
       </div></div>
