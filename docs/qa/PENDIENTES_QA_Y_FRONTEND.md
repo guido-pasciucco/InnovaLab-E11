@@ -71,7 +71,7 @@ Búsquedas recientes (3)                       [Limpiar]
 
 **Dos precisiones importantes:**
 
-1. [docs/ideas/cache-busquedas-direcciones.md](ideas/cache-busquedas-direcciones.md) propone un caché **de backend** para las respuestas de Georef. El pedido actual es un caché **local de historial en el frontend**: son cosas distintas y pueden convivir.
+1. [docs/ideas/cache-busquedas-direcciones.md](../ideas/cache-busquedas-direcciones.md) propone un caché **de backend** para las respuestas de Georef. El pedido actual es un caché **local de historial en el frontend**: son cosas distintas y pueden convivir.
 2. El asistente usa `submitFollowUp(result.consultationId, …)` (`front/src/App.tsx:150`), un identificador que vive en el servidor. Al recargar la página, el `consultationId` guardado alcanza para mostrar la orientación, pero **no** para seguir haciendo preguntas. Antes de implementar «Ver resultado» hay que decidir: repetir la consulta al abrir un registro histórico, o persistir las consultas en el backend.
 
 ## Checklist unificado
