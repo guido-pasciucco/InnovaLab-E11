@@ -129,6 +129,24 @@ Cada entrada tiene: el punto en lenguaje simple, por qué importa, lo que pidió
 
 **Confirmado:** 22/11/2026.
 
+### 5. Que cada paso tenga su propia dirección (FE-01)
+
+**Cómo se entendió:** hoy la app es una sola página. Los pasos —Consulta, Análisis, Orientación, Mapa, Asistente— son como pestañas que se prenden y apagan adentro de la misma pantalla: la barra de dirección del navegador siempre dice lo mismo, aunque estés en el Mapa. El paso se guarda en una variable dentro del componente principal (`front/src/App.tsx:38`), no en la dirección.
+
+**Por qué importa:** no se puede copiar un link a "Orientación" y mandarlo porque esa dirección no existe; el botón atrás del navegador no devuelve al paso anterior; y si recargás la página, volvés al inicio en vez de seguir donde estabas.
+
+**Lo que pide el cambio:** que cada paso tenga su dirección —`/consulta`, `/analisis`, `/orientacion`, `/mapa`, `/asistente`— agregando una librería de rutas para React (`react-router-dom`). Así se puede compartir un paso, usar el botón atrás y recargar sin perder el lugar.
+
+**Detalle importante:** si alguien entra directo a `/orientacion` sin haber hecho una consulta, no hay resultado para mostrar. Hay que hacer que lo mande al inicio: no dejar entrar a una página que necesita datos que todavía no existen.
+
+**Ojo con el deploy:** hoy no hay configuración de reescritura en Vercel (`front/vercel.json` no existe), así que las direcciones nuevas podrían dar "página no encontrada" al abrirlas directo. Hay que verificarlo.
+
+**Cómo sabremos que está listo:** al caminar por los pasos, la barra de dirección cambia; el botón atrás funciona; recargar en `/mapa` te deja en el mapa si hay una consulta hecha; y entrar a `/orientacion` sin consulta te lleva al inicio.
+
+**Lo que NO se hace:** todavía no hacer clickeables los pasos de la barra (es el siguiente ítem), ni tocar el diseño.
+
+**Confirmado:** 22/11/2026 (el dueño indicó "dale" para registrar y continuar).
+
 ## Cómo se usa
 
 1. Te explico un pendiente, de a uno, en lenguaje simple y con el mismo detalle que vas a ver acá.
