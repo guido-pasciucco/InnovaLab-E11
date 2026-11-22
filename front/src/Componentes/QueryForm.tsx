@@ -3,6 +3,7 @@ import { geocodeAddressNominatim } from "../api/client";
 import ActivityAutocomplete from "./ActivityAutocomplete";
 import AddressAutocomplete from "./AddressAutocomplete";
 import type { ActivitySuggestion, Address, ConsultationRequest, GeoPoint } from "../types";
+import { TEXT_RULES, validateActivity, validateAddress } from "../validation";
 
 type Props = { onSubmit: (value: ConsultationRequest) => void; busy: boolean };
 
@@ -17,29 +18,30 @@ export default function QueryForm({ onSubmit, busy }: Props) {
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [searchAvailable, setSearchAvailable] = useState(true);
   const [locating, setLocating] = useState(false);
-  const [error, setError] = useState("");
+  const [activityError, setActivityError] = useState("");
+  const [addressError, setAddressError] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!activity.trim() || !address.trim()) {
-      setError("Completá la actividad y la dirección para continuar.");
-      return;
-    }
+    // Validate both fields at once so every problem shows next to its field before anything is sent.
+    const activityProblem = validateActivity(activity);
+    const addressProblem = validateAddress(address);
+    setActivityError(activityProblem ?? "");
+    setAddressError(addressProblem ?? "");
+    if (activityProblem || addressProblem) return;
     const activitySlug = selectedActivity?.slug ?? null;
     if (selectedAddress) {
-      setError("");
       onSubmit({ activity: activity.trim(), address: selectedAddress.full_address, point: toGeoPoint(selectedAddress.coordinates), activitySlug });
       return;
     }
     if (searchAvailable) {
-      setError("Elegí una dirección de la lista de sugerencias.");
+      setAddressError("Elegí una dirección de la lista de sugerencias.");
       return;
     }
     // Free text without backend geocoding: try Nominatim so the map still gets a point.
     setLocating(true);
     try {
       const point = await geocodeAddressNominatim(address.trim());
-      setError("");
       onSubmit({ activity: activity.trim(), address: address.trim(), point, activitySlug });
     } finally {
       setLocating(false);
@@ -51,19 +53,25 @@ export default function QueryForm({ onSubmit, busy }: Props) {
       <div className="query-field">
         <label htmlFor="activity">¿Qué actividad querés realizar?</label>
         <ActivityAutocomplete id="activity" value={activity} selected={selectedActivity}
-          invalid={!!error && !activity.trim()}
-          onChange={value => { setActivity(value); setError(""); }} onSelect={setSelectedActivity} />
-        <span className="field-hint">Elegí una actividad de la lista para ver los trámites oficiales que suelen aplicar.</span>
+          invalid={!!activityError}
+          describedBy={["activity-hint", "activity-counter", activityError && "activity-error"].filter(Boolean).join(" ")}
+          onChange={value => { setActivity(value); setActivityError(""); }} onSelect={setSelectedActivity} />
+        <div className="field-meta">
+          <span className="field-hint" id="activity-hint">Elegí una actividad de la lista para ver los trámites oficiales que suelen aplicar.</span>
+          <span className="char-counter" id="activity-counter">{activity.length}/{TEXT_RULES.activity.max}</span>
+        </div>
+        {activityError && <p className="field-error" id="activity-error" role="alert">{activityError}</p>}
       </div>
       <div className="query-field">
         <label htmlFor="address">¿En qué dirección?</label>
         <AddressAutocomplete id="address" value={address} selected={selectedAddress}
-          invalid={!!error && !selectedAddress && (!address.trim() || searchAvailable)}
-          onChange={value => { setAddress(value); setError(""); }} onSelect={setSelectedAddress}
+          invalid={!!addressError}
+          describedBy={["address-hint", addressError && "address-error"].filter(Boolean).join(" ")}
+          onChange={value => { setAddress(value); setAddressError(""); }} onSelect={setSelectedAddress}
           onAvailabilityChange={setSearchAvailable} />
-        <span className="field-hint">Escribí calle y altura, sin el barrio, y elegí una opción de la lista. También podés usar «Corrientes y Callao» o «Corrientes entre Callao y Riobamba».</span>
+        <span className="field-hint" id="address-hint">Escribí calle y altura, sin el barrio, y elegí una opción de la lista. También podés usar «Corrientes y Callao» o «Corrientes entre Callao y Riobamba».</span>
+        {addressError && <p className="field-error" id="address-error" role="alert">{addressError}</p>}
       </div>
-      {error && <p className="error-message" role="alert">{error}</p>}
       <button className="primary query-submit" type="submit" disabled={busy || locating}>{busy ? "Consultando…" : locating ? "Ubicando dirección…" : <>Consultar requisitos <span aria-hidden="true">→</span></>}</button>
       <p className="hint">La orientación es inicial y depende de las fuentes oficiales conectadas.</p>
     </form>

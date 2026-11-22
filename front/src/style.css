@@ -60,6 +60,9 @@ h1,h2,h3 { font-family:"Manrope", sans-serif; }
 .query-field input[aria-invalid="true"] { border-color:#B42318; }
 .field-hint,.hint { display:block; margin:7px 0 0; color:var(--text-muted); font-size:11px; line-height:1.6; }
 .field-hint--warning { color:#8A5A00; }
+.field-meta { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.char-counter { flex:0 0 auto; margin:7px 0 0; color:var(--text-muted); font-size:11px; font-variant-numeric:tabular-nums; }
+.field-error { margin:6px 0 0; color:#B42318; font-size:12px; font-weight:600; }
 .address-autocomplete { position:relative; }
 .address-suggestions { position:absolute; z-index:20; top:calc(100% + 4px); left:0; right:0; max-height:280px; margin:0; padding:6px; overflow-y:auto; list-style:none; border:1px solid var(--border); border-radius:8px; background:var(--white); box-shadow:var(--shadow); }
 .address-suggestion { display:flex; flex-direction:column; gap:2px; padding:9px 10px; border-radius:6px; cursor:pointer; }
@@ -331,3 +334,12 @@ h1,h2,h3 { font-family:"Manrope", sans-serif; }
 .map-demo-label span { display:inline-block; padding:3px 8px; border:1px solid var(--ink); border-radius:4px; background:#fff; color:var(--ink); font-size:10px; font-weight:700; white-space:nowrap; }
 .map-demo-stop { background:transparent; border:0; }
 .map-demo-stop i { display:block; width:12px; height:12px; margin:2px; border:2px solid #fff; border-radius:50%; background:var(--blue); box-shadow:0 1px 4px rgb(29 51 67 / 40%); }
+
+/* Error notices and fallback screen (QA-01: section level and unexpected errors). */
+.notice--error { border-color:#F0B8B2; background:#FEF3F2; color:#7A271A; }
+.notice--error .notice-icon { border-color:#B42318; }
+.notice-action { min-height:36px; margin-top:10px; padding:7px 14px; }
+.fallback-screen { display:grid; justify-items:center; gap:14px; max-width:560px; margin:12vh auto; padding:32px 24px; text-align:center; }
+.fallback-screen__logo { width:150px; max-height:48px; object-fit:contain; }
+.fallback-screen h1 { margin:0; color:var(--ink); font-size:28px; }
+.fallback-screen p { margin:0; color:var(--text-muted); font-size:14px; line-height:1.7; }

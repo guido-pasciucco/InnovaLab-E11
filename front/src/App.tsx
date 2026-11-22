@@ -5,7 +5,9 @@ import RequirementsChecklist from "./Componentes/RequirementsChecklist";
 import OfficialSources from "./Componentes/OfficialSources";
 import ContextQuestions from "./Componentes/ContextQuestions";
 import AnalysisSources from "./Componentes/AnalysisSources";
+import ErrorBoundary from "./Componentes/ErrorBoundary";
 import { getActivityProcedures, submitConsultation, submitFollowUp } from "./api/client";
+import { describeError } from "./api/errors";
 import type { ActivityProceduresResponse, ConsultationRequest, ConsultationResponse, ContextAnswers, SourceReference } from "./types";
 
 type Step = 1 | 2 | 3 | 4 | 5;
@@ -20,13 +22,15 @@ const SUGGESTED_QUESTIONS = [
   "¿Está permitido el rubro en esta zona?",
 ];
 
-/** Official procedures of the picked activity, or null when none was picked or they could not be loaded. */
-async function loadActivityProcedures(slug: string | null | undefined): Promise<ActivityProceduresResponse | null> {
-  if (!slug) return null;
+type ProceduresLoad = { procedures: ActivityProceduresResponse | null; error: string | null };
+
+/** Official procedures of the picked activity; a failure keeps the general guidance and explains why. */
+async function loadActivityProcedures(slug: string | null | undefined): Promise<ProceduresLoad> {
+  if (!slug) return { procedures: null, error: null };
   try {
-    return await getActivityProcedures(slug);
-  } catch {
-    return null;
+    return { procedures: await getActivityProcedures(slug), error: null };
+  } catch (err) {
+    return { procedures: null, error: describeError(err) };
   }
 }
 
@@ -39,7 +43,7 @@ export default function App() {
   const [query, setQuery] = useState<ConsultationRequest>({ activity: "", address: "" });
   const [result, setResult] = useState<ConsultationResponse | null>(null);
   const [activityProcedures, setActivityProcedures] = useState<ActivityProceduresResponse | null>(null);
-  const [proceduresUnavailable, setProceduresUnavailable] = useState(false);
+  const [proceduresError, setProceduresError] = useState<string | null>(null);
   const [contextAnswers, setContextAnswers] = useState<ContextAnswers>({});
   const [refining, setRefining] = useState(false);
   const [refineError, setRefineError] = useState(false);
@@ -70,7 +74,7 @@ export default function App() {
     setQuery(data);
     setResult(null);
     setActivityProcedures(null);
-    setProceduresUnavailable(false);
+    setProceduresError(null);
     setContextAnswers({});
     setRefineError(false);
     setChecked([]);
@@ -82,16 +86,16 @@ export default function App() {
     setStep(2);
     setBusy(true);
     try {
-      const [response, procedures] = await Promise.all([
+      const [response, load] = await Promise.all([
         submitConsultation(data), loadActivityProcedures(data.activitySlug),
       ]);
       setResult(response);
-      setActivityProcedures(procedures);
-      setProceduresUnavailable(!!data.activitySlug && !procedures);
+      setActivityProcedures(load.procedures);
+      setProceduresError(load.error);
       setMessages([{ role: "bot", text: `Hola. Puedo ayudarte a revisar la orientación de tu consulta sobre ${response.interpretedActivity} en ${response.normalizedAddress}. ¿Qué te gustaría saber?` }]);
       setStep(3);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "No pudimos procesar la consulta. Intentá nuevamente.");
+      setError(describeError(err) ?? "");
       setStep(1);
     } finally {
       setBusy(false);
@@ -125,7 +129,7 @@ export default function App() {
     setQuery({ activity: "", address: "" });
     setResult(null);
     setActivityProcedures(null);
-    setProceduresUnavailable(false);
+    setProceduresError(null);
     setContextAnswers({});
     setRefineError(false);
     setChecked([]);
@@ -150,7 +154,8 @@ export default function App() {
       const response = await submitFollowUp(result.consultationId, { question: trimmed });
       setMessages(current => [...current, { role: "bot", text: response.answer, sourceIds: response.sourceIds }]);
     } catch (err) {
-      setMessages(current => [...current, { role: "bot", text: err instanceof Error ? err.message : "No se pudo enviar la pregunta." }]);
+      const message = describeError(err);
+      if (message) setMessages(current => [...current, { role: "bot", text: message }]);
     } finally {
       setAssistantBusy(false);
     }
@@ -215,6 +220,7 @@ export default function App() {
       {queryBar}
 
       <main className={`main-content ${step >= 3 ? "main-content--wide" : ""}`}>
+        <ErrorBoundary variant="section" resetKey={step}>
         {step === 1 && (
           <section className="hero">
             <p className="eyebrow">TU ACTIVIDAD · TU DIRECCIÓN · TU PRÓXIMO PASO</p>
@@ -257,7 +263,7 @@ export default function App() {
                 <h1>Trámites relacionados</h1>
                 <p>Una guía inicial de temas que conviene revisar para avanzar con tu actividad.</p>
               </div>
-              {proceduresUnavailable && <div className="notice"><span className="notice-icon">i</span><div><strong>No pudimos cargar los trámites oficiales</strong><p>Te mostramos una orientación general. Intentá de nuevo más tarde.</p></div></div>}
+              {proceduresError && <div className="notice"><span className="notice-icon">i</span><div><strong>No pudimos cargar los trámites oficiales</strong><p>{proceduresError} Mientras tanto, te mostramos una orientación general.</p></div></div>}
               {activityProcedures && (
                 <ContextQuestions questions={activityProcedures.questions} busy={refining} onAnswer={answerContext} />
               )}
@@ -419,6 +425,7 @@ export default function App() {
             <div className="orientation-actions"><button className="secondary" type="button" onClick={() => setStep(4)}>← Volver al mapa</button><button className="primary" type="button" onClick={startOver}>Nueva consulta →</button></div>
           </section>
         )}
+        </ErrorBoundary>
       </main>
 
       <footer className="footer">

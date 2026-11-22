@@ -1,8 +1,9 @@
 import { useEffect, useId, useState, type KeyboardEvent } from "react";
-import { ApiError, searchAddresses } from "../api/client";
+import { searchAddresses } from "../api/client";
+import { describeError } from "../api/errors";
 import type { Address } from "../types";
+import { TEXT_RULES, reachesThreshold } from "../validation";
 
-const MIN_CHARS = 3;
 const DEBOUNCE_MS = 300;
 // "Sara Beatriz Fernandez 580" → street "Sara Beatriz Fernandez", number 580.
 const TRAILING_NUMBER = /^(.*\D)\s+(\d+)\s*$/;
@@ -15,6 +16,8 @@ type Props = {
   value: string;
   selected: Address | null;
   invalid: boolean;
+  /** Ids of the hint and error that describe the field. */
+  describedBy?: string;
   onChange: (value: string) => void;
   onSelect: (address: Address | null) => void;
   /** Tells the form whether the search service answered, so it can accept free text when it is down. */
@@ -75,12 +78,12 @@ async function findSuggestions(query: string, signal: AbortSignal): Promise<Sugg
   const { addresses } = await searchAddresses(query, { signal });
   if (addresses.length) return toSuggestions(addresses);
   const match = TRAILING_NUMBER.exec(query);
-  if (!match) return [];
+  if (!match || !reachesThreshold(match[1], TEXT_RULES.address)) return [];
   const street = await searchAddresses(match[1].trim(), { signal });
   return withoutNumbering(street.addresses, Number(match[2]));
 }
 
-export default function AddressAutocomplete({ id, value, selected, invalid, onChange, onSelect, onAvailabilityChange }: Props) {
+export default function AddressAutocomplete({ id, value, selected, invalid, describedBy, onChange, onSelect, onAvailabilityChange }: Props) {
   const listId = useId();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [status, setStatus] = useState<Status>("idle");
@@ -91,7 +94,8 @@ export default function AddressAutocomplete({ id, value, selected, invalid, onCh
   useEffect(() => {
     const query = value.trim();
     if (selected && value === inputLabel(selected)) return;
-    if (query.length < MIN_CHARS) {
+    // Below the API's threshold there is nothing to ask: no request is sent.
+    if (!reachesThreshold(query, TEXT_RULES.address)) {
       setSuggestions([]);
       setStatus("idle");
       setOpen(false);
@@ -108,12 +112,11 @@ export default function AddressAutocomplete({ id, value, selected, invalid, onCh
         setStatus(found.length ? "ready" : "empty");
         onAvailabilityChange(true);
       } catch (err) {
-        if (controller.signal.aborted) return;
+        const message = describeError(err);
+        if (controller.signal.aborted || message === null) return;
         setSuggestions([]);
         setStatus("error");
-        setErrorMessage(err instanceof ApiError && err.status === 502
-          ? "El servicio de direcciones no está disponible. Podés continuar con la dirección escrita."
-          : "No pudimos buscar direcciones. Podés continuar con la dirección escrita.");
+        setErrorMessage(`${message} Podés continuar con la dirección escrita.`);
         onAvailabilityChange(false);
       }
     }, DEBOUNCE_MS);
@@ -149,12 +152,12 @@ export default function AddressAutocomplete({ id, value, selected, invalid, onCh
   return (
     <div className="address-autocomplete">
       <input id={id} name="address" value={value} role="combobox" aria-autocomplete="list" aria-expanded={showList}
-        aria-controls={listId} aria-activedescendant={activeId} aria-invalid={invalid}
+        aria-controls={listId} aria-activedescendant={activeId} aria-invalid={invalid} aria-describedby={describedBy}
         onChange={e => { onChange(e.target.value); if (selected) onSelect(null); }}
         onKeyDown={handleKeyDown}
         onFocus={() => { if (suggestions.length && !selected) setOpen(true); }}
         onBlur={() => setOpen(false)}
-        placeholder="Ej.: Corrientes 2500" maxLength={200} autoComplete="off" />
+        placeholder="Ej.: Corrientes 2500" maxLength={TEXT_RULES.address.max} autoComplete="off" />
       {showList && (
         <ul className="address-suggestions" id={listId} role="listbox">
           {status === "loading" && <li className="address-suggestions__status">Buscando direcciones…</li>}
