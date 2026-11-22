@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import QueryForm from "./Componentes/QueryForm";
 import MapPanel from "./Componentes/MapPanel";
 import RequirementsChecklist from "./Componentes/RequirementsChecklist";
@@ -8,10 +9,13 @@ import AnalysisSources from "./Componentes/AnalysisSources";
 import ErrorBoundary from "./Componentes/ErrorBoundary";
 import { getActivityProcedures, submitConsultation, submitFollowUp } from "./api/client";
 import { describeError } from "./api/errors";
+import { HOME_PATH, STEPS, isStepAvailable, pathOf, stepFromPath, type Step } from "./navigation/steps";
+import { clearConsultation, loadConsultation, saveConsultation } from "./session/currentConsultation";
 import type { ActivityProceduresResponse, ConsultationRequest, ConsultationResponse, ContextAnswers, SourceReference } from "./types";
 
-type Step = 1 | 2 | 3 | 4 | 5;
-const steps = ["Consulta", "Análisis", "Orientación", "Mapa", "Asistente"];
+/** Official site of the City's procedures, the source the guidance cites. */
+const OFFICIAL_PROCEDURES_URL = "https://buenosaires.gob.ar/gobierno/tramites";
+const OPEN_DATA_URL = "https://data.buenosaires.gob.ar/";
 
 type ChatMessage = { role: "user" | "bot"; text: string; sourceIds?: string[] };
 
@@ -38,25 +42,51 @@ function toSourceReference(data: ActivityProceduresResponse): SourceReference {
   return { id: "caba-tramites", title: data.source.name, publisher: "Gobierno de la Ciudad de Buenos Aires", url: data.source.url, note: data.source.license };
 }
 
+function greeting(response: ConsultationResponse): ChatMessage {
+  return { role: "bot", text: `Hola. Puedo ayudarte a revisar la orientación de tu consulta sobre ${response.interpretedActivity} en ${response.normalizedAddress}. ¿Qué te gustaría saber?` };
+}
+
 export default function App() {
-  const [step, setStep] = useState<Step>(1);
-  const [query, setQuery] = useState<ConsultationRequest>({ activity: "", address: "" });
-  const [result, setResult] = useState<ConsultationResponse | null>(null);
-  const [activityProcedures, setActivityProcedures] = useState<ActivityProceduresResponse | null>(null);
-  const [proceduresError, setProceduresError] = useState<string | null>(null);
-  const [contextAnswers, setContextAnswers] = useState<ContextAnswers>({});
+  const location = useLocation();
+  const navigate = useNavigate();
+  // The consultation of this tab survives a reload: restore it once, before the first render.
+  const [saved] = useState(() => loadConsultation());
+  const [query, setQuery] = useState<ConsultationRequest>(saved?.query ?? { activity: "", address: "" });
+  const [result, setResult] = useState<ConsultationResponse | null>(saved?.result ?? null);
+  const [activityProcedures, setActivityProcedures] = useState<ActivityProceduresResponse | null>(saved?.activityProcedures ?? null);
+  const [proceduresError, setProceduresError] = useState<string | null>(saved?.proceduresError ?? null);
+  const [contextAnswers, setContextAnswers] = useState<ContextAnswers>(saved?.contextAnswers ?? {});
   const [refining, setRefining] = useState(false);
   const [refineError, setRefineError] = useState(false);
   const refineRequest = useRef(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [checked, setChecked] = useState<string[]>([]);
-  const [checkedRequirements, setCheckedRequirements] = useState<string[]>([]);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [checked, setChecked] = useState<string[]>(saved?.checked ?? []);
+  const [checkedRequirements, setCheckedRequirements] = useState<string[]>(saved?.checkedRequirements ?? []);
+  const [messages, setMessages] = useState<ChatMessage[]>(saved ? [greeting(saved.result)] : []);
   const [suggested, setSuggested] = useState<string[]>(SUGGESTED_QUESTIONS);
   const [question, setQuestion] = useState("");
   const [assistantBusy, setAssistantBusy] = useState(false);
   const chatLog = useRef<HTMLDivElement>(null);
+  const step = stepFromPath(location.pathname);
+  const stepState = { analyzing: busy, hasResult: !!result };
+
+  function goTo(target: Step) {
+    navigate(pathOf(target));
+  }
+
+  useEffect(() => {
+    if (!result) {
+      clearConsultation();
+      return;
+    }
+    saveConsultation({ query, result, activityProcedures, proceduresError, contextAnswers, checked, checkedRequirements });
+  }, [query, result, activityProcedures, proceduresError, contextAnswers, checked, checkedRequirements]);
+
+  // Client-side navigation does not scroll to #anchors on its own (used by the footer links).
+  useEffect(() => {
+    if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView({ block: "start" });
+  }, [location]);
 
   const guidanceCount = activityProcedures?.procedures.length ?? result?.steps.length ?? 0;
   const progress = useMemo(() => guidanceCount
@@ -83,8 +113,8 @@ export default function App() {
     setSuggested(SUGGESTED_QUESTIONS);
     setQuestion("");
     setError("");
-    setStep(2);
     setBusy(true);
+    goTo(2);
     try {
       const [response, load] = await Promise.all([
         submitConsultation(data), loadActivityProcedures(data.activitySlug),
@@ -92,11 +122,12 @@ export default function App() {
       setResult(response);
       setActivityProcedures(load.procedures);
       setProceduresError(load.error);
-      setMessages([{ role: "bot", text: `Hola. Puedo ayudarte a revisar la orientación de tu consulta sobre ${response.interpretedActivity} en ${response.normalizedAddress}. ¿Qué te gustaría saber?` }]);
-      setStep(3);
+      setMessages([greeting(response)]);
+      goTo(3);
     } catch (err) {
       setError(describeError(err) ?? "");
-      setStep(1);
+      // The failed analysis should not stay in the history: Back would land on an empty step.
+      navigate(HOME_PATH, { replace: true });
     } finally {
       setBusy(false);
     }
@@ -125,7 +156,7 @@ export default function App() {
   }
 
   function startOver() {
-    setStep(1);
+    goTo(1);
     setQuery({ activity: "", address: "" });
     setResult(null);
     setActivityProcedures(null);
@@ -178,18 +209,22 @@ export default function App() {
       .filter((source): source is SourceReference => !!source);
   }
 
+  // Unknown addresses and steps without data to show (e.g. opening /orientacion with no consultation) go home.
+  if (step === null || !isStepAvailable(step, stepState)) return <Navigate to={HOME_PATH} replace />;
+
   const queryBar = step >= 3 && (
     <div className="query-bar">
       <div className="query-bar__summary">
         <span className="query-bar__label">Tu consulta</span>
         <span className="query-pill">{query.activity}</span>
         <span className="query-pill">{query.address}</span>
-        <button className="text-button" onClick={() => setStep(1)} type="button">Editar consulta</button>
+        <button className="text-button" onClick={() => goTo(1)} type="button">Editar consulta</button>
       </div>
       <nav className="tabs" aria-label="Secciones de la consulta">
-        <button className={step === 3 ? "is-active" : ""} onClick={() => setStep(3)} type="button">Orientación</button>
-        <button className={step === 4 ? "is-active" : ""} onClick={() => setStep(4)} type="button">Mapa</button>
-        <button className={step === 5 ? "is-active" : ""} onClick={() => setStep(5)} type="button">Asistente</button>
+        {STEPS.slice(2).map(item => (
+          <button key={item.path} className={step === item.step ? "is-active" : ""} aria-current={step === item.step ? "page" : undefined}
+            onClick={() => goTo(item.step)} type="button">{item.label}</button>
+        ))}
       </nav>
     </div>
   );
@@ -204,15 +239,19 @@ export default function App() {
       </header>
 
       <nav className="steps" aria-label="Pasos de la consulta">
-        {steps.map((label, index) => {
-          const number = index + 1;
+        {STEPS.map(({ step: number, label }) => {
+          const current = number === step;
           const completed = number < step;
+          const available = isStepAvailable(number, stepState);
           return (
-            <div className={`step ${number === step ? "active" : ""} ${completed ? "completed" : ""}`} key={label}
-              aria-current={number === step ? "step" : undefined}>
-              <span className="step-number">{completed ? "✓" : number}</span>
+            // aria-disabled instead of disabled: unavailable steps stay focusable so screen readers announce them.
+            <button type="button" key={label} className={`step ${current ? "active" : ""} ${completed ? "completed" : ""}`}
+              aria-current={current ? "step" : undefined} aria-disabled={!available || undefined}
+              onClick={() => { if (available && !current) goTo(number); }}>
+              <span className="step-number" aria-hidden="true">{completed ? "✓" : number}</span>
               <span>{label}</span>
-            </div>
+              <span className="sr-only">{current ? " (paso actual)" : !available ? " (no disponible todavía)" : completed ? " (completado)" : ""}</span>
+            </button>
           );
         })}
       </nav>
@@ -233,7 +272,7 @@ export default function App() {
             <QueryForm busy={busy} onSubmit={handleSubmit} />
             {error && <p className="error-message" role="alert">{error}</p>}
             <p className="security-note"><span className="security-dot" />Tus datos se utilizan para preparar esta consulta.</p>
-            <div className="features">
+            <div className="features" id="como-funciona">
               <article className="feature"><div className="feature__icon" /><div><h2>Varias fuentes, una respuesta</h2><p>Cruzamos trámites, normativa y datos territoriales al mismo tiempo.</p></div></article>
               <article className="feature"><div className="feature__icon" /><div><h2>Cada dato con su fuente</h2><p>Vas a ver de dónde sale cada requisito y cada afirmación.</p></div></article>
               <article className="feature"><div className="feature__icon" /><div><h2>Tu ubicación en el mapa</h2><p>Te mostramos la zona consultada con sus capas de información.</p></div></article>
@@ -251,7 +290,7 @@ export default function App() {
               <article><span>UBICACIÓN</span><strong>{query.address}</strong></article>
             </div>
             <AnalysisSources running={busy} />
-            <button className="secondary" type="button" onClick={() => setStep(1)} disabled={busy}>Volver a editar</button>
+            <button className="secondary" type="button" onClick={() => goTo(1)} disabled={busy}>Volver a editar</button>
           </section>
         )}
 
@@ -314,8 +353,8 @@ export default function App() {
                 <div className="progress-track"><span style={{ width: `${progress}%` }} /></div>
               </div>
               <div className="orientation-actions">
-                <button className="secondary" type="button" onClick={() => setStep(2)}>← Volver al análisis</button>
-                <button className="primary" type="button" onClick={() => setStep(4)}>Ver mapa →</button>
+                <button className="secondary" type="button" onClick={() => goTo(2)}>← Volver al análisis</button>
+                <button className="primary" type="button" onClick={() => goTo(4)}>Ver mapa →</button>
               </div>
             </section>
             <aside className="side-column">
@@ -349,8 +388,8 @@ export default function App() {
             </div>
             <MapPanel point={result.point} address={result.normalizedAddress} features={result.territorialFeatures} />
             <div className="orientation-actions">
-              <button className="secondary" type="button" onClick={() => setStep(3)}>← Volver a orientación</button>
-              <button className="primary" type="button" onClick={() => setStep(5)}>Consultar al asistente →</button>
+              <button className="secondary" type="button" onClick={() => goTo(3)}>← Volver a orientación</button>
+              <button className="primary" type="button" onClick={() => goTo(5)}>Consultar al asistente →</button>
             </div>
           </div>
         )}
@@ -422,7 +461,7 @@ export default function App() {
                 <p>Usa la información de la consulta y las fuentes oficiales conectadas. Si no hay una fuente que responda, te lo dice en lugar de inventar una respuesta.</p>
               </section>
             </div>
-            <div className="orientation-actions"><button className="secondary" type="button" onClick={() => setStep(4)}>← Volver al mapa</button><button className="primary" type="button" onClick={startOver}>Nueva consulta →</button></div>
+            <div className="orientation-actions"><button className="secondary" type="button" onClick={() => goTo(4)}>← Volver al mapa</button><button className="primary" type="button" onClick={startOver}>Nueva consulta →</button></div>
           </section>
         )}
         </ErrorBoundary>
@@ -433,25 +472,27 @@ export default function App() {
           <div className="footer__brand">
             <p>Consultá qué necesitás para habilitar tu comercio en la Ciudad de Buenos Aires, con información de fuentes oficiales.</p>
             <h2>Seguinos</h2>
-            <div className="social">
-              <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
-              <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
-              <a href="#" aria-label="X"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"/></svg></a>
+            {/* No official accounts yet: icons are shown without a fake link. */}
+            <div className="social" title="Próximamente">
+              <span className="social__item" role="img" aria-label="Instagram (próximamente)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></span>
+              <span className="social__item" role="img" aria-label="Facebook (próximamente)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></span>
+              <span className="social__item" role="img" aria-label="X (próximamente)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"/></svg></span>
             </div>
           </div>
           <nav className="footer__col" aria-label="Consultas">
             <h2>Consultas</h2>
-            <a href="#" onClick={e => { e.preventDefault(); startOver(); }}>Habilitación de comercios</a>
-            <a href="#" onClick={e => { e.preventDefault(); result ? setStep(3) : startOver(); }}>Trámites y requisitos</a>
-            <a href="#" onClick={e => { e.preventDefault(); result ? setStep(4) : startOver(); }}>Mapa de la Ciudad</a>
-            <a href="#" onClick={e => e.preventDefault()}>Preguntas frecuentes</a>
+            <Link to={HOME_PATH} onClick={event => { event.preventDefault(); startOver(); }}>Habilitación de comercios</Link>
+            <Link to={result ? pathOf(3) : HOME_PATH}>Trámites y requisitos</Link>
+            <Link to={result ? pathOf(4) : HOME_PATH}>Mapa de la Ciudad</Link>
+            <Link to={result ? pathOf(5) : `${HOME_PATH}#como-funciona`}>Preguntas frecuentes</Link>
           </nav>
           <nav className="footer__col" aria-label="Ayuda">
             <h2>Ayuda</h2>
-            <a href="#" onClick={e => e.preventDefault()}>Cómo funciona</a>
-            <a href="#" onClick={e => { e.preventDefault(); result ? setStep(3) : startOver(); }}>Fuentes oficiales</a>
-            <a href="#" onClick={e => e.preventDefault()}>Centro de ayuda</a>
-            <a href="#" onClick={e => e.preventDefault()}>Accesibilidad</a>
+            <Link to={`${HOME_PATH}#como-funciona`}>Cómo funciona</Link>
+            <a href={OFFICIAL_PROCEDURES_URL} target="_blank" rel="noreferrer">Fuentes oficiales <span aria-hidden="true">↗</span></a>
+            {/* No page exists yet for these: plain text instead of links that lead nowhere. */}
+            <span>Centro de ayuda (próximamente)</span>
+            <span>Accesibilidad (próximamente)</span>
           </nav>
           <div className="footer__col">
             <h2>Contacto</h2>
@@ -462,9 +503,9 @@ export default function App() {
         </div>
         <div className="footer__bar">
           <span>© 2026 ConCo — Orientación inicial para emprendedores</span>
-          <a href="#" onClick={e => e.preventDefault()}>Términos y condiciones</a>
-          <a href="#" onClick={e => e.preventDefault()}>Política de privacidad</a>
-          <a href="#" onClick={e => e.preventDefault()}>Datos abiertos</a>
+          <span>Términos y condiciones (próximamente)</span>
+          <span>Política de privacidad (próximamente)</span>
+          <a href={OPEN_DATA_URL} target="_blank" rel="noreferrer">Datos abiertos <span aria-hidden="true">↗</span></a>
         </div>
         <div className="footer__logo-wrap">
           <button className="brand" type="button" onClick={startOver} aria-label="Volver al inicio de Conco">
