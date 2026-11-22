@@ -49,6 +49,18 @@ Cada entrada tiene tres cosas:
 
 **Confirmado:** 22/11/2026.
 
+### 3. Mensajes de error que se entienden (QA-04)
+
+**Cómo se entendió:** cuando alguien carga mal un dato en el formulario, la de QA pide que no se envíe el pedido, que se limpien los espacios de más, que el error aparezca al lado del campo en palabras de persona, que el campo de actividad tenga un contador de caracteres a la vista y que los mínimos y máximos sean los mismos en la página y en la API. Los mínimos que ella enumeró: dirección desde 3 caracteres, actividad desde 2 y hasta 100, y cantidad de resultados entre 1 y 10 (hasta 20 en trámites).
+
+**Contexto que lo aclaró:**
+
+- Un mensaje como *"string_pattern_mismatch"* no le dice a nadie qué corregir; en cambio *"Escribí al menos 3 caracteres"*, sí.
+- La decisión de arquitectura de errores tomada para la especificación 1 aplica acá: un único lugar que traduzca los códigos a mensajes en español, `ApiError` extendido para entender `code` y mensaje, y tres niveles de aviso (al lado del campo, dentro de la sección y pantalla de respaldo).
+- El error boundary atrapa errores de render; los errores de la API los maneja el cliente. No se cambian las reglas de validación de la API (ella pidió conservarlas) ni el formato del 422.
+
+**Confirmado:** 22/11/2026 (el dueño indicó que "ya quedó lo de errores").
+
 ## Cómo se usa
 
 1. Te explico un pendiente, de a uno, en lenguaje simple.
