@@ -35,6 +35,7 @@ Evidencia del estado actual:
 - Los enlaces del footer usan `href="#"` con `preventDefault` (`front/src/App.tsx:437-460`).
 - No hay `localStorage`, `sessionStorage` ni `indexedDB` en `front/src/`.
 - No hay `front/vercel.json`: las rutas profundas requieren verificar el fallback SPA en la configuración de Vercel.
+- Los ejemplos de la home están en `front/src/Componentes/QueryForm.tsx:7-12` (arreglo `examples`) y en el bloque `Probá con un ejemplo` de la línea 74.
 
 | ID | Modificación pendiente | Dependencias | Criterio de cierre |
 |---|---|---|---|
@@ -42,6 +43,7 @@ Evidencia del estado actual:
 | FE-02 | Hacer clickeables los pasos de la barra (y los tabs internos y enlaces del footer) con `Link`/`NavLink`, deshabilitando los pasos aún no desbloqueados. | FE-01 | Navegación por teclado y lector de pantalla; estados activo/completado/bloqueado visibles. |
 | FE-03 | Mostrar el historial de búsquedas en la misma pantalla del paso 1, con el diseño descripto más abajo. | FE-01 (para abrir el resultado) | El historial se ve sin salir de la pantalla de consulta; se puede limpiar; funciona en móvil. |
 | FE-04 | Persistir el historial en `localStorage` con normalización, dedupe, tope y rehidratación de la consulta. | FE-03 | Recargar la página conserva el historial; las reglas de privacidad y el problema del `consultationId` están resueltos. |
+| FE-05 | Quitar los ejemplos de la página principal: el bloque «Probá con un ejemplo» con los chips `Cafetería`, `Almacén` y `Peluquería`. | — | El formulario de inicio ya no muestra ejemplos ni rellena los campos con datos de prueba. |
 
 ### Diseño propuesto del historial (FE-03 / FE-04)
 
@@ -74,6 +76,10 @@ Búsquedas recientes (3)                       [Limpiar]
 1. [docs/ideas/cache-busquedas-direcciones.md](../ideas/cache-busquedas-direcciones.md) propone un caché **de backend** para las respuestas de Georef. El pedido actual es un caché **local de historial en el frontend**: son cosas distintas y pueden convivir.
 2. El asistente usa `submitFollowUp(result.consultationId, …)` (`front/src/App.tsx:150`), un identificador que vive en el servidor. Al recargar la página, el `consultationId` guardado alcanza para mostrar la orientación, pero **no** para seguir haciendo preguntas. Antes de implementar «Ver resultado» hay que decidir: repetir la consulta al abrir un registro histórico, o persistir las consultas en el backend.
 
+### Alcance de FE-05
+
+Quitar el arreglo `examples`, su comentario asociado y el bloque JSX «Probá con un ejemplo» en `QueryForm.tsx`. Los estilos `.examples` y `.examples-title` (`front/src/style.css:77-78`) quedan sin uso y también se eliminan. **No** eliminar `.example-chips` ni `.chip`: el asistente los usa para las preguntas sugeridas en `front/src/App.tsx:387-389`.
+
 ## Checklist unificado
 
 - [ ] QA-01 — diagnosticar INC-01 y registrar causa + fix
@@ -90,6 +96,7 @@ Búsquedas recientes (3)                       [Limpiar]
 - [ ] FE-02 — pasos, tabs y enlaces del footer navegables por teclado
 - [ ] FE-03 — panel «Búsquedas recientes» en el paso 1
 - [ ] FE-04 — persistencia local, dedupe, limpieza y rehidratación
+- [ ] FE-05 — quitar los ejemplos «Probá con un ejemplo» del formulario principal
 
 ## Dependencias y riesgos
 
