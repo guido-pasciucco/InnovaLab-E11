@@ -23,15 +23,19 @@ Documento de referencia para **implementar** los cambios de experiencia pedidos 
 
 ### UX-2. Navegación repetida: Orientación, Mapa y Asistente aparecen dos veces
 
-**Estado:** confirmada (qué barra queda: ver decisión pendiente).
+**Estado:** confirmada (22/11/2026: quedan solo los pasos de arriba).
 
 **Cómo se entendió:** en los pasos 3 a 5 conviven dos navegaciones con los mismos destinos: los pasos de arriba (Consulta · Análisis · Orientación · Mapa · Asistente) y las pestañas a la derecha de "Tu consulta" (Orientación · Mapa · Asistente). Es redundante y obliga a decidir cuál usar.
 
-**Cómo sabremos que está listo:** Orientación, Mapa y Asistente se pueden abrir desde un solo lugar.
+**Cómo sabremos que está listo:**
+
+- Se quitan las pestañas de la barra "Tu consulta". Esa barra sigue mostrando la actividad, la dirección, "Editar consulta" y "Actualizar".
+- Orientación, Mapa y Asistente se abren solo desde los pasos de arriba.
+- Junto con UX-3, los pasos de arriba quedan: Consulta · Orientación · Mapa · Asistente.
 
 **Lo que NO se hace:** cambiar las direcciones de cada pantalla (`/orientacion`, `/mapa`, `/asistente`): siguen pudiendo compartirse y recargarse.
 
-**Decisión pendiente:** qué barra se queda.
+**Decisión:** se eligió la barra de pasos porque se ve en todas las pantallas, incluida "Consulta"; las pestañas solo aparecían del paso 3 en adelante. Se aceptó que Mapa y Asistente se vean como pasos aunque sean vistas del mismo resultado.
 
 ### UX-3. "Análisis" es solo una pantalla de carga
 
