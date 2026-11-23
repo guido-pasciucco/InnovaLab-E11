@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { STEPS, isStepAvailable, pathOf, stepFromPath } from "./steps";
+import { NAV_STEPS, STEPS, isStepAvailable, pathOf, stepFromPath } from "./steps";
 
 describe("step routes", () => {
   it("gives each step its own address", () => {
@@ -21,6 +21,12 @@ describe("step routes", () => {
   });
 });
 
+describe("steps bar", () => {
+  it("shows every step except the Análisis loading screen", () => {
+    expect(NAV_STEPS.map(({ label }) => label)).toEqual(["Consulta", "Orientación", "Mapa", "Asistente"]);
+  });
+});
+
 describe("which steps can be opened", () => {
   it("without a consultation only Consulta is available", () => {
     const state = { analyzing: false, hasResult: false };
@@ -32,8 +38,8 @@ describe("which steps can be opened", () => {
     expect(STEPS.map(({ step }) => isStepAvailable(step, state))).toEqual([true, true, false, false, false]);
   });
 
-  it("with a result every step is available", () => {
+  it("with a result every step but Análisis is available", () => {
     const state = { analyzing: false, hasResult: true };
-    expect(STEPS.map(({ step }) => isStepAvailable(step, state))).toEqual([true, true, true, true, true]);
+    expect(STEPS.map(({ step }) => isStepAvailable(step, state))).toEqual([true, false, true, true, true]);
   });
 });

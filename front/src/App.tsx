@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import QueryForm from "./Componentes/QueryForm";
 import MapPanel from "./Componentes/MapPanel";
-import RequirementsChecklist from "./Componentes/RequirementsChecklist";
+import RequirementsChecklist, { RequirementsSummary } from "./Componentes/RequirementsChecklist";
+import { requirementCount } from "./Componentes/requirementGroups";
 import OfficialSources from "./Componentes/OfficialSources";
 import ContextQuestions from "./Componentes/ContextQuestions";
 import AnalysisSources from "./Componentes/AnalysisSources";
@@ -12,7 +13,7 @@ import { getActivityProcedures, submitConsultation, submitFollowUp } from "./api
 import { describeError } from "./api/errors";
 import type { HistoryEntry } from "./history/searchHistory";
 import { useSearchHistory } from "./history/useSearchHistory";
-import { HOME_PATH, STEPS, isStepAvailable, pathOf, stepFromPath, type Step } from "./navigation/steps";
+import { HOME_PATH, NAV_STEPS, isStepAvailable, pathOf, stepFromPath, type Step } from "./navigation/steps";
 import { clearConsultation, loadConsultation, saveConsultation } from "./session/currentConsultation";
 import { excludedNote } from "./text";
 import type { ActivityProceduresResponse, ConsultationRequest, ConsultationResponse, ContextAnswers, SourceReference } from "./types";
@@ -82,11 +83,14 @@ export default function App() {
   const history = useSearchHistory();
   // Values the form starts with after reopening a search from the history (and its remount key).
   const [prefill, setPrefill] = useState<{ key: number; request: ConsultationRequest } | null>(null);
+  // Orientation tab ("Trámites" / "Qué tenés que conseguir") and the requirement groups expanded in it.
+  const [orientationTab, setOrientationTab] = useState<"procedures" | "requirements">("procedures");
+  const [openRequirementGroups, setOpenRequirementGroups] = useState<string[]>([]);
   const step = stepFromPath(location.pathname);
   const stepState = { analyzing: busy, hasResult: !!result };
 
-  function goTo(target: Step) {
-    navigate(pathOf(target));
+  function goTo(target: Step, replace = false) {
+    navigate(pathOf(target), { replace });
   }
 
   useEffect(() => {
@@ -129,8 +133,11 @@ export default function App() {
     setSuggested(SUGGESTED_QUESTIONS);
     setQuestion("");
     setError("");
+    setOrientationTab("procedures");
+    setOpenRequirementGroups([]);
     setBusy(true);
-    goTo(2);
+    // Re-running from a result replaces it in the history instead of stacking another entry.
+    goTo(2, step !== 1);
     try {
       const [response, load] = await Promise.all([
         submitConsultation(data), loadActivityProcedures(data.activitySlug),
@@ -143,7 +150,8 @@ export default function App() {
         summary: historySummary(response, load.procedures), searchedAt: new Date().toISOString(),
       });
       setMessages([greeting(response)]);
-      goTo(3);
+      // Análisis is only a loading screen: Back from the orientation must not land on it.
+      goTo(3, true);
     } catch (err) {
       setError(describeError(err) ?? "");
       // The failed analysis should not stay in the history: Back would land on an empty step.
@@ -180,6 +188,21 @@ export default function App() {
     const request: ConsultationRequest = { activity: entry.activity, address: entry.address, point: entry.point, activitySlug: entry.activitySlug };
     setPrefill(current => ({ key: (current?.key ?? 0) + 1, request }));
     void handleSubmit(request);
+  }
+
+  /** Back to the form with the current consultation loaded, ready to change one field. */
+  function editQuery() {
+    setPrefill(current => ({ key: (current?.key ?? 0) + 1, request: query }));
+    goTo(1);
+  }
+
+  function openRequirements(groupId?: string) {
+    setOrientationTab("requirements");
+    if (groupId) {
+      setOpenRequirementGroups(old => old.includes(groupId) ? old : [...old, groupId]);
+      // Wait for the tab to render before scrolling to the group.
+      requestAnimationFrame(() => document.getElementById(`requisitos-${groupId}`)?.scrollIntoView({ block: "start" }));
+    }
   }
 
   function startOver() {
@@ -237,6 +260,9 @@ export default function App() {
       .filter((source): source is SourceReference => !!source);
   }
 
+  // Análisis is only the loading screen: once the result is in, its address leads to the orientation.
+  // This also covers the moment the analysis ends before the router has moved on.
+  if (step === 2 && !busy && result) return <Navigate to={pathOf(3)} replace />;
   // Unknown addresses and steps without data to show (e.g. opening /orientacion with no consultation) go home.
   if (step === null || !isStepAvailable(step, stepState)) return <Navigate to={HOME_PATH} replace />;
 
@@ -246,16 +272,10 @@ export default function App() {
         <span className="query-bar__label">Tu consulta</span>
         <span className="query-pill">{query.activity}</span>
         <span className="query-pill">{query.address}</span>
-        <button className="text-button" onClick={() => goTo(1)} type="button">Editar consulta</button>
+        <button className="text-button" onClick={editQuery} type="button">Editar consulta</button>
         <button className="text-button" onClick={() => void handleSubmit(query)} type="button" disabled={busy}
           title="Volver a consultar por si cambió algo">Actualizar</button>
       </div>
-      <nav className="tabs" aria-label="Secciones de la consulta">
-        {STEPS.slice(2).map(item => (
-          <button key={item.path} className={step === item.step ? "is-active" : ""} aria-current={step === item.step ? "page" : undefined}
-            onClick={() => goTo(item.step)} type="button">{item.label}</button>
-        ))}
-      </nav>
     </div>
   );
 
@@ -269,7 +289,7 @@ export default function App() {
       </header>
 
       <nav className="steps" aria-label="Pasos de la consulta">
-        {STEPS.map(({ step: number, label }) => {
+        {NAV_STEPS.map(({ step: number, label }, index) => {
           const current = number === step;
           const completed = number < step;
           const available = isStepAvailable(number, stepState);
@@ -278,7 +298,7 @@ export default function App() {
             <button type="button" key={label} className={`step ${current ? "active" : ""} ${completed ? "completed" : ""}`}
               aria-current={current ? "step" : undefined} aria-disabled={!available || undefined}
               onClick={() => { if (available && !current) goTo(number); }}>
-              <span className="step-number" aria-hidden="true">{completed ? "✓" : number}</span>
+              <span className="step-number" aria-hidden="true">{completed ? "✓" : index + 1}</span>
               <span>{label}</span>
               <span className="sr-only">{current ? " (paso actual)" : !available ? " (no disponible todavía)" : completed ? " (completado)" : ""}</span>
             </button>
@@ -317,7 +337,7 @@ export default function App() {
 
         {step === 2 && (
           <section className="analysis-page panel" aria-live="polite">
-            <p className="eyebrow">PASO 2 · ANÁLISIS</p>
+            <p className="eyebrow">ANÁLISIS</p>
             <h1>{busy ? "Estamos interpretando tu consulta" : "Consulta procesada"}</h1>
             <p className="results-intro">Identificamos la actividad y la ubicación para preparar una orientación con los datos disponibles.</p>
             <div className="analysis-summary">
@@ -325,7 +345,6 @@ export default function App() {
               <article><span>UBICACIÓN</span><strong>{query.address}</strong></article>
             </div>
             <AnalysisSources running={busy} />
-            <button className="secondary" type="button" onClick={() => goTo(1)} disabled={busy}>Volver a editar</button>
           </section>
         )}
 
@@ -333,7 +352,7 @@ export default function App() {
           <div className="orientation-layout">
             <section className="content-column">
               <div className="page-heading">
-                <p className="eyebrow">PASO 3 · ORIENTACIÓN</p>
+                <p className="eyebrow">PASO 2 · ORIENTACIÓN</p>
                 <h1>Trámites relacionados</h1>
                 <p>Una guía inicial de temas que conviene revisar para avanzar con tu actividad.</p>
               </div>
@@ -343,6 +362,29 @@ export default function App() {
               )}
               {refineError && <div className="notice"><span className="notice-icon">i</span><div><strong>No pudimos actualizar los trámites</strong><p>Seguimos mostrando la lista anterior. Probá responder de nuevo.</p></div></div>}
               {discardedNote && <p className="excluded-note" aria-live="polite">{discardedNote}</p>}
+              {activityProcedures && (
+                <div className="tabs orientation-tabs" role="tablist" aria-label="Vistas de la orientación">
+                  <button type="button" role="tab" aria-selected={orientationTab === "procedures"}
+                    className={orientationTab === "procedures" ? "is-active" : ""}
+                    onClick={() => setOrientationTab("procedures")}>Trámites ({activityProcedures.procedures.length})</button>
+                  <button type="button" role="tab" aria-selected={orientationTab === "requirements"}
+                    className={orientationTab === "requirements" ? "is-active" : ""}
+                    onClick={() => openRequirements()}>Qué tenés que conseguir ({activityProcedures.requirements.length})</button>
+                </div>
+              )}
+              {activityProcedures && orientationTab === "requirements" ? (
+                <RequirementsChecklist
+                  requirements={activityProcedures.requirements}
+                  procedures={activityProcedures.procedures.map(({ procedure }) => procedure)}
+                  note={activityProcedures.requirements_note}
+                  checked={checkedRequirements}
+                  onToggle={id => setCheckedRequirements(old =>
+                    old.includes(id) ? old.filter(checkedId => checkedId !== id) : [...old, id])}
+                  openGroups={openRequirementGroups}
+                  onToggleGroup={(id, open) => setOpenRequirementGroups(old =>
+                    open ? (old.includes(id) ? old : [...old, id]) : old.filter(groupId => groupId !== id))}
+                />
+              ) : <>
               <div className="guidance-list">
                 {activityProcedures ? activityProcedures.procedures.map(({ procedure, note, status }, index) => (
                   <article className="guidance-card" key={procedure.id}>
@@ -359,6 +401,11 @@ export default function App() {
                     <p className="guidance-note"><strong>Cuándo aplica:</strong> {note}</p>
                     <p>{procedure.summary}</p>
                     <a className="procedure-link" href={procedure.official_url} target="_blank" rel="noreferrer">Ver el trámite en buenosaires.gob.ar <span aria-hidden="true">↗</span></a>
+                    {requirementCount(activityProcedures.requirements, procedure.id) > 0 && (
+                      <button className="text-button needs-link" type="button" onClick={() => openRequirements(procedure.id)}>
+                        Necesitás {requirementCount(activityProcedures.requirements, procedure.id)} cosas →
+                      </button>
+                    )}
                     <label className="review-check">
                       <input type="checkbox" checked={checked.includes(procedure.id)}
                         onChange={e => setChecked(old => e.target.checked ? [...old, procedure.id] : old.filter(id => id !== procedure.id))} />
@@ -386,8 +433,8 @@ export default function App() {
                 <div><strong>Tu avance</strong><span>{checked.length} de {guidanceCount} revisados</span></div>
                 <div className="progress-track"><span style={{ width: `${progress}%` }} /></div>
               </div>
-              <div className="orientation-actions">
-                <button className="secondary" type="button" onClick={() => goTo(2)}>← Volver al análisis</button>
+              </>}
+              <div className="orientation-actions orientation-actions--end">
                 <button className="primary" type="button" onClick={() => goTo(4)}>Ver mapa →</button>
               </div>
             </section>
@@ -400,13 +447,8 @@ export default function App() {
                   ? "Estos son trámites que suelen aplicar a esta actividad. Es una orientación general: verificá los requisitos con el organismo responsable."
                   : result.summary}</p>
               </section>
-              <RequirementsChecklist
-                requirements={activityProcedures?.requirements ?? []}
-                note={activityProcedures?.requirements_note ?? ""}
-                checked={checkedRequirements}
-                onToggle={id => setCheckedRequirements(old =>
-                  old.includes(id) ? old.filter(checkedId => checkedId !== id) : [...old, id])}
-              />
+              <RequirementsSummary total={activityProcedures?.requirements.length ?? 0} checked={checkedRequirements.length}
+                onOpen={() => { openRequirements(); window.scrollTo({ top: 0 }); }} />
               <OfficialSources sources={officialSources} />
               {result.limitations.length > 0 && <div className="notice"><span className="notice-icon">i</span><div><strong>Tené en cuenta</strong><p>{result.limitations.join(" ")}</p></div></div>}
             </aside>
@@ -416,7 +458,7 @@ export default function App() {
         {step === 4 && result && (
           <div className="map-page">
             <div className="page-heading">
-              <p className="eyebrow">PASO 4 · MAPA</p>
+              <p className="eyebrow">PASO 3 · MAPA</p>
               <h1>Explorá la ubicación</h1>
               <p>Visualizá el punto asociado a tu consulta y las capas territoriales disponibles.</p>
             </div>
@@ -431,7 +473,7 @@ export default function App() {
         {step === 5 && result && (
           <section className="assistant-page">
             <div className="page-heading">
-              <p className="eyebrow">PASO 5 · ASISTENTE</p>
+              <p className="eyebrow">PASO 4 · ASISTENTE</p>
               <h1>¿Qué necesitás aclarar?</h1>
               <p>Hacé una pregunta sobre la orientación de tu consulta.</p>
             </div>

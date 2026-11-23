@@ -69,3 +69,9 @@ Documento de referencia para **implementar** los cambios de experiencia pedidos 
 **Cómo sabremos que está listo:** desde un trámite se llega a sus requerimientos con un clic, y desde un requerimiento se ve a qué trámite pertenece; ninguna de las dos listas obliga a un scroll largo en la columna lateral.
 
 **Lo que NO se hace:** cambiar qué requerimientos trae la API ni cómo se marcan; lo marcado se sigue guardando igual.
+
+## Notas de implementación (22/11/2026)
+
+- **UX-3:** si se abre `/analisis` cuando la consulta ya terminó, se pasa a la orientación. Hace falta porque el análisis termina un instante antes de que cambie la dirección; sin esto, la app mandaba al inicio.
+- **UX-4:** la API a veces repite el mismo trámite dos veces como origen de un requisito. Se cuenta una sola vez; si no, el requisito caía por error en "Sirve para varios trámites" (con "Comercio minorista" eran 3 de 9).
+- La numeración de los títulos ("PASO 2 · ORIENTACIÓN", etc.) sigue a la nueva barra de cuatro pasos.
