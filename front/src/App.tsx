@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import QueryForm from "./Componentes/QueryForm";
 import MapPanel from "./Componentes/MapPanel";
-import RequirementsChecklist, { RequirementsSummary } from "./Componentes/RequirementsChecklist";
+import RequirementsChecklist from "./Componentes/RequirementsChecklist";
+import ProgressSidebar from "./Componentes/ProgressSidebar";
 import { requirementCount } from "./Componentes/requirementGroups";
 import OfficialSources from "./Componentes/OfficialSources";
 import ContextQuestions from "./Componentes/ContextQuestions";
@@ -86,6 +87,8 @@ export default function App() {
   // Orientation tab ("Trámites" / "Qué tenés que conseguir") and the requirement groups expanded in it.
   const [orientationTab, setOrientationTab] = useState<"procedures" | "requirements">("procedures");
   const [openRequirementGroups, setOpenRequirementGroups] = useState<string[]>([]);
+  // Element to bring into view once the orientation has rendered it (a procedure card or a requirement group).
+  const [scrollTarget, setScrollTarget] = useState<string | null>(null);
   const step = stepFromPath(location.pathname);
   const stepState = { analyzing: busy, hasResult: !!result };
 
@@ -101,14 +104,24 @@ export default function App() {
     saveConsultation({ query, result, activityProcedures, proceduresError, contextAnswers, checked, checkedRequirements });
   }, [query, result, activityProcedures, proceduresError, contextAnswers, checked, checkedRequirements]);
 
+  useEffect(() => {
+    if (!scrollTarget) return;
+    document.getElementById(scrollTarget)?.scrollIntoView({ block: "start" });
+    setScrollTarget(null);
+  }, [scrollTarget]);
+
   // Client-side navigation does not scroll to #anchors on its own (used by the footer links).
   useEffect(() => {
     if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView({ block: "start" });
   }, [location]);
 
-  const guidanceCount = activityProcedures?.procedures.length ?? result?.steps.length ?? 0;
-  const progress = useMemo(() => guidanceCount
-    ? Math.round((checked.length / guidanceCount) * 100) : 0, [checked, guidanceCount]);
+  // "Tené en cuenta" of the orientation: the general disclaimer plus the backend's limitations.
+  const notices = result ? [
+    activityProcedures
+      ? "Estos son trámites que suelen aplicar a esta actividad. Es una orientación general: verificá los requisitos con el organismo responsable."
+      : result.summary,
+    ...result.limitations,
+  ].filter(Boolean) : [];
   const officialSources = useMemo(
     () => (activityProcedures ? [toSourceReference(activityProcedures)] : []),
     [activityProcedures],
@@ -200,9 +213,14 @@ export default function App() {
     setOrientationTab("requirements");
     if (groupId) {
       setOpenRequirementGroups(old => old.includes(groupId) ? old : [...old, groupId]);
-      // Wait for the tab to render before scrolling to the group.
-      requestAnimationFrame(() => document.getElementById(`requisitos-${groupId}`)?.scrollIntoView({ block: "start" }));
+      setScrollTarget(`requisitos-${groupId}`);
     }
+  }
+
+  /** Shows a procedure card from anywhere in the orientation (e.g. "Siguiente trámite"). */
+  function openProcedure(id: string) {
+    setOrientationTab("procedures");
+    setScrollTarget(`tramite-${id}`);
   }
 
   function startOver() {
@@ -387,7 +405,7 @@ export default function App() {
               ) : <>
               <div className="guidance-list">
                 {activityProcedures ? activityProcedures.procedures.map(({ procedure, note, status }, index) => (
-                  <article className="guidance-card" key={procedure.id}>
+                  <article className="guidance-card" key={procedure.id} id={`tramite-${procedure.id}`}>
                     <div className="guidance-card__top">
                       <span className="guidance-number">{String(index + 1).padStart(2, "0")}</span>
                       {status === "applies"
@@ -413,7 +431,7 @@ export default function App() {
                     </label>
                   </article>
                 )) : result.steps.length ? result.steps.map((item, index) => (
-                  <article className="guidance-card" key={item.id}>
+                  <article className="guidance-card" key={item.id} id={`tramite-${item.id}`}>
                     <div className="guidance-card__top">
                       <span className="guidance-number">{String(index + 1).padStart(2, "0")}</span>
                       <span className="guidance-tag">PASO A REVISAR</span>
@@ -429,28 +447,33 @@ export default function App() {
                   </article>
                 )) : <article className="guidance-card"><h2>Orientación en preparación</h2><p>{result.summary}</p></article>}
               </div>
-              <div className="progress-panel">
-                <div><strong>Tu avance</strong><span>{checked.length} de {guidanceCount} revisados</span></div>
-                <div className="progress-track"><span style={{ width: `${progress}%` }} /></div>
-              </div>
               </>}
+              <OfficialSources sources={officialSources} />
+              {notices.length > 0 && (
+                <details className="notice notice--collapsible">
+                  <summary><span className="notice-icon" aria-hidden="true">i</span><strong>Tené en cuenta</strong></summary>
+                  <ul>{notices.map(text => <li key={text}>{text}</li>)}</ul>
+                </details>
+              )}
               <div className="orientation-actions orientation-actions--end">
                 <button className="primary" type="button" onClick={() => goTo(4)}>Ver mapa →</button>
               </div>
             </section>
             <aside className="side-column">
-              <section className="panel understood-card">
-                <h2>Lo que entendimos</h2>
-                <div className="result-detail"><span>Actividad</span><p>{activityProcedures?.activity.name ?? result.interpretedActivity}</p></div>
-                <div className="result-detail"><span>Ubicación</span><p>{result.normalizedAddress}</p></div>
-                <p className="small-note">{activityProcedures
-                  ? "Estos son trámites que suelen aplicar a esta actividad. Es una orientación general: verificá los requisitos con el organismo responsable."
-                  : result.summary}</p>
-              </section>
-              <RequirementsSummary total={activityProcedures?.requirements.length ?? 0} checked={checkedRequirements.length}
-                onOpen={() => { openRequirements(); window.scrollTo({ top: 0 }); }} />
-              <OfficialSources sources={officialSources} />
-              {result.limitations.length > 0 && <div className="notice"><span className="notice-icon">i</span><div><strong>Tené en cuenta</strong><p>{result.limitations.join(" ")}</p></div></div>}
+              <ProgressSidebar
+                activity={activityProcedures?.activity.name ?? result.interpretedActivity}
+                address={result.normalizedAddress}
+                procedures={activityProcedures
+                  ? activityProcedures.procedures.map(({ procedure }) => ({ id: procedure.id, title: procedure.title }))
+                  : result.steps.map(({ id, title }) => ({ id, title }))}
+                reviewed={checked}
+                requirementsTotal={activityProcedures?.requirements.length ?? 0}
+                requirementsChecked={checkedRequirements.length}
+                onOpenProcedure={openProcedure}
+                onOpenRequirements={() => { openRequirements(); window.scrollTo({ top: 0 }); }}
+                onOpenMap={() => goTo(4)}
+                onOpenAssistant={() => goTo(5)}
+              />
             </aside>
           </div>
         )}

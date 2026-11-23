@@ -92,27 +92,3 @@ export default function RequirementsChecklist({ requirements, procedures, note, 
     </section>
   );
 }
-
-type SummaryProps = {
-  total: number;
-  checked: number;
-  onOpen: () => void;
-};
-
-/** Sidebar summary: only the overall progress and the way into the requirements tab. */
-export function RequirementsSummary({ total, checked, onOpen }: SummaryProps) {
-  if (!total) return null;
-  return (
-    <section className="panel requirements-panel">
-      <h2>Antes de empezar</h2>
-      <div className="progress-panel requirements-progress">
-        <div>
-          <strong>Lo que tenés que conseguir</strong>
-          <span>{checked} de {total} marcados</span>
-        </div>
-        <div className="progress-track"><span style={{ width: `${percent(checked, total)}%` }} /></div>
-      </div>
-      <button className="text-button requirements-summary__open" type="button" onClick={onOpen}>Ver la lista completa →</button>
-    </section>
-  );
-}

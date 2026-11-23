@@ -70,6 +70,27 @@ Documento de referencia para **implementar** los cambios de experiencia pedidos 
 
 **Lo que NO se hace:** cambiar qué requerimientos trae la API ni cómo se marcan; lo marcado se sigue guardando igual.
 
+### UX-5. El lateral de la orientación ocupa lugar con cosas poco útiles
+
+**Estado:** confirmada (22/11/2026).
+
+**Cómo se entendió:** en el lateral de la orientación, "Fuentes oficiales" y "Tené en cuenta" ocupan lugar que sería más útil para seguir los trámites. No se pueden borrar: los datos de trámites tienen licencia CC BY 2.5 AR, que obliga a citar la fuente (`back/src/conco/guidance/infrastructure.py:67`), y los avisos del backend dicen que no es asesoramiento jurídico ni contable y que el mapa es ilustrativo (`back/src/conco/consultation/service.py:104`). El texto "Datos de demostración" de la captura sale de los datos de prueba del front (`front/src/api/mock.ts:24`), no del backend real.
+
+**Cómo sabremos que está listo:**
+
+- La fuente pasa a una línea debajo de la lista, en las dos pestañas: "Fuente: Trámites del Gobierno de la Ciudad ↗ · CC BY 2.5 AR".
+- Los avisos pasan al final de la columna principal, en un bloque "Tené en cuenta" cerrado por defecto.
+- El lateral queda fijo al hacer scroll (en pantallas anchas) y es un panel "Tu avance" con:
+  - "Lo que entendimos": actividad y dirección.
+  - El avance de trámites revisados ("3 de 10"); deja de estar al final de la lista.
+  - El avance de requisitos, con "Ver la lista completa →".
+  - El siguiente trámite sin revisar, como enlace que lleva a su tarjeta.
+  - Accesos a "Ver mapa" y "Preguntar al asistente".
+
+**Lo que NO se hace:** cambiar el texto de los avisos ni quitar la cita de la fuente.
+
+**Decisión:** se eligió el panel fijo frente a sacar el lateral y dar todo el ancho a los trámites, porque así el avance queda a la vista mientras se lee la lista.
+
 ## Notas de implementación (22/11/2026)
 
 - **UX-3:** si se abre `/analisis` cuando la consulta ya terminó, se pasa a la orientación. Hace falta porque el análisis termina un instante antes de que cambie la dirección; sin esto, la app mandaba al inicio.
