@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { discardedByAnswer, excludedNote, listInSpanish } from "./text";
+import { discardReasons, excludedNote, listInSpanish } from "./text";
 
 describe("listInSpanish", () => {
   it.each([
@@ -17,14 +17,11 @@ describe("listInSpanish", () => {
 });
 
 describe("excludedNote", () => {
-  it("names the discarded procedures", () => {
-    expect(excludedNote([{ id: "1", title: "Habilitación exprés" }, { id: "2", title: "Trámite de bajo impacto" }], 2))
-      .toBe("Descartamos: Habilitación exprés y Trámite de bajo impacto.");
-  });
-
-  it("gives only the total when the API says which answer discarded each one", () => {
-    expect(excludedNote([{ id: "1", title: "A", because: ["has_employees"] }, { id: "2", title: "B", because: ["signage"] }], 2))
-      .toBe("Descartamos 2 trámites según tus respuestas.");
+  it("gives the total and points to the list, where the discarded procedures are shown", () => {
+    expect(excludedNote([{ id: "1", title: "A", because: ["has_employees"] }, { id: "2", title: "B" }], 2))
+      .toBe("Descartamos 2 trámites según tus respuestas. Los ves al final de la lista.");
+    expect(excludedNote([{ id: "1", title: "A" }], 1))
+      .toBe("Descartamos 1 trámite según tus respuestas. Los ves al final de la lista.");
   });
 
   it("falls back to the count when the API does not send names (older backend)", () => {
@@ -38,24 +35,22 @@ describe("excludedNote", () => {
   });
 });
 
-describe("discardedByAnswer", () => {
-  const excluded = [
-    { id: "1", title: "Registro de Empleadores", because: ["has_employees"] },
-    { id: "2", title: "Habilitación exprés", because: ["under_200_m2", "has_employees"] },
-    { id: "3", title: "Visado de anuncio", because: ["signage"] },
+describe("discardReasons", () => {
+  const questions = [
+    { id: "has_employees", text: "¿Vas a contratar personal?", answer: false },
+    { id: "signage", text: "¿Vas a poner un cartel?", answer: true },
+    { id: "under_200_m2", text: "¿El local tiene menos de 200 m²?", answer: null },
   ];
 
-  it("names what the answer to that question discarded, quoting the answer", () => {
-    expect(discardedByAnswer({ id: "has_employees", answer: false }, excluded))
-      .toBe("Con «No» descartamos: Registro de Empleadores y Habilitación exprés.");
-    expect(discardedByAnswer({ id: "signage", answer: true }, excluded))
-      .toBe("Con «Sí» descartamos: Visado de anuncio.");
+  it("names each question that discarded the procedure with the answer given, in question order", () => {
+    expect(discardReasons({ id: "1", title: "A", because: ["signage", "has_employees"] }, questions)).toEqual([
+      { question: "¿Vas a contratar personal?", answer: "No" },
+      { question: "¿Vas a poner un cartel?", answer: "Sí" },
+    ]);
   });
 
-  it("says nothing when the question is unanswered, discarded nothing or the API sends no reasons", () => {
-    expect(discardedByAnswer({ id: "has_employees", answer: null }, excluded)).toBeNull();
-    expect(discardedByAnswer({ id: "takes_over_existing", answer: true }, excluded)).toBeNull();
-    expect(discardedByAnswer({ id: "has_employees", answer: false }, [{ id: "1", title: "A" }])).toBeNull();
-    expect(discardedByAnswer({ id: "has_employees", answer: false }, undefined)).toBeNull();
+  it("is empty when the API sends no reasons or they point to unknown or unanswered questions", () => {
+    expect(discardReasons({ id: "1", title: "A" }, questions)).toEqual([]);
+    expect(discardReasons({ id: "1", title: "A", because: ["unknown", "under_200_m2"] }, questions)).toEqual([]);
   });
 });

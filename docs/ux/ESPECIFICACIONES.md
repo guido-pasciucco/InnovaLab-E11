@@ -100,9 +100,11 @@ Documento de referencia para **implementar** los cambios de experiencia pedidos 
 **Cómo sabremos que está listo:**
 
 - La API agrega a cada trámite de `excluded` el campo `because`: la lista de preguntas que lo descartaron, en el orden en que se hacen las preguntas (por ejemplo `["has_employees"]`). Es un campo nuevo; los que ya existen no cambian.
-- Debajo de cada pregunta respondida que descartó algo aparece una línea: "Con «No» descartamos: Registro de Empleadores, Rúbrica de documentación laboral".
-- Si dos respuestas descartan el mismo trámite, aparece debajo de las dos.
-- El párrafo largo se reemplaza por el total: "Descartamos 6 trámites según tus respuestas." Si la API no trae `because`, se sigue mostrando la lista como hasta ahora.
+- Los trámites descartados se muestran al final de la lista de trámites, en una sección "Descartados por tus respuestas (N)", con colores apagados y la etiqueta "DESCARTADO". No se numeran, no se pueden marcar como revisados y no cuentan en el avance.
+- Debajo del título de cada descartado se ve qué pregunta lo descartó y qué respondiste, por ejemplo: "¿Vas a contratar personal? · respondiste No". Si lo descartaron dos respuestas, se ven las dos.
+- Debajo de las preguntas queda solo el total: "Descartamos 2 trámites según tus respuestas. Los ves al final de la lista." Si la API no trae `because`, la tarjeta dice "Descartado según tus respuestas", sin la pregunta.
+
+**Cambio de diseño (22/11/2026):** la primera versión mostraba una línea debajo de cada pregunta ("Con «No» descartamos: …"). Se reemplazó por la sección al final de la lista porque así el trámite descartado sigue en su lugar natural, la lista, y se ve junto a los demás.
 
 **Lo que NO se hace:** cambiar qué trámites se descartan ni las preguntas.
 
@@ -113,4 +115,4 @@ Documento de referencia para **implementar** los cambios de experiencia pedidos 
 - **UX-3:** si se abre `/analisis` cuando la consulta ya terminó, se pasa a la orientación. Hace falta porque el análisis termina un instante antes de que cambie la dirección; sin esto, la app mandaba al inicio.
 - **UX-4:** la API a veces repite el mismo trámite dos veces como origen de un requisito. Se cuenta una sola vez; si no, el requisito caía por error en "Sirve para varios trámites" (con "Comercio minorista" eran 3 de 9).
 - La numeración de los títulos ("PASO 2 · ORIENTACIÓN", etc.) sigue a la nueva barra de cuatro pasos.
-- **UX-6:** el front funciona con un backend que todavía no manda `because`: en ese caso muestra la lista de descartados como antes. La línea por pregunta aparece cuando el backend nuevo está desplegado.
+- **UX-6:** el front funciona con un backend que todavía no manda `because`: los descartados igual aparecen al final, sin la pregunta. La pregunta aparece cuando el backend nuevo está desplegado.

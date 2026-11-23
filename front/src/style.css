@@ -429,6 +429,11 @@ button.step.active { cursor:default; }
 @media (max-width:850px) { .side-column { grid-template-columns:1fr; } }
 .guidance-card { scroll-margin-top:16px; }
 
-/* What each context answer discarded (UX-6): its own line under the question. */
-.context-question { flex-wrap:wrap; }
-.context-question__discarded { flex-basis:100%; margin:0; padding:7px 10px; border-left:3px solid #B99A25; border-radius:4px; background:#FFF9DF; color:#5D4D1B; font-size:12px; line-height:1.5; }
+/* Discarded procedures at the end of the list, muted (UX-6). */
+.discarded-section { margin-top:28px; }
+.discarded-section>h2 { margin:0 0 12px; color:var(--text-muted); font-size:15px; }
+.guidance-card--discarded { background:#F6F8F9; border-style:dashed; }
+.guidance-card--discarded h3 { margin:0 0 8px; color:var(--text-muted); font-size:16px; }
+.guidance-tag--discarded { background:#E4E8EB; color:#5B6770; }
+.discard-reasons { margin:0; padding:0; list-style:none; color:var(--text-muted); font-size:12px; line-height:1.6; }
+.discard-reasons strong { color:var(--text-soft); }

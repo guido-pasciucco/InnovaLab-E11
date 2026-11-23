@@ -1,4 +1,4 @@
-import type { ExcludedProcedure } from "./types";
+import type { ContextQuestion, ExcludedProcedure } from "./types";
 
 /** Starts with the "i" sound (i-, hi-), but not hie-/hia- (hielo, hiato), where Spanish keeps "y". */
 function startsWithISound(word: string): boolean {
@@ -12,25 +12,26 @@ export function listInSpanish(items: string[]): string {
   return `${items.slice(0, -1).join(", ")} ${startsWithISound(last) ? "e" : "y"} ${last}`;
 }
 
+function procedureCount(count: number): string {
+  return `${count} ${count === 1 ? "trámite" : "trámites"}`;
+}
+
 /**
- * Note under the context questions. It names what was discarded; an older API that only sends
- * the count still gets the previous wording.
+ * Note under the context questions: only the total. The discarded procedures themselves are shown at
+ * the end of the list; an older API that only sends the count gets the count alone.
  */
 export function excludedNote(excluded: ExcludedProcedure[] | undefined, excludedCount: number): string | null {
-  // With reasons, each question names what it discarded; this note only gives the total.
-  const withReasons = !!excluded?.length && excluded.every(item => item.because?.length);
-  if (excluded?.length && !withReasons) return `Descartamos: ${listInSpanish(excluded.map(item => item.title))}.`;
-  if (excludedCount > 0) return `Descartamos ${excludedCount} ${excludedCount === 1 ? "trámite" : "trámites"} según tus respuestas.`;
+  if (excluded?.length) return `Descartamos ${procedureCount(excluded.length)} según tus respuestas. Los ves al final de la lista.`;
+  if (excludedCount > 0) return `Descartamos ${procedureCount(excludedCount)} según tus respuestas.`;
   return null;
 }
 
-/** Line under an answered context question: what that answer discarded, or null if nothing. */
-export function discardedByAnswer(
-  question: { id: string; answer: boolean | null },
-  excluded: ExcludedProcedure[] | undefined,
-): string | null {
-  if (question.answer === null) return null;
-  const titles = (excluded ?? []).filter(item => item.because?.includes(question.id)).map(item => item.title);
-  if (!titles.length) return null;
-  return `Con «${question.answer ? "Sí" : "No"}» descartamos: ${listInSpanish(titles)}.`;
+/** Questions (with the answer given) that discarded a procedure, in question order; empty without reasons. */
+export function discardReasons(
+  item: ExcludedProcedure,
+  questions: ContextQuestion[],
+): { question: string; answer: string }[] {
+  return questions
+    .filter(question => question.answer !== null && item.because?.includes(question.id))
+    .map(question => ({ question: question.text, answer: question.answer ? "Sí" : "No" }));
 }

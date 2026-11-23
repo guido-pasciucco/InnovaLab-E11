@@ -16,7 +16,7 @@ import type { HistoryEntry } from "./history/searchHistory";
 import { useSearchHistory } from "./history/useSearchHistory";
 import { HOME_PATH, NAV_STEPS, isStepAvailable, pathOf, stepFromPath, type Step } from "./navigation/steps";
 import { clearConsultation, loadConsultation, saveConsultation } from "./session/currentConsultation";
-import { excludedNote } from "./text";
+import { discardReasons, excludedNote } from "./text";
 import type { ActivityProceduresResponse, ConsultationRequest, ConsultationResponse, ContextAnswers, SourceReference } from "./types";
 
 /** Official site of the City's procedures, the source the guidance cites. */
@@ -376,7 +376,7 @@ export default function App() {
               </div>
               {proceduresError && <div className="notice"><span className="notice-icon">i</span><div><strong>No pudimos cargar los trámites oficiales</strong><p>{proceduresError} Mientras tanto, te mostramos una orientación general.</p></div></div>}
               {activityProcedures && (
-                <ContextQuestions questions={activityProcedures.questions} busy={refining} excluded={activityProcedures.excluded} onAnswer={answerContext} />
+                <ContextQuestions questions={activityProcedures.questions} busy={refining} onAnswer={answerContext} />
               )}
               {refineError && <div className="notice"><span className="notice-icon">i</span><div><strong>No pudimos actualizar los trámites</strong><p>Seguimos mostrando la lista anterior. Probá responder de nuevo.</p></div></div>}
               {discardedNote && <p className="excluded-note" aria-live="polite">{discardedNote}</p>}
@@ -447,6 +447,27 @@ export default function App() {
                   </article>
                 )) : <article className="guidance-card"><h2>Orientación en preparación</h2><p>{result.summary}</p></article>}
               </div>
+              {activityProcedures?.excluded?.length ? (
+                <section className="discarded-section" aria-labelledby="descartados-title">
+                  <h2 id="descartados-title">Descartados por tus respuestas ({activityProcedures.excluded.length})</h2>
+                  <div className="guidance-list">
+                    {activityProcedures.excluded.map(item => {
+                      const reasons = discardReasons(item, activityProcedures.questions);
+                      return (
+                        <article className="guidance-card guidance-card--discarded" key={item.id}>
+                          <div className="guidance-card__top"><span className="guidance-tag guidance-tag--discarded">DESCARTADO</span></div>
+                          <h3>{item.title}</h3>
+                          {reasons.length
+                            ? <ul className="discard-reasons">{reasons.map(reason => (
+                              <li key={reason.question}>{reason.question} · respondiste <strong>{reason.answer}</strong></li>
+                            ))}</ul>
+                            : <p className="discard-reasons">Descartado según tus respuestas.</p>}
+                        </article>
+                      );
+                    })}
+                  </div>
+                </section>
+              ) : null}
               </>}
               <OfficialSources sources={officialSources} />
               {notices.length > 0 && (
