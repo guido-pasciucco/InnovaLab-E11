@@ -359,6 +359,7 @@ def test_procedures_answer_drops_contradicted_procedure(client: TestClient) -> N
         {
             "id": "1fb7a579-8fc2-4216-b113-684cc272f7f1",
             "title": "Inscripción en el Registro de Empleadores",
+            "because": ["has_employees"],
         }
     ]
     assert body["questions"][0]["answer"] is False

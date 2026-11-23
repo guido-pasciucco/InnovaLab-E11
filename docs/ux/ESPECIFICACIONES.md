@@ -91,8 +91,26 @@ Documento de referencia para **implementar** los cambios de experiencia pedidos 
 
 **Decisión:** se eligió el panel fijo frente a sacar el lateral y dar todo el ancho a los trámites, porque así el avance queda a la vista mientras se lee la lista.
 
+### UX-6. Al responder, no se ve qué trámite descarta cada respuesta
+
+**Estado:** confirmada (22/11/2026).
+
+**Cómo se entendió:** debajo de las preguntas "Contanos más de tu comercio" aparece un solo párrafo largo, "Descartamos: …", con todos los trámites descartados juntos. No se ve qué respuesta descartó cada uno. El backend sí lo calcula (`back/src/conco/guidance/domain.py:211`), pero la API devuelve cada trámite descartado solo con `id` y `title`.
+
+**Cómo sabremos que está listo:**
+
+- La API agrega a cada trámite de `excluded` el campo `because`: la lista de preguntas que lo descartaron, en el orden en que se hacen las preguntas (por ejemplo `["has_employees"]`). Es un campo nuevo; los que ya existen no cambian.
+- Debajo de cada pregunta respondida que descartó algo aparece una línea: "Con «No» descartamos: Registro de Empleadores, Rúbrica de documentación laboral".
+- Si dos respuestas descartan el mismo trámite, aparece debajo de las dos.
+- El párrafo largo se reemplaza por el total: "Descartamos 6 trámites según tus respuestas." Si la API no trae `because`, se sigue mostrando la lista como hasta ahora.
+
+**Lo que NO se hace:** cambiar qué trámites se descartan ni las preguntas.
+
+**Decisión:** que la API diga el motivo, en vez de calcularlo en el front, porque el front no recibe las condiciones de cada trámite.
+
 ## Notas de implementación (22/11/2026)
 
 - **UX-3:** si se abre `/analisis` cuando la consulta ya terminó, se pasa a la orientación. Hace falta porque el análisis termina un instante antes de que cambie la dirección; sin esto, la app mandaba al inicio.
 - **UX-4:** la API a veces repite el mismo trámite dos veces como origen de un requisito. Se cuenta una sola vez; si no, el requisito caía por error en "Sirve para varios trámites" (con "Comercio minorista" eran 3 de 9).
 - La numeración de los títulos ("PASO 2 · ORIENTACIÓN", etc.) sigue a la nueva barra de cuatro pasos.
+- **UX-6:** el front funciona con un backend que todavía no manda `because`: en ese caso muestra la lista de descartados como antes. La línea por pregunta aparece cuando el backend nuevo está desplegado.

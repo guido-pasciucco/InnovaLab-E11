@@ -17,7 +17,20 @@ export function listInSpanish(items: string[]): string {
  * the count still gets the previous wording.
  */
 export function excludedNote(excluded: ExcludedProcedure[] | undefined, excludedCount: number): string | null {
-  if (excluded?.length) return `Descartamos: ${listInSpanish(excluded.map(item => item.title))}.`;
+  // With reasons, each question names what it discarded; this note only gives the total.
+  const withReasons = !!excluded?.length && excluded.every(item => item.because?.length);
+  if (excluded?.length && !withReasons) return `Descartamos: ${listInSpanish(excluded.map(item => item.title))}.`;
   if (excludedCount > 0) return `Descartamos ${excludedCount} ${excludedCount === 1 ? "trámite" : "trámites"} según tus respuestas.`;
   return null;
+}
+
+/** Line under an answered context question: what that answer discarded, or null if nothing. */
+export function discardedByAnswer(
+  question: { id: string; answer: boolean | null },
+  excluded: ExcludedProcedure[] | undefined,
+): string | null {
+  if (question.answer === null) return null;
+  const titles = (excluded ?? []).filter(item => item.because?.includes(question.id)).map(item => item.title);
+  if (!titles.length) return null;
+  return `Con «${question.answer ? "Sí" : "No"}» descartamos: ${listInSpanish(titles)}.`;
 }

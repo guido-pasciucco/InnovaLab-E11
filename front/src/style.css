@@ -428,3 +428,7 @@ button.step.active { cursor:default; }
 @media (min-width:851px) { .side-column { position:sticky; top:16px; max-height:calc(100vh - 32px); overflow-y:auto; } }
 @media (max-width:850px) { .side-column { grid-template-columns:1fr; } }
 .guidance-card { scroll-margin-top:16px; }
+
+/* What each context answer discarded (UX-6): its own line under the question. */
+.context-question { flex-wrap:wrap; }
+.context-question__discarded { flex-basis:100%; margin:0; padding:7px 10px; border-left:3px solid #B99A25; border-radius:4px; background:#FFF9DF; color:#5D4D1B; font-size:12px; line-height:1.5; }

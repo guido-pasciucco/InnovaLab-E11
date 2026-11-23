@@ -376,7 +376,7 @@ export default function App() {
               </div>
               {proceduresError && <div className="notice"><span className="notice-icon">i</span><div><strong>No pudimos cargar los trámites oficiales</strong><p>{proceduresError} Mientras tanto, te mostramos una orientación general.</p></div></div>}
               {activityProcedures && (
-                <ContextQuestions questions={activityProcedures.questions} busy={refining} onAnswer={answerContext} />
+                <ContextQuestions questions={activityProcedures.questions} busy={refining} excluded={activityProcedures.excluded} onAnswer={answerContext} />
               )}
               {refineError && <div className="notice"><span className="notice-icon">i</span><div><strong>No pudimos actualizar los trámites</strong><p>Seguimos mostrando la lista anterior. Probá responder de nuevo.</p></div></div>}
               {discardedNote && <p className="excluded-note" aria-live="polite">{discardedNote}</p>}
