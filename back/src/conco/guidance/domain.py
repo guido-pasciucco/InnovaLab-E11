@@ -182,6 +182,8 @@ class ExcludedProcedure(BaseModel):
 
     id: UUID
     title: str
+    # Context questions whose answer contradicts the procedure, in question order.
+    because: list[str] = Field(default_factory=list)
 
 
 class ContextualProcedures(BaseModel):
@@ -209,9 +211,16 @@ def apply_context(result: ActivityProcedures, answers: ContextAnswers) -> Contex
     excluded: list[ExcludedProcedure] = []
     for applicable in result.procedures:
         conditions = applicable.applies_when.answered()
-        if any(key in given and given[key] != value for key, value in conditions.items()):
+        because = [
+            key
+            for key in ContextAnswers.model_fields
+            if key in conditions and key in given and given[key] != conditions[key]
+        ]
+        if because:
             excluded.append(
-                ExcludedProcedure(id=applicable.procedure.id, title=applicable.procedure.title)
+                ExcludedProcedure(
+                    id=applicable.procedure.id, title=applicable.procedure.title, because=because
+                )
             )
             continue
         status = "applies" if conditions.keys() <= given.keys() else "may_apply"

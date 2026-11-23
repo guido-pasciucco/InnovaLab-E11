@@ -9,6 +9,9 @@ export const STEPS: readonly { step: Step; label: string; path: string }[] = [
   { step: 5, label: "Asistente", path: "/asistente" },
 ];
 
+/** Steps shown in the steps bar. Análisis is only the loading screen of a consultation, so it is not listed. */
+export const NAV_STEPS = STEPS.filter(item => item.step !== 2);
+
 export const HOME_PATH = STEPS[0].path;
 
 export function pathOf(step: Step): string {
@@ -30,6 +33,6 @@ export type StepState = {
 /** A step can be opened only when it has something to show; the others stay visible but disabled. */
 export function isStepAvailable(step: Step, { analyzing, hasResult }: StepState): boolean {
   if (step === 1) return true;
-  if (step === 2) return analyzing || hasResult;
+  if (step === 2) return analyzing;
   return hasResult;
 }

@@ -73,6 +73,18 @@ def test_excluded_lists_the_discarded_procedures_in_catalog_order() -> None:
     assert result.excluded_count == len(result.excluded)
 
 
+def test_excluded_says_which_answers_discarded_each_procedure() -> None:
+    answers = ContextAnswers(under_200_m2=False, takes_over_existing=True, has_employees=False)
+
+    result = apply_context(CAFETERIA, answers)
+
+    assert {e.title: e.because for e in result.excluded} == {
+        "Habilitación": ["takes_over_existing"],
+        "Habilitación exprés": ["under_200_m2", "takes_over_existing"],
+        "Registro de Empleadores": ["has_employees"],
+    }
+
+
 def test_excluded_is_empty_without_answers() -> None:
     assert apply_context(CAFETERIA, ContextAnswers()).excluded == []
 

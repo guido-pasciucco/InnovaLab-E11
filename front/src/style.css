@@ -374,3 +374,66 @@ button.step.active { cursor:default; }
   .hero--with-history { max-width:1120px; }
   .query-layout--with-history { grid-template-columns:minmax(0,760px) minmax(280px,1fr); align-items:start; }
 }
+
+/* Orientation: "Trámites" / "Qué tenés que conseguir" tabs and grouped requirements (UX-4). */
+.orientation-tabs { width:fit-content; max-width:100%; margin:0 0 16px; }
+.orientation-actions--end { justify-content:flex-end; }
+.needs-link { display:block; margin-top:10px; padding:0; font-size:13px; font-weight:600; }
+.requirements-tab { display:grid; gap:14px; }
+.requirements-intro { margin:0; color:var(--text-soft); font-size:13px; line-height:1.6; }
+.requirement-groups { display:grid; gap:10px; }
+.requirement-group { border:1px solid var(--border); border-radius:14px; background:#fff; scroll-margin-top:16px; }
+.requirement-group summary { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 20px; color:var(--ink); font-size:15px; font-weight:700; cursor:pointer; list-style:none; }
+.requirement-group summary::-webkit-details-marker { display:none; }
+.requirement-group summary::before { content:"▸"; color:var(--blue); transition:transform .15s; }
+.requirement-group[open] summary::before { transform:rotate(90deg); }
+.requirement-group__title { flex:1; overflow-wrap:anywhere; }
+.requirement-group__count { flex:none; color:var(--text-muted); font-size:12px; font-weight:600; }
+.requirement-group .requirements-list { margin:0; padding:0 20px 16px; }
+.requirement-group__link { margin:0 20px 10px; }
+.requirement-group .requirement-check { font-size:13px; }
+.requirement-origins span { color:var(--text-muted); font-size:11px; }
+.requirements-summary__open { padding:0; margin-top:12px; font-weight:600; }
+@media (max-width:640px) {
+  .orientation-tabs { width:100%; }
+  .requirement-group summary { padding:14px 16px; }
+  .requirement-group .requirements-list { padding:0 16px 14px; }
+  .requirement-group__link { margin:0 16px 10px; }
+}
+
+/* Orientation sidebar "Tu avance", source line and collapsible notices (UX-5). */
+.progress-sidebar { display:grid; gap:14px; padding:22px; }
+.progress-sidebar h2 { margin:0; }
+.progress-sidebar .result-detail { margin:0; }
+.progress-sidebar__block { display:grid; gap:7px; padding-top:14px; border-top:1px solid #E8EEF1; }
+.progress-sidebar__row { display:flex; justify-content:space-between; gap:10px; color:var(--ink); font-size:12px; }
+.progress-sidebar__row span { flex:none; color:var(--text-muted); }
+.progress-sidebar__label { color:var(--text-muted); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+.progress-sidebar__link,.progress-sidebar__next { justify-self:start; padding:0; font-size:13px; font-weight:600; text-align:left; }
+.progress-sidebar__done { margin:0; color:var(--text-soft); font-size:13px; }
+.progress-sidebar__actions { display:grid; gap:8px; padding-top:14px; border-top:1px solid #E8EEF1; }
+.progress-sidebar__actions button { width:100%; }
+.source-line { margin:18px 0 0; color:var(--text-muted); font-size:12px; line-height:1.6; overflow-wrap:anywhere; }
+.source-line a { color:var(--blue); font-weight:600; text-decoration:none; }
+.source-line a:hover { text-decoration:underline; }
+.notice--collapsible { display:block; margin-top:16px; }
+.notice--collapsible summary { display:flex; align-items:center; gap:11px; cursor:pointer; list-style:none; }
+.notice--collapsible summary::-webkit-details-marker { display:none; }
+.notice--collapsible summary strong { margin:0; }
+.notice--collapsible summary::after { content:"▸"; margin-left:auto; transition:transform .15s; }
+.notice--collapsible[open] summary::after { transform:rotate(90deg); }
+.notice--collapsible ul { margin:10px 0 0; padding-left:52px; }
+.notice--collapsible li+li { margin-top:4px; }
+/* Sticky only on wide screens; it scrolls on its own if the window is shorter than the panel. */
+@media (min-width:851px) { .side-column { position:sticky; top:16px; max-height:calc(100vh - 32px); overflow-y:auto; } }
+@media (max-width:850px) { .side-column { grid-template-columns:1fr; } }
+.guidance-card { scroll-margin-top:16px; }
+
+/* Discarded procedures at the end of the list, muted (UX-6). */
+.discarded-section { margin-top:28px; }
+.discarded-section>h2 { margin:0 0 12px; color:var(--text-muted); font-size:15px; }
+.guidance-card--discarded { background:#F6F8F9; border-style:dashed; }
+.guidance-card--discarded h3 { margin:0 0 8px; color:var(--text-muted); font-size:16px; }
+.guidance-tag--discarded { background:#E4E8EB; color:#5B6770; }
+.discard-reasons { margin:0; padding:0; list-style:none; color:var(--text-muted); font-size:12px; line-height:1.6; }
+.discard-reasons strong { color:var(--text-soft); }

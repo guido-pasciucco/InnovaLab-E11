@@ -111,7 +111,12 @@ export type ContextQuestion = {
 };
 
 /** Procedure discarded by the context answers. */
-export type ExcludedProcedure = { id: string; title: string };
+export type ExcludedProcedure = {
+  id: string;
+  title: string;
+  /** Ids of the context questions whose answer discarded it; missing when the API predates the field. */
+  because?: string[];
+};
 
 /** Response of GET /guidance/activities/{slug}/procedures. */
 export type ActivityProceduresResponse = {
