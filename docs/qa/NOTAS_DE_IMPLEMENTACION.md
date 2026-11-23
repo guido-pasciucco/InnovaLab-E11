@@ -38,7 +38,7 @@ Qué se implementó de [ESPECIFICACIONES.md](ESPECIFICACIONES.md), qué falla se
 
 ## 2. Mantener despierta la API en Render (QA-02)
 
-Esto se configura fuera del código y lo hace el dueño, porque requiere crear una cuenta.
+Esto se configura fuera del código y lo hace el dueño, porque requiere crear una cuenta. La lista para tildar, paso a paso dentro de cron-job.org, está en [GUIA_CRON_JOB_ORG.md](GUIA_CRON_JOB_ORG.md).
 
 1. Crear una cuenta gratis en [cron-job.org](https://cron-job.org/en/) (no pide tarjeta).
 2. Crear una tarea que haga `GET https://conco-api.onrender.com/health` **cada 10 minutos**.
