@@ -3,49 +3,64 @@ import { geocodeAddressNominatim } from "../api/client";
 import ActivityAutocomplete from "./ActivityAutocomplete";
 import AddressAutocomplete from "./AddressAutocomplete";
 import type { ActivitySuggestion, Address, ConsultationRequest, GeoPoint } from "../types";
+import { TEXT_RULES, validateActivity, validateAddress } from "../validation";
 
-type Props = { onSubmit: (value: ConsultationRequest) => void; busy: boolean };
-// Georef works best without the neighbourhood, so the examples only carry street and number.
-const examples = [
-  { label: "Cafetería", activity: "Abrir una cafetería", address: "Av. Cabildo 2040" },
-  { label: "Almacén", activity: "Abrir un almacén", address: "Av. Rivadavia 5200" },
-  { label: "Peluquería", activity: "Abrir una peluquería", address: "Av. Santa Fe 1800" },
-];
+type Props = {
+  onSubmit: (value: ConsultationRequest) => void;
+  busy: boolean;
+  /** Values to start with, e.g. a search reopened from the history. */
+  initial?: ConsultationRequest | null;
+};
 
 function toGeoPoint(coordinates: Address["coordinates"]): GeoPoint | null {
   return coordinates ? { lat: coordinates.latitude, lng: coordinates.longitude } : null;
 }
 
-export default function QueryForm({ onSubmit, busy }: Props) {
-  const [activity, setActivity] = useState("");
-  const [selectedActivity, setSelectedActivity] = useState<ActivitySuggestion | null>(null);
-  const [address, setAddress] = useState("");
-  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+/** A previous query counts as already picked from the lists, so it can be sent again as it was. */
+function initialActivity(initial: ConsultationRequest): ActivitySuggestion | null {
+  return initial.activitySlug
+    ? { slug: initial.activitySlug, name: initial.activity, matched_alias: initial.activity, similarity: 1 } : null;
+}
+
+function initialAddress(initial: ConsultationRequest): Address {
+  const point = initial.point ?? null;
+  return {
+    full_address: initial.address, street: null, number: null, department: null, locality: null, province: null,
+    coordinates: point ? { latitude: point.lat, longitude: point.lng } : null,
+  };
+}
+
+export default function QueryForm({ onSubmit, busy, initial = null }: Props) {
+  const [activity, setActivity] = useState(initial?.activity ?? "");
+  const [selectedActivity, setSelectedActivity] = useState<ActivitySuggestion | null>(initial ? initialActivity(initial) : null);
+  const [address, setAddress] = useState(initial?.address ?? "");
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(initial ? initialAddress(initial) : null);
   const [searchAvailable, setSearchAvailable] = useState(true);
   const [locating, setLocating] = useState(false);
-  const [error, setError] = useState("");
+  const [activityError, setActivityError] = useState("");
+  const [addressError, setAddressError] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!activity.trim() || !address.trim()) {
-      setError("Completá la actividad y la dirección para continuar.");
-      return;
-    }
+    // Validate both fields at once so every problem shows next to its field before anything is sent.
+    const activityProblem = validateActivity(activity);
+    const addressProblem = validateAddress(address);
+    setActivityError(activityProblem ?? "");
+    setAddressError(addressProblem ?? "");
+    if (activityProblem || addressProblem) return;
     const activitySlug = selectedActivity?.slug ?? null;
     if (selectedAddress) {
-      setError("");
       onSubmit({ activity: activity.trim(), address: selectedAddress.full_address, point: toGeoPoint(selectedAddress.coordinates), activitySlug });
       return;
     }
     if (searchAvailable) {
-      setError("Elegí una dirección de la lista de sugerencias.");
+      setAddressError("Elegí una dirección de la lista de sugerencias.");
       return;
     }
     // Free text without backend geocoding: try Nominatim so the map still gets a point.
     setLocating(true);
     try {
       const point = await geocodeAddressNominatim(address.trim());
-      setError("");
       onSubmit({ activity: activity.trim(), address: address.trim(), point, activitySlug });
     } finally {
       setLocating(false);
@@ -57,23 +72,26 @@ export default function QueryForm({ onSubmit, busy }: Props) {
       <div className="query-field">
         <label htmlFor="activity">¿Qué actividad querés realizar?</label>
         <ActivityAutocomplete id="activity" value={activity} selected={selectedActivity}
-          invalid={!!error && !activity.trim()}
-          onChange={value => { setActivity(value); setError(""); }} onSelect={setSelectedActivity} />
-        <span className="field-hint">Elegí una actividad de la lista para ver los trámites oficiales que suelen aplicar.</span>
+          invalid={!!activityError}
+          describedBy={["activity-hint", "activity-counter", activityError && "activity-error"].filter(Boolean).join(" ")}
+          onChange={value => { setActivity(value); setActivityError(""); }} onSelect={setSelectedActivity} />
+        <div className="field-meta">
+          <span className="field-hint" id="activity-hint">Elegí una actividad de la lista para ver los trámites oficiales que suelen aplicar.</span>
+          <span className="char-counter" id="activity-counter">{activity.length}/{TEXT_RULES.activity.max}</span>
+        </div>
+        {activityError && <p className="field-error" id="activity-error" role="alert">{activityError}</p>}
       </div>
       <div className="query-field">
         <label htmlFor="address">¿En qué dirección?</label>
         <AddressAutocomplete id="address" value={address} selected={selectedAddress}
-          invalid={!!error && !selectedAddress && (!address.trim() || searchAvailable)}
-          onChange={value => { setAddress(value); setError(""); }} onSelect={setSelectedAddress}
+          invalid={!!addressError}
+          describedBy={["address-hint", addressError && "address-error"].filter(Boolean).join(" ")}
+          onChange={value => { setAddress(value); setAddressError(""); }} onSelect={setSelectedAddress}
           onAvailabilityChange={setSearchAvailable} />
-        <span className="field-hint">Escribí calle y altura, sin el barrio, y elegí una opción de la lista. También podés usar «Corrientes y Callao» o «Corrientes entre Callao y Riobamba».</span>
+        <span className="field-hint" id="address-hint">Escribí calle y altura, sin el barrio, y elegí una opción de la lista. También podés usar «Corrientes y Callao» o «Corrientes entre Callao y Riobamba».</span>
+        {addressError && <p className="field-error" id="address-error" role="alert">{addressError}</p>}
       </div>
-      {error && <p className="error-message" role="alert">{error}</p>}
       <button className="primary query-submit" type="submit" disabled={busy || locating}>{busy ? "Consultando…" : locating ? "Ubicando dirección…" : <>Consultar requisitos <span aria-hidden="true">→</span></>}</button>
-      <div className="examples"><span className="examples-title">Probá con un ejemplo</span><div className="example-chips">
-        {examples.map(item => <button key={item.label} type="button" className="chip" onClick={() => { setActivity(item.activity); setSelectedActivity(null); setAddress(item.address); setSelectedAddress(null); setError(""); }}>{item.label}</button>)}
-      </div></div>
       <p className="hint">La orientación es inicial y depende de las fuentes oficiales conectadas.</p>
     </form>
   );

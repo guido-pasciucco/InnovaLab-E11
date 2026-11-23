@@ -1,6 +1,6 @@
 """Rutas de la API de consultas (contrato camelCase para el frontend)."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from typing import Annotated
 
 from conco.consultation.domain import (
@@ -15,6 +15,7 @@ from conco.consultation.service import (
     build_consultation,
     build_follow_up,
 )
+from conco.errors import ConsultationsUnavailable, InvalidConsultationId
 
 # Reutiliza el mismo directorio compartido y pool que el resto de la API.
 from conco.guidance.api import (
@@ -24,9 +25,6 @@ from conco.guidance.api import (
 from conco.guidance.domain import ActivityDirectory, ActivityDirectoryError, ProcedureCatalog
 
 router = APIRouter(prefix="/consultations", tags=["Consultas"])
-
-UNAVAILABLE_DETAIL = "El servicio de consultas no está disponible. Intentá de nuevo más tarde."
-
 
 def get_address_geocoder() -> AddressGeocoder:
     """Los tests lo reemplazan por un geocoder falso."""
@@ -44,10 +42,7 @@ async def submit_consultation(
     try:
         return await build_consultation(payload, directory, catalog, geocoder)
     except ActivityDirectoryError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=UNAVAILABLE_DETAIL,
-        ) from exc
+        raise ConsultationsUnavailable() from exc
 
 
 @router.post("/{consultation_id}/follow-up", response_model=FollowUpResponse)
@@ -61,12 +56,6 @@ async def follow_up(
     try:
         return await build_follow_up(consultation_id, payload.question, directory, catalog)
     except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Identificador de consulta inválido.",
-        ) from exc
+        raise InvalidConsultationId() from exc
     except ActivityDirectoryError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=UNAVAILABLE_DETAIL,
-        ) from exc
+        raise ConsultationsUnavailable() from exc

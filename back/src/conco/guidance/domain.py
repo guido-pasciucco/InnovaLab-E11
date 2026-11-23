@@ -175,6 +175,15 @@ class ContextualProcedure(BaseModel):
     status: Literal["applies", "may_apply"]
 
 
+class ExcludedProcedure(BaseModel):
+    """Trámite descartado porque sus condiciones contradicen las respuestas de contexto."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: UUID
+    title: str
+
+
 class ContextualProcedures(BaseModel):
     """Trámites de una actividad afinados con el contexto que dio la persona."""
 
@@ -184,6 +193,8 @@ class ContextualProcedures(BaseModel):
     questions: list[ContextQuestion]
     procedures: list[ContextualProcedure]
     excluded_count: int
+    # Trámites descartados, en el orden del catálogo, para poder nombrarlos en pantalla.
+    excluded: list[ExcludedProcedure] = Field(default_factory=list)
     requirements: list[Requirement] = Field(default_factory=list)
     requirements_note: str = REQUIREMENTS_NOTE
 
@@ -195,9 +206,13 @@ def apply_context(result: ActivityProcedures, answers: ContextAnswers) -> Contex
     """
     given = answers.answered()
     procedures: list[ContextualProcedure] = []
+    excluded: list[ExcludedProcedure] = []
     for applicable in result.procedures:
         conditions = applicable.applies_when.answered()
         if any(key in given and given[key] != value for key, value in conditions.items()):
+            excluded.append(
+                ExcludedProcedure(id=applicable.procedure.id, title=applicable.procedure.title)
+            )
             continue
         status = "applies" if conditions.keys() <= given.keys() else "may_apply"
         procedures.append(
@@ -215,7 +230,8 @@ def apply_context(result: ActivityProcedures, answers: ContextAnswers) -> Contex
         activity=result.activity,
         questions=questions,
         procedures=procedures,
-        excluded_count=len(result.procedures) - len(procedures),
+        excluded_count=len(excluded),
+        excluded=excluded,
         requirements=result.requirements,
         requirements_note=result.requirements_note,
     )
@@ -234,6 +250,11 @@ class ActivityDirectory(Protocol):
 
     async def procedures_for(self, slug: str) -> ActivityProcedures | None:
         """Trámites curados de la actividad, o None si no existe; lanza ActivityDirectoryError si falla."""
+        ...
+
+    async def catalog_ready(self) -> bool:
+        """Indica si el catálogo de actividades ya está cargado; lanza ActivityDirectoryError
+        si la base no responde."""
         ...
 
 

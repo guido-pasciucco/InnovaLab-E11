@@ -106,7 +106,9 @@ Cada carpeta con código Python dentro de `src/` incluye un archivo `__init__.py
 
 | Parte | Responsabilidad | No hace |
 |---|---|---|
-| `main.py` | Crea la app, registra el middleware de CORS y los routers | Consumir APIs externas |
+| `main.py` | Crea la app, registra los middlewares (CORS y request id), el manejo de errores, `/health`, `/ready` y los routers | Consumir APIs externas |
+| `errors.py` | Define los errores propios: código, mensaje en español y estado HTTP | Conocer qué endpoint los usa |
+| `request_id.py` | Asigna un request id a cada petición y registra una línea por pedido | Conocer reglas de negocio |
 | `<funcionalidad>/domain.py` | Define los conceptos propios del sistema y el puerto que necesita | Conocer APIs externas |
 | `<funcionalidad>/infrastructure.py` | Implementa el puerto usando una integración y traduce sus datos al dominio | Exponer endpoints |
 | `<funcionalidad>/api.py` | Valida la consulta HTTP y traduce errores a códigos HTTP | Conocer qué API externa se usa |
@@ -188,7 +190,7 @@ Ejemplo de respuesta (abreviado), obtenido con `direccion=Corrientes 2500`:
 |---|---|
 | `200` con `{"addresses": [...]}` | La búsqueda funcionó; la lista puede venir vacía |
 | `422` | Los parámetros no cumplen la validación |
-| `502` | Georef no respondió o devolvió algo inesperado |
+| `502` | Georef no respondió o devolvió algo inesperado (`ADDRESSES_UNAVAILABLE`) |
 
 `coordinates` puede venir en `null` cuando Georef no tiene datos suficientes para ubicar la dirección.
 
@@ -214,7 +216,8 @@ uv run uvicorn conco.main:app --reload
 - La API no tiene documentación pública: es el JSON:API que Drupal expone por defecto. Su forma puede cambiar sin aviso; el test de integración es la alerta temprana.
 - La búsqueda es solo por texto en el título (no distingue mayúsculas ni acentos). No hay búsqueda por actividad ni por relevancia.
 - El contenido de cada trámite está armado con párrafos anidados (requisitos, pasos, organismo, botón para iniciar). El cliente pide solo esos párrafos y descarta el resto (costos, normativa, textos de ayuda).
-- Un id inexistente o no publicado no devuelve 404: redirige (301) a una página HTML. El cliente lo informa como "no encontrado".
+- Un id inexistente o no publicado no devuelve 404: redirige (301) a una página HTML. QA vio que la misma ficha publicada redirigió una vez y luego respondió 200 (INC-01), así que el cliente reintenta la redirección una vez y solo si se repite la informa como "no encontrado".
+- **Reintento acotado:** la búsqueda, el detalle y cada página del catálogo completo se reintentan una sola vez (2 intentos en total, con una espera corta de `RETRY_BACKOFF_SECONDS`) solo ante errores transitorios: timeout, falla de conexión o respuesta 502, 503 o 504. Otros 4xx, el 500 y las respuestas que no validan no se reintentan.
 - Sin `filter[status]=1`, las páginas vienen incompletas porque la API omite los trámites no publicados.
 
 Ejemplo de respuesta de la búsqueda (abreviado), obtenido con `filter[title][value]=habilitaci`:
@@ -236,6 +239,45 @@ Ejemplo de respuesta de la búsqueda (abreviado), obtenido con `filter[title][va
   "meta": { "count": 11 }
 }
 ```
+
+## Estado de la API
+
+| Endpoint | Qué indica | Hace consultas |
+|---|---|---|
+| `GET /health` | El proceso está vivo: siempre `{"status": "ok"}` | No. Es el que usa el ping de mantenimiento |
+| `GET /ready` | La base responde y el catálogo de actividades está cargado | Sí, una consulta a la base |
+
+`/ready` responde `200` con `{"status": "ready", "checks": {"database": "ok", "catalog": "ok"}}`, o `503` con `{"status": "not_ready", "checks": {...}}`, donde `database` puede ser `error` y `catalog` puede ser `empty` (base vacía) o `error` (no se pudo comprobar). Un monitor de disponibilidad debe mirar `/ready`; el ping para que Render no duerma la API va siempre a `/health`.
+
+## Errores y request id
+
+Todos los errores propios de la API responden con la misma forma:
+
+```json
+{"code": "PROCEDURES_UNAVAILABLE", "request_id": "3f2b...", "detail": "No pudimos consultar los trámites. Intentá de nuevo."}
+```
+
+- `code` es estable y sirve para que el frontend elija qué mostrar.
+- `detail` es el mensaje en español para la persona (se mantiene porque el frontend y QA ya lo leen).
+- `request_id` es el mismo valor que el encabezado `X-Request-ID`.
+
+| `code` | Estado | `detail` |
+|---|---|---|
+| `PROCEDURE_NOT_FOUND` | `404` | No encontramos ese trámite. |
+| `PROCEDURES_UNAVAILABLE` | `503` | No pudimos consultar los trámites. Intentá de nuevo. |
+| `PROCEDURES_LOADING` | `503` | Estamos cargando los trámites, volvé a intentar. |
+| `ACTIVITY_NOT_FOUND` | `404` | No se encontró la actividad solicitada. |
+| `ACTIVITIES_UNAVAILABLE` | `503` | La búsqueda de actividades no está disponible. Intentá de nuevo más tarde. |
+| `ADDRESSES_UNAVAILABLE` | `502` | El servicio de direcciones no está disponible. Intentá de nuevo más tarde. |
+| `CONSULTATIONS_UNAVAILABLE` | `503` | El servicio de consultas no está disponible. Intentá de nuevo más tarde. |
+| `INVALID_CONSULTATION_ID` | `400` | Identificador de consulta inválido. |
+| `INTERNAL_ERROR` | `500` | Ocurrió un error inesperado. Intentá de nuevo más tarde. |
+
+- El `422` de validación **no cambia**: mantiene el formato de FastAPI `{"detail": [...]}`.
+- Ante un error no previsto, la persona recibe `INTERNAL_ERROR` y el detalle técnico (traceback) queda solo en los logs, junto con el request id.
+- **Request id:** cada respuesta trae el encabezado `X-Request-ID`. Si la petición ya trae uno válido (letras, números y guiones, hasta 64 caracteres) se reutiliza; si no, se genera. CORS lo expone para que el navegador pueda leerlo. Cada petición deja una línea en el log con método, ruta, estado, duración en ms y request id, lo que permite seguir un caso como el 404→200 de INC-01.
+
+Para agregar un error nuevo, crear una subclase de `ConcoError` en `src/conco/errors.py` con su `code`, `message` y `status_code`, y lanzarla desde el `api.py`: el manejador de `main.py` la convierte sola.
 
 ## Endpoints de orientación sobre trámites
 
@@ -261,9 +303,9 @@ Respuesta (`200`): `{"procedure": {...}, "source": {...}}`. Además de los datos
 | Respuesta | Cuándo |
 |---|---|
 | `200` | La consulta funcionó |
-| `404` | El trámite no existe o no está publicado (solo el detalle) |
+| `404` | El trámite no existe o no está publicado (solo el detalle; `PROCEDURE_NOT_FOUND`) |
 | `422` | Los parámetros no cumplen la validación (en el detalle, si el id no es un UUID) |
-| `502` | La API de la Ciudad no respondió o devolvió algo inesperado |
+| `503` | La API de la Ciudad no respondió o devolvió algo inesperado, incluso después del reintento (`PROCEDURES_UNAVAILABLE`) |
 
 Para explorar la API en forma aislada:
 
@@ -340,21 +382,23 @@ Devuelve los trámites que suelen aplicar a la actividad, en el orden en que con
 | `protected_building` | ¿El inmueble está en un área de protección histórica (APH) o está catalogado? |
 | `takes_over_existing` | ¿Vas a continuar un local que ya está habilitado? |
 
-Respuesta (`200`): `{"activity": {"slug", "name"}, "questions": [{"id": "has_employees", "text": "¿Vas a contratar personal?", "answer": null}], "procedures": [{"procedure": {...}, "note": "Si vas a contratar personal.", "status": "may_apply"}], "excluded_count": 0, "source": {...}}`.
+Respuesta (`200`): `{"activity": {"slug", "name"}, "questions": [{"id": "has_employees", "text": "¿Vas a contratar personal?", "answer": null}], "procedures": [{"procedure": {...}, "note": "Si vas a contratar personal.", "status": "may_apply"}], "excluded_count": 0, "excluded": [], "source": {...}}`.
 
 - `questions` trae solo las preguntas que usa esa actividad, con la respuesta recibida (`null` si no se respondió).
 - Cada `procedure` tiene los mismos campos que en la búsqueda de trámites; `note` dice en qué caso aplica.
 - `status` es `applies` si el trámite no tiene condiciones o todas se cumplen, y `may_apply` si falta responder alguna.
 - `excluded_count` cuenta los trámites descartados por las respuestas.
+- `excluded` nombra esos trámites, en el orden del catálogo: `[{"id": "1fb7a579-...", "title": "Inscripción en el Registro de Empleadores"}]`. Permite decir *cuáles* se descartaron.
 
 Las condiciones de cada trámite están en `applies_when` dentro de `src/conco/guidance/data/activities.json`. Al cambiarlas, hay que volver a correr la carga.
 
 | Respuesta | Cuándo |
 |---|---|
 | `200` | La consulta funcionó |
-| `404` | La actividad no existe (solo los trámites) |
+| `404` | La actividad no existe (solo los trámites; `ACTIVITY_NOT_FOUND`) |
 | `422` | Los parámetros no cumplen la validación (el `slug` va en minúsculas, con números y guiones; las respuestas, `true` o `false`; no se aceptan preguntas desconocidas) |
-| `503` | La base de datos no está disponible |
+| `503` | La base de datos no está disponible: `ACTIVITIES_UNAVAILABLE` en la sugerencia y `PROCEDURES_UNAVAILABLE` en los trámites |
+| `503` | El catálogo todavía no está cargado (solo los trámites; `PROCEDURES_LOADING`) |
 
 ## Endpoints de consulta integral
 
@@ -376,7 +420,7 @@ Respuesta (`200`): `{"consultationId", "interpretedActivity", "normalizedAddress
 |---|---|
 | `200` | La consulta funcionó |
 | `422` | Los parámetros no cumplen la validación (`activitySlug` en minúsculas/números/guiones) |
-| `503` | La base de datos no está disponible |
+| `503` | La base de datos no está disponible (`CONSULTATIONS_UNAVAILABLE`) |
 
 ### `POST /consultations/{consultationId}/follow-up`
 
@@ -389,8 +433,8 @@ Respuesta (`200`): `{"answer": "...", "sourceIds": ["caba-tramites"], "limitatio
 | Respuesta | Cuándo |
 |---|---|
 | `200` | La pregunta fue recibida y respondida |
-| `400` | `consultationId` inválido o manipulado |
-| `503` | La base de datos no está disponible |
+| `400` | `consultationId` inválido o manipulado (`INVALID_CONSULTATION_ID`) |
+| `503` | La base de datos no está disponible (`CONSULTATIONS_UNAVAILABLE`) |
 
 ## Cómo incorporar una API nueva
 

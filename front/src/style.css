@@ -60,6 +60,9 @@ h1,h2,h3 { font-family:"Manrope", sans-serif; }
 .query-field input[aria-invalid="true"] { border-color:#B42318; }
 .field-hint,.hint { display:block; margin:7px 0 0; color:var(--text-muted); font-size:11px; line-height:1.6; }
 .field-hint--warning { color:#8A5A00; }
+.field-meta { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.char-counter { flex:0 0 auto; margin:7px 0 0; color:var(--text-muted); font-size:11px; font-variant-numeric:tabular-nums; }
+.field-error { margin:6px 0 0; color:#B42318; font-size:12px; font-weight:600; }
 .address-autocomplete { position:relative; }
 .address-suggestions { position:absolute; z-index:20; top:calc(100% + 4px); left:0; right:0; max-height:280px; margin:0; padding:6px; overflow-y:auto; list-style:none; border:1px solid var(--border); border-radius:8px; background:var(--white); box-shadow:var(--shadow); }
 .address-suggestion { display:flex; flex-direction:column; gap:2px; padding:9px 10px; border-radius:6px; cursor:pointer; }
@@ -74,8 +77,6 @@ h1,h2,h3 { font-family:"Manrope", sans-serif; }
 .secondary { background:#fff; border-color:var(--blue); color:var(--blue); }
 .secondary:hover:not(:disabled) { background:#EAF1F5; }
 .query-submit { width:100%; margin-top:2px; }
-.examples { margin-top:23px; padding-top:18px; border-top:1px solid #E8EEF1; }
-.examples-title { color:var(--text-muted); font-size:12px; font-weight:600; }
 .example-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
 .chip { min-height:34px; padding:6px 12px; border:1px solid #AEBFC9; border-radius:20px; background:#fff; color:var(--ink); font-size:12px; }
 .chip:hover { border-color:var(--blue); background:#EDF4F7; }
@@ -333,3 +334,43 @@ h1,h2,h3 { font-family:"Manrope", sans-serif; }
 .map-demo-label span { display:inline-block; padding:3px 8px; border:1px solid var(--ink); border-radius:4px; background:#fff; color:var(--ink); font-size:10px; font-weight:700; white-space:nowrap; }
 .map-demo-stop { background:transparent; border:0; }
 .map-demo-stop i { display:block; width:12px; height:12px; margin:2px; border:2px solid #fff; border-radius:50%; background:var(--blue); box-shadow:0 1px 4px rgb(29 51 67 / 40%); }
+
+/* Error notices and fallback screen (QA-01: section level and unexpected errors). */
+.notice--error { border-color:#F0B8B2; background:#FEF3F2; color:#7A271A; }
+.notice--error .notice-icon { border-color:#B42318; }
+.notice-action { min-height:36px; margin-top:10px; padding:7px 14px; }
+.fallback-screen { display:grid; justify-items:center; gap:14px; max-width:560px; margin:12vh auto; padding:32px 24px; text-align:center; }
+.fallback-screen__logo { width:150px; max-height:48px; object-fit:contain; }
+.fallback-screen h1 { margin:0; color:var(--ink); font-size:28px; }
+.fallback-screen p { margin:0; color:var(--text-muted); font-size:14px; line-height:1.7; }
+
+/* Clickable step bar (FE-02): same look, now buttons with available/unavailable states. */
+button.step { padding:4px 6px; border:0; border-radius:8px; background:transparent; font:inherit; font-size:13px; }
+button.step:not([aria-disabled="true"]):not(.active):hover { color:var(--blue); }
+button.step:not([aria-disabled="true"]):not(.active):hover .step-number { border-color:var(--blue); }
+button.step[aria-disabled="true"] { cursor:not-allowed; opacity:.55; }
+button.step.active { cursor:default; }
+.social__item { width:36px; height:36px; display:grid; place-items:center; border:1px solid var(--border); border-radius:8px; color:var(--text-muted); opacity:.7; }
+.sr-only { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+@media (max-width:640px) { button.step { font-size:9px; padding:2px; } }
+
+/* "Puede aplicar" explained next to its tag (QA-07). */
+.guidance-card__top { flex-wrap:wrap; }
+.guidance-tag-hint { flex:1 1 220px; color:var(--text-muted); font-size:11px; line-height:1.5; }
+
+/* Recent searches on the Consulta step (FE-03/FE-04): side card on desktop, collapsible on mobile. */
+.query-layout { display:grid; gap:18px; }
+.recent-searches { padding:20px; }
+.recent-searches h2,.recent-searches summary { margin:0 0 12px; color:var(--ink); font-family:"Manrope",sans-serif; font-size:15px; font-weight:700; }
+.recent-searches summary { margin:0; cursor:pointer; }
+.recent-searches[open] summary { margin-bottom:12px; }
+.recent-searches__list { display:grid; gap:2px; margin:0 0 8px; padding:0; list-style:none; }
+.recent-searches__item { display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:8px; padding:9px 0; border-top:1px solid #E8EEF1; }
+.recent-searches__item:first-child { border-top:0; }
+.recent-searches__label { max-width:100%; }
+.recent-searches__time { color:var(--text-muted); font-size:11px; white-space:nowrap; }
+.recent-searches__clear { width:100%; min-height:38px; margin-top:12px; padding:8px 14px; }
+@media (min-width:1100px) {
+  .hero--with-history { max-width:1120px; }
+  .query-layout--with-history { grid-template-columns:minmax(0,760px) minmax(280px,1fr); align-items:start; }
+}

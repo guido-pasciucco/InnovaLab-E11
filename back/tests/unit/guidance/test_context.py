@@ -59,6 +59,24 @@ def test_answers_drop_contradicted_procedures_and_confirm_the_rest() -> None:
     assert apply_context(CAFETERIA, answers).excluded_count == 3
 
 
+def test_excluded_lists_the_discarded_procedures_in_catalog_order() -> None:
+    answers = ContextAnswers(takes_over_existing=True, has_employees=False)
+
+    result = apply_context(CAFETERIA, answers)
+
+    by_title = {a.procedure.title: a.procedure.id for a in CAFETERIA.procedures}
+    assert [(e.id, e.title) for e in result.excluded] == [
+        (by_title["Habilitación"], "Habilitación"),
+        (by_title["Habilitación exprés"], "Habilitación exprés"),
+        (by_title["Registro de Empleadores"], "Registro de Empleadores"),
+    ]
+    assert result.excluded_count == len(result.excluded)
+
+
+def test_excluded_is_empty_without_answers() -> None:
+    assert apply_context(CAFETERIA, ContextAnswers()).excluded == []
+
+
 def test_partial_answers_keep_procedures_with_unanswered_conditions() -> None:
     assert _titles(ContextAnswers(takes_over_existing=False)) == {
         "Habilitación": "applies",

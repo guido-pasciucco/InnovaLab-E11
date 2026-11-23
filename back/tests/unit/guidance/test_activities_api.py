@@ -101,6 +101,7 @@ ACTIVITY_PROCEDURES_JSON = {
     ],
     "procedures": [HABILITACION_JSON, EMPLEADORES_JSON],
     "excluded_count": 0,
+    "excluded": [],
     "source": SOURCE_JSON,
     "requirements": [],
     "requirements_note": REQUIREMENTS_NOTE_TEXT,
@@ -129,9 +130,14 @@ REQUIREMENT_JSON = {
         }
     ],
 }
-UNAVAILABLE_JSON = {
-    "detail": "La búsqueda de actividades no está disponible. Intentá de nuevo más tarde."
-}
+ACTIVITIES_UNAVAILABLE_MESSAGE = (
+    "La búsqueda de actividades no está disponible. Intentá de nuevo más tarde."
+)
+
+
+def error_json(response, code: str, detail: str) -> dict[str, str]:
+    """Cuerpo esperado de un error propio, con el request id que devolvió la respuesta."""
+    return {"code": code, "request_id": response.headers["x-request-id"], "detail": detail}
 
 
 class FakeActivityDirectory:
@@ -143,6 +149,8 @@ class FakeActivityDirectory:
         self.error: Exception | None = None
         self.suggest_calls: list[tuple[str, int]] = []
         self.procedures_calls: list[str] = []
+        self.catalog_loaded = True
+        self.catalog_error: Exception | None = None
 
     async def suggest(self, query: str, limit: int) -> list[ActivitySuggestion]:
         self.suggest_calls.append((query, limit))
@@ -155,6 +163,11 @@ class FakeActivityDirectory:
         if self.error is not None:
             raise self.error
         return self.procedures
+
+    async def catalog_ready(self) -> bool:
+        if self.catalog_error is not None:
+            raise self.catalog_error
+        return self.catalog_loaded
 
 
 class FakeProcedureCatalog:
@@ -256,7 +269,9 @@ def test_suggest_returns_503_when_directory_fails(
     response = client.get(SUGGEST_URL, params={"query": "barbería"})
 
     assert response.status_code == 503
-    assert response.json() == UNAVAILABLE_JSON
+    assert response.json() == error_json(
+        response, "ACTIVITIES_UNAVAILABLE", ACTIVITIES_UNAVAILABLE_MESSAGE
+    )
 
 
 def test_procedures_returns_activity_procedures_and_source(
@@ -277,7 +292,23 @@ def test_procedures_returns_404_for_unknown_activity(
     response = client.get("/guidance/activities/gimnasio/procedures")
 
     assert response.status_code == 404
-    assert response.json() == {"detail": "No se encontró la actividad solicitada."}
+    assert response.json() == error_json(
+        response, "ACTIVITY_NOT_FOUND", "No se encontró la actividad solicitada."
+    )
+
+
+def test_procedures_returns_503_while_the_catalog_is_still_loading(
+    client: TestClient, directory: FakeActivityDirectory
+) -> None:
+    directory.procedures = None
+    directory.catalog_loaded = False
+
+    response = client.get(PROCEDURES_URL)
+
+    assert response.status_code == 503
+    assert response.json() == error_json(
+        response, "PROCEDURES_LOADING", "Estamos cargando los trámites, volvé a intentar."
+    )
 
 
 @pytest.mark.parametrize("slug", ["Peluqueria", "pelu queria", "pelu_queria", "x" * 61])
@@ -298,7 +329,11 @@ def test_procedures_returns_503_when_directory_fails(
     response = client.get(PROCEDURES_URL)
 
     assert response.status_code == 503
-    assert response.json() == UNAVAILABLE_JSON
+    assert response.json() == error_json(
+        response,
+        "PROCEDURES_UNAVAILABLE",
+        "No pudimos consultar los trámites. Intentá de nuevo.",
+    )
 
 
 def test_procedures_answer_confirms_conditional_procedure(client: TestClient) -> None:
@@ -320,6 +355,12 @@ def test_procedures_answer_drops_contradicted_procedure(client: TestClient) -> N
     body = response.json()
     assert body["procedures"] == [HABILITACION_JSON]
     assert body["excluded_count"] == 1
+    assert body["excluded"] == [
+        {
+            "id": "1fb7a579-8fc2-4216-b113-684cc272f7f1",
+            "title": "Inscripción en el Registro de Empleadores",
+        }
+    ]
     assert body["questions"][0]["answer"] is False
 
 

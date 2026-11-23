@@ -1,8 +1,9 @@
 import { useEffect, useId, useState, type KeyboardEvent } from "react";
-import { ApiError, suggestActivities } from "../api/client";
+import { suggestActivities } from "../api/client";
+import { describeError } from "../api/errors";
 import type { ActivitySuggestion } from "../types";
+import { TEXT_RULES, reachesThreshold } from "../validation";
 
-const MIN_CHARS = 3;
 const DEBOUNCE_MS = 300;
 
 type Status = "idle" | "loading" | "ready" | "empty" | "error";
@@ -12,6 +13,8 @@ type Props = {
   value: string;
   selected: ActivitySuggestion | null;
   invalid: boolean;
+  /** Ids of the hint, counter and error that describe the field. */
+  describedBy?: string;
   onChange: (value: string) => void;
   onSelect: (activity: ActivitySuggestion | null) => void;
 };
@@ -21,7 +24,7 @@ type Props = {
  * Picking one is optional: the catalog is small, so free text still works and keeps the generic guidance.
  * It reuses the address autocomplete styles so both fields look and behave the same.
  */
-export default function ActivityAutocomplete({ id, value, selected, invalid, onChange, onSelect }: Props) {
+export default function ActivityAutocomplete({ id, value, selected, invalid, describedBy, onChange, onSelect }: Props) {
   const listId = useId();
   const [suggestions, setSuggestions] = useState<ActivitySuggestion[]>([]);
   const [status, setStatus] = useState<Status>("idle");
@@ -32,7 +35,8 @@ export default function ActivityAutocomplete({ id, value, selected, invalid, onC
   useEffect(() => {
     const query = value.trim();
     if (selected && value === selected.name) return;
-    if (query.length < MIN_CHARS) {
+    // Below the API's threshold there is nothing to ask: no request is sent.
+    if (!reachesThreshold(query, TEXT_RULES.activity)) {
       setSuggestions([]);
       setStatus("idle");
       setOpen(false);
@@ -48,12 +52,11 @@ export default function ActivityAutocomplete({ id, value, selected, invalid, onC
         setActiveIndex(-1);
         setStatus(activities.length ? "ready" : "empty");
       } catch (err) {
-        if (controller.signal.aborted) return;
+        const message = describeError(err);
+        if (controller.signal.aborted || message === null) return;
         setSuggestions([]);
         setStatus("error");
-        setErrorMessage(err instanceof ApiError && err.status === 503
-          ? "La búsqueda de actividades no está disponible. Podés continuar con la actividad escrita."
-          : "No pudimos buscar actividades. Podés continuar con la actividad escrita.");
+        setErrorMessage(`${message} Podés continuar con la actividad escrita.`);
       }
     }, DEBOUNCE_MS);
     return () => { clearTimeout(timer); controller.abort(); };
@@ -88,12 +91,12 @@ export default function ActivityAutocomplete({ id, value, selected, invalid, onC
   return (
     <div className="address-autocomplete">
       <input id={id} name="activity" value={value} role="combobox" aria-autocomplete="list" aria-expanded={showList}
-        aria-controls={listId} aria-activedescendant={activeId} aria-invalid={invalid}
+        aria-controls={listId} aria-activedescendant={activeId} aria-invalid={invalid} aria-describedby={describedBy}
         onChange={e => { onChange(e.target.value); if (selected) onSelect(null); }}
         onKeyDown={handleKeyDown}
         onFocus={() => { if (suggestions.length && !selected) setOpen(true); }}
         onBlur={() => setOpen(false)}
-        placeholder="Ej.: abrir una cafetería" maxLength={100} autoComplete="off" />
+        placeholder="Ej.: abrir una cafetería" maxLength={TEXT_RULES.activity.max} autoComplete="off" />
       {showList && (
         <ul className="address-suggestions" id={listId} role="listbox">
           {status === "loading" && <li className="address-suggestions__status">Buscando actividades…</li>}

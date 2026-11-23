@@ -295,3 +295,145 @@ async def test_list_procedures_http_error_raises_caba_tramites_error() -> None:
 
     with pytest.raises(CabaTramitesError):
         await list_procedures()
+
+
+# Reintento acotado: como máximo 2 intentos, solo ante errores transitorios.
+
+
+@respx.mock
+@pytest.mark.parametrize(
+    "first",
+    [
+        httpx.Response(502),
+        httpx.Response(503),
+        httpx.Response(504),
+        httpx.ReadTimeout("timeout"),
+        httpx.ConnectError("connection refused"),
+    ],
+)
+async def test_search_procedures_retries_once_on_transient_errors(first: object) -> None:
+    route = respx.get(PROCEDURES_URL)
+    route.side_effect = [first, httpx.Response(200, json=load_fixture("busqueda_habilitaci.json"))]
+
+    result = await search_procedures("habilitaci")
+
+    assert len(result.procedures) == 10
+    assert route.call_count == 2
+
+
+@respx.mock
+async def test_search_procedures_gives_up_after_two_transient_errors() -> None:
+    route = respx.get(PROCEDURES_URL).respond(503)
+
+    with pytest.raises(CabaTramitesError):
+        await search_procedures("habilitaci")
+
+    assert route.call_count == 2
+
+
+@respx.mock
+@pytest.mark.parametrize("status", [400, 404, 500])
+async def test_search_procedures_does_not_retry_other_errors(status: int) -> None:
+    route = respx.get(PROCEDURES_URL).respond(status)
+
+    with pytest.raises(CabaTramitesError):
+        await search_procedures("habilitaci")
+
+    assert route.call_count == 1
+
+
+@respx.mock
+async def test_search_procedures_does_not_retry_an_unexpected_body() -> None:
+    route = respx.get(PROCEDURES_URL).respond(200, text="<html>Mantenimiento</html>")
+
+    with pytest.raises(CabaTramitesError):
+        await search_procedures("habilitaci")
+
+    assert route.call_count == 1
+
+
+@respx.mock
+async def test_get_procedure_retries_once_on_timeout() -> None:
+    route = respx.get(HABILITACION_URL)
+    route.side_effect = [
+        httpx.ReadTimeout("timeout"),
+        httpx.Response(200, json=load_fixture("tramite_habilitacion_actividad_economica.json")),
+    ]
+
+    detail = await get_procedure(HABILITACION_ID)
+
+    assert detail is not None
+    assert detail.procedure.id == HABILITACION_ID
+    assert route.call_count == 2
+
+
+@respx.mock
+async def test_get_procedure_retries_a_redirect_before_reporting_not_found() -> None:
+    # INC-01: la misma ficha publicada respondió primero con la redirección y luego con 200.
+    route = respx.get(HABILITACION_URL)
+    route.side_effect = [
+        httpx.Response(
+            301,
+            text=read_fixture_text("tramite_inexistente_301.html"),
+            headers={"Location": "https://buenosaires.gob.ar/gcaba_historico/jsonapi"},
+        ),
+        httpx.Response(200, json=load_fixture("tramite_habilitacion_actividad_economica.json")),
+    ]
+
+    detail = await get_procedure(HABILITACION_ID)
+
+    assert detail is not None
+    assert detail.procedure.id == HABILITACION_ID
+    assert route.call_count == 2
+
+
+@respx.mock
+async def test_get_procedure_repeated_redirect_means_not_found() -> None:
+    route = respx.get(UNKNOWN_URL).respond(
+        301,
+        text=read_fixture_text("tramite_inexistente_301.html"),
+        headers={"Location": "https://buenosaires.gob.ar/gcaba_historico/jsonapi"},
+    )
+
+    assert await get_procedure(UNKNOWN_ID) is None
+    assert route.call_count == 2
+
+
+@respx.mock
+async def test_get_procedure_does_not_retry_a_server_error() -> None:
+    route = respx.get(HABILITACION_URL).respond(500, text="Internal Server Error")
+
+    with pytest.raises(CabaTramitesError):
+        await get_procedure(HABILITACION_ID)
+
+    assert route.call_count == 1
+
+
+@respx.mock
+async def test_list_procedures_retries_a_single_page() -> None:
+    route = respx.get(PROCEDURES_URL)
+    route.side_effect = [
+        httpx.Response(200, json=_catalog_page(50, start=0)),
+        httpx.Response(503),
+        httpx.Response(200, json=_catalog_page(1, start=50)),
+    ]
+
+    procedures = await list_procedures()
+
+    assert len(procedures) == 51
+    assert [call.request.url.params["page[offset]"] for call in route.calls] == ["0", "50", "50"]
+
+
+@respx.mock
+async def test_list_procedures_gives_up_when_a_page_keeps_failing() -> None:
+    route = respx.get(PROCEDURES_URL)
+    route.side_effect = [
+        httpx.Response(200, json=_catalog_page(50, start=0)),
+        httpx.Response(504),
+        httpx.Response(504),
+    ]
+
+    with pytest.raises(CabaTramitesError):
+        await list_procedures()
+
+    assert route.call_count == 3
