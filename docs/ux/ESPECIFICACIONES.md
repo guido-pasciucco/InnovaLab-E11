@@ -1,6 +1,6 @@
 # Especificaciones de experiencia (navegación y orientación)
 
-Documento de referencia para **implementar** los cambios de experiencia pedidos el 22/11/2026. Sigue el formato de [ESPECIFICACIONES.md](ESPECIFICACIONES.md): cada entrada tiene el punto en lenguaje simple, por qué importa, cómo sabremos que está listo, qué NO se hace y las decisiones que lo cerraron. Una entrada marcada **Propuesta** todavía espera confirmación del dueño del producto y no se implementa hasta que se confirme.
+Documento de referencia para **implementar** los cambios de experiencia pedidos el 22/11/2026. Sigue el formato de [las especificaciones de QA](../qa/ESPECIFICACIONES.md): cada entrada tiene el punto en lenguaje simple, por qué importa, cómo sabremos que está listo, qué NO se hace y las decisiones que lo cerraron. Una entrada marcada **Propuesta** todavía espera confirmación del dueño del producto y no se implementa hasta que se confirme.
 
 ## Entradas
 
@@ -49,13 +49,13 @@ Documento de referencia para **implementar** los cambios de experiencia pedidos 
 
 ### UX-4. La lista "Antes de empezar: lo que tenés que conseguir" es demasiado larga
 
-**Estado:** propuesta, a confirmar.
+**Estado:** confirmada (22/11/2026: se eligió la pestaña agrupada frente a poner los requerimientos dentro de cada trámite o dejarlos en un lateral compacto).
 
 **Cómo se entendió:** la lista de requerimientos está en la columna lateral de la orientación (`front/src/Componentes/RequirementsChecklist.tsx`) y muestra todos los requerimientos juntos, cada uno con los trámites de los que sale. Con muchos ítems el scroll es largo, y cuesta ver qué requerimiento corresponde a qué trámite.
 
 **Objetivo:** que sea fácil ver los requerimientos y, a la vez, saber a qué trámite pertenece cada uno.
 
-**Propuesta recomendada:**
+**Diseño acordado:**
 
 - La orientación pasa a tener dos pestañas en la columna principal: **Trámites (N)** y **Qué tenés que conseguir (M)**.
 - En "Qué tenés que conseguir", los requerimientos se agrupan por trámite en bloques que se abren y cierran, cada uno con su avance ("2 de 5"). Los requerimientos que piden varios trámites van en un grupo propio al principio, "Sirve para varios trámites", para no repetirlos.
