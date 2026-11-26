@@ -53,6 +53,20 @@ async def test_normalize_address_parses_the_official_payload() -> None:
 
 
 @respx.mock
+async def test_normalize_address_strips_the_context_suffix() -> None:
+    normalize = respx.get(NORMALIZE_URL).respond(
+        200, json=load_fixture("normalizar_corrientes.json")
+    )
+
+    result = await usig_client.normalize_address(
+        "AV CORRIENTES 2801, Comuna 3, Ciudad Autónoma de Buenos Aires"
+    )
+
+    assert normalize.calls.last.request.url.params["direccion"] == "AV CORRIENTES 2801"
+    assert result[0].number == 2801
+
+
+@respx.mock
 async def test_normalize_address_returns_an_empty_list_for_an_unknown_street() -> None:
     respx.get(NORMALIZE_URL).respond(
         200, json=load_fixture("normalizar_calle_inexistente.json")

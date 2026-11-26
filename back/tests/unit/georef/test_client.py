@@ -61,6 +61,20 @@ async def test_search_addresses_sends_normalized_query_params() -> None:
 
 
 @respx.mock
+async def test_search_addresses_strips_the_context_suffix() -> None:
+    """Georef parses the height wrong when the normalized address includes Comuna/provincia."""
+    route = respx.get(ADDRESSES_URL).respond(
+        200, json=load_fixture("direcciones_corrientes_2500.json")
+    )
+
+    await search_addresses(
+        "AV CORRIENTES 2801, Comuna 3, Ciudad Autónoma de Buenos Aires"
+    )
+
+    assert route.calls.last.request.url.params["direccion"] == "AV CORRIENTES 2801"
+
+
+@respx.mock
 async def test_search_addresses_without_results_returns_empty_list() -> None:
     respx.get(ADDRESSES_URL).respond(
         200, json=load_fixture("direcciones_sin_resultados.json")

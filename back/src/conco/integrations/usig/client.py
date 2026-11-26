@@ -106,10 +106,15 @@ async def get_parcela(lat: float, lng: float) -> UsigParcela:
 
 
 async def normalize_address(address: str) -> list[UsigDireccionNormalizada]:
-    """Normaliza una dirección; sin calle conocida USIG responde una lista vacía."""
+    """Normaliza una dirección; sin calle conocida USIG responde una lista vacía.
+
+    La nomenclatura de Georef incluye ", Comuna N, Ciudad Autónoma…" y USIG la
+    rechaza como calle inexistente; se envía sólo calle y altura.
+    """
+    query = " ".join(address.split(",", 1)[0].split())
     data = await _request(
         NORMALIZAR_PATH,
-        {"direccion": address, "geocodificar": "true", "srid": 4326},
+        {"direccion": query, "geocodificar": "true", "srid": 4326},
         _NORMALIZAR,
         base_url=settings.usig_normalize_base_url,
     )

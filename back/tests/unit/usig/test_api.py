@@ -493,3 +493,39 @@ def test_real_use_table_resolver_falls_back_to_the_official_address() -> None:
         "limitations",
     }
     assert any("dirección" in item.lower() for item in body["limitations"])
+
+
+@respx.mock
+def test_real_use_table_accepts_the_full_normalized_address() -> None:
+    """La dirección que devuelve Georef incluye Comuna y provincia; USIG no la entiende así."""
+    respx.get(f"{BASE}/catastro/parcela/").respond(200, json={})
+    normalize = respx.get(NORMALIZE_URL).respond(
+        200, json=load_fixture("normalizar_corrientes.json")
+    )
+    respx.get(CATASTRO_API_PARCELA_URL).respond(
+        200, json=load_fixture("parcela_corrientes.json")
+    )
+    respx.get(f"{BASE}/cur3d/mixtura_usos/").respond(
+        200, json=load_fixture("mixtura_usos.json")
+    )
+    respx.get(f"{BASE}/cur3d/categorias/").respond(
+        200, json=load_fixture("categorias.json")
+    )
+    respx.get(f"{BASE}/cur3d/cuadrosdeuso/rubros/").respond(
+        200, json=load_fixture("rubros.json")
+    )
+
+    response = TestClient(app).get(
+        USE_TABLE_URL,
+        params={
+            "lat": -34.5000,
+            "lng": -58.4000,
+            "address": "AV CORRIENTES 2801, Comuna 3, Ciudad Autónoma de Buenos Aires",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["smp"] == "013-099-018"
+    assert (
+        normalize.calls.last.request.url.params["direccion"] == "AV CORRIENTES 2801"
+    )
