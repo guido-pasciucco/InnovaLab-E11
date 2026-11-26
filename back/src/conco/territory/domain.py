@@ -1,6 +1,6 @@
 """Modelos del dominio y puertos del cuadro de usos, sin depender de USIG."""
 
-from typing import Protocol
+from typing import Any, Protocol
 
 from pydantic import BaseModel, ConfigDict
 
@@ -33,6 +33,16 @@ class TerritorySource(BaseModel):
     title: str
     publisher: str
     url: str
+
+
+class ParcelGeometry(BaseModel):
+    """Geometría oficial de la parcela para dibujar en el mapa."""
+
+    model_config = ConfigDict(frozen=True)
+
+    geometry: dict[str, Any] | None
+    source: TerritorySource
+    limitations: list[str]
 
 
 class UseTable(BaseModel):
@@ -69,6 +79,11 @@ SOURCE = TerritorySource(
     url="https://ciudad3d.buenosaires.gob.ar",
 )
 
+# RN-03: el punto se resuelve con Georef, así que la parcela es estimada.
+APPROXIMATE_LOCATION_LIMITATION = (
+    "La ubicación de la parcela proviene de Georef y es aproximada: el SMP puede "
+    "corresponder a la parcela vecina o a la calle."
+)
 # RN-04: el cuadro es orientación general, no una determinación legal ni una
 # confirmación catastral de lo que se puede hacer en el lote.
 REFERENCE_LIMITATIONS = [
@@ -79,6 +94,14 @@ NO_PARCELA_LIMITATION = "No se encontró la parcela para el punto consultado den
 
 class TerritoryLookupError(Exception):
     """La consulta a USIG falló o devolvió algo inesperado."""
+
+
+class ParcelGeometryResolver(Protocol):
+    """Puerto: devuelve la geometría oficial de una parcela por SMP."""
+
+    async def resolve(self, smp: str) -> ParcelGeometry:
+        """Devuelve la geometría; lanza TerritoryLookupError si USIG falla."""
+        ...
 
 
 class UseTableResolver(Protocol):

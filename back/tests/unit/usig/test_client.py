@@ -18,6 +18,7 @@ MIXTURA_URL = f"{BASE}/cur3d/mixtura_usos/"
 CATEGORIAS_URL = f"{BASE}/cur3d/categorias/"
 RUBROS_URL = f"{BASE}/cur3d/cuadrosdeuso/rubros/"
 REFERENCIAS_URL = f"{BASE}/cur3d/cuadrosdeuso/referencias/"
+GEOMETRIA_URL = f"{BASE}/catastro/geometria/"
 
 
 def load_fixture(name: str) -> Any:
@@ -33,6 +34,7 @@ async def test_every_upstream_request_sends_a_non_curl_user_agent() -> None:
         respx.get(CATEGORIAS_URL).respond(200, json=load_fixture("categorias.json")),
         respx.get(RUBROS_URL).respond(200, json=load_fixture("rubros.json")),
         respx.get(REFERENCIAS_URL).respond(200, json=load_fixture("referencias.json")),
+        respx.get(GEOMETRIA_URL).respond(200, json=load_fixture("geometria.json")),
     ]
 
     await usig_client.get_parcela(-34.6040, -58.4055)
@@ -40,6 +42,7 @@ async def test_every_upstream_request_sends_a_non_curl_user_agent() -> None:
     await usig_client.list_categorias()
     await usig_client.list_rubros(1, 4)
     await usig_client.get_referencias(1, 4, 102)
+    await usig_client.get_geometria("013-099-018")
 
     for route in routes:
         assert route.called
@@ -56,6 +59,7 @@ async def test_all_upstream_paths_end_with_a_trailing_slash() -> None:
         respx.get(CATEGORIAS_URL).respond(200, json=load_fixture("categorias.json")),
         respx.get(RUBROS_URL).respond(200, json=load_fixture("rubros.json")),
         respx.get(REFERENCIAS_URL).respond(200, json=load_fixture("referencias.json")),
+        respx.get(GEOMETRIA_URL).respond(200, json=load_fixture("geometria.json")),
     ]
 
     await usig_client.get_parcela(-34.6040, -58.4055)
@@ -63,6 +67,7 @@ async def test_all_upstream_paths_end_with_a_trailing_slash() -> None:
     await usig_client.list_categorias()
     await usig_client.list_rubros(1, 4)
     await usig_client.get_referencias(1, 4, 102)
+    await usig_client.get_geometria("013-099-018")
 
     paths = [str(call.request.url.path) for route in routes for call in route.calls]
     assert paths and all(path.endswith("/") for path in paths)
@@ -135,3 +140,23 @@ async def test_network_error_raises_usig_error() -> None:
 
     with pytest.raises(usig_client.UsigError):
         await usig_client.list_categorias()
+
+
+@respx.mock
+async def test_get_geometria_returns_the_first_feature_geometry() -> None:
+    payload = load_fixture("geometria.json")
+    respx.get(GEOMETRIA_URL).respond(200, json=payload)
+
+    geometry = await usig_client.get_geometria("013-099-018")
+
+    assert geometry == payload["features"][0]["geometry"]
+    assert geometry is not None and geometry["type"] == "MultiPolygon"
+
+
+@respx.mock
+async def test_get_geometria_without_features_returns_none() -> None:
+    respx.get(GEOMETRIA_URL).respond(
+        200, json={"type": "FeatureCollection", "features": []}
+    )
+
+    assert await usig_client.get_geometria("000-000-000") is None

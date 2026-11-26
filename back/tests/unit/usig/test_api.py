@@ -13,6 +13,7 @@ from conco.geolocation.domain import Address, Coordinates
 from conco.main import app
 from conco.territory.api import get_references_resolver, get_use_table_resolver
 from conco.territory.domain import (
+    APPROXIMATE_LOCATION_LIMITATION,
     SOURCE,
     Category,
     Rubro,
@@ -23,6 +24,7 @@ from conco.territory.domain import (
 
 USE_TABLE_URL = "/territory/use-table"
 REFERENCIAS_URL = "/territory/rubro-referencias"
+PARCEL_GEOMETRY_URL = "/territory/parcel-geometry"
 
 EXPECTED_SOURCE = {
     "id": "usig-ciudad-3d",
@@ -31,7 +33,8 @@ EXPECTED_SOURCE = {
     "url": "https://ciudad3d.buenosaires.gob.ar",
 }
 LIMITATIONS = [
-    "Información de referencia del cuadro de usos oficial: no acredita la zonificación del lote ni confirma que una actividad esté permitida."
+    APPROXIMATE_LOCATION_LIMITATION,
+    "Información de referencia del cuadro de usos oficial: no acredita la zonificación del lote ni confirma que una actividad esté permitida.",
 ]
 NO_PARCELA_LIMITATION = "No se encontró la parcela para el punto consultado dentro de la Ciudad Autónoma de Buenos Aires."
 
@@ -170,6 +173,7 @@ def test_empty_parcela_returns_null_smp_and_empty_categories(
     assert body["mix_area"] is None
     assert body["categories"] == []
     assert NO_PARCELA_LIMITATION in body["limitations"]
+    assert APPROXIMATE_LOCATION_LIMITATION in body["limitations"]
 
 
 @pytest.mark.parametrize(
@@ -332,6 +336,9 @@ def test_real_use_table_resolver_is_wired_to_the_port() -> None:
 
 @respx.mock
 def test_real_references_resolver_is_wired_to_the_port() -> None:
+    respx.get(f"{BASE}/cur3d/mixtura_usos/").respond(
+        200, json=load_fixture("mixtura_usos.json")
+    )
     respx.get(f"{BASE}/cur3d/cuadrosdeuso/referencias/").respond(
         200, json=load_fixture("referencias.json")
     )
@@ -343,3 +350,76 @@ def test_real_references_resolver_is_wired_to_the_port() -> None:
 
     assert response.status_code == 200
     assert response.json()["permitido_mixtura_de_usos"]
+
+
+@respx.mock
+def test_rubro_referencias_uses_the_mix_area_derived_from_smp() -> None:
+    """S11: `mixtura` se acepta por contrato, pero USIG recibe la derivada del SMP."""
+    respx.get(f"{BASE}/cur3d/mixtura_usos/").respond(
+        200, json=load_fixture("mixtura_usos.json")
+    )
+    referencias = respx.get(f"{BASE}/cur3d/cuadrosdeuso/referencias/").respond(
+        200, json=load_fixture("referencias.json")
+    )
+
+    response = TestClient(app).get(
+        REFERENCIAS_URL,
+        params={"smp": "013-099-018", "categoria": 1, "mixtura": 9, "rubro": 102},
+    )
+
+    assert response.status_code == 200
+    assert referencias.calls.last.request.url.params["mixtura"] == "4"
+
+
+@respx.mock
+def test_parcel_geometry_returns_a_real_multipolygon_through_real_di() -> None:
+    """S12: sin dependency_overrides, la DI real debe exponer la geometría de USIG."""
+    respx.get(f"{BASE}/catastro/geometria/").respond(
+        200, json=load_fixture("geometria.json")
+    )
+
+    response = TestClient(app).get(
+        PARCEL_GEOMETRY_URL, params={"smp": "013-099-018"}
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["geometry"]["type"] == "MultiPolygon"
+    assert body["source"] == EXPECTED_SOURCE
+    assert APPROXIMATE_LOCATION_LIMITATION in body["limitations"]
+    assert any("referencia" in item.lower() for item in body["limitations"])
+
+
+@respx.mock
+def test_parcel_geometry_without_features_returns_null_geometry() -> None:
+    respx.get(f"{BASE}/catastro/geometria/").respond(
+        200, json={"type": "FeatureCollection", "features": []}
+    )
+
+    response = TestClient(app).get(
+        PARCEL_GEOMETRY_URL, params={"smp": "000-000-000"}
+    )
+
+    assert response.status_code == 200
+    assert response.json()["geometry"] is None
+
+
+@pytest.mark.parametrize("params", [{}, {"smp": ""}])
+def test_invalid_parcel_geometry_params_return_422(params: dict[str, object]) -> None:
+    assert TestClient(app).get(PARCEL_GEOMETRY_URL, params=params).status_code == 422
+
+
+@respx.mock
+def test_parcel_geometry_upstream_failure_keeps_the_standard_error_body() -> None:
+    respx.get(f"{BASE}/catastro/geometria/").respond(500, text="down")
+
+    response = TestClient(app).get(
+        PARCEL_GEOMETRY_URL, params={"smp": "013-099-018"}
+    )
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "code": "TERRITORY_UNAVAILABLE",
+        "request_id": response.headers["x-request-id"],
+        "detail": "No pudimos consultar el cuadro de usos. Intentá de nuevo más tarde.",
+    }

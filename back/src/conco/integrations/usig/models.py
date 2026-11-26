@@ -1,5 +1,7 @@
 """Payloads crudos de USIG, con los nombres originales en español como alias."""
 
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -64,3 +66,21 @@ class UsigReferencias(BaseModel):
     estacionamientos: list[UsigDetalle] = Field(default_factory=list)
     cargaydescarga: list[UsigDetalle] = Field(default_factory=list)
     observaciones: str | None = None
+
+
+class UsigGeometryFeature(BaseModel):
+    """Cada feature del FeatureCollection de /catastro/geometria/."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    type: str = "Feature"
+    geometry: dict[str, Any] | None = None
+
+
+class UsigGeometriaResponse(BaseModel):
+    """GeoJSON `FeatureCollection` devuelto por /catastro/geometria/."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    type: str = "FeatureCollection"
+    features: list[UsigGeometryFeature] = Field(default_factory=list)

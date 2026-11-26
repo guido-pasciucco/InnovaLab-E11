@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     usig_base_url: str = "https://epok.buenosaires.gob.ar"
     usig_timeout_seconds: float = 10.0
     usig_user_agent: str = "CONCO/0.1"
+    # S8: sólo respuestas GET exitosas se cachean; LRU acotada para no crecer sin límite.
+    usig_cache_ttl_seconds: float = 300.0
+    usig_cache_max_entries: int = 256
 
     # Postgres con pgvector; por defecto, el Supabase local de back/supabase.
     database_url: str = "postgresql://postgres:postgres@127.0.0.1:55322/postgres"

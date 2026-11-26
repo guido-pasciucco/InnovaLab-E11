@@ -6,13 +6,16 @@ modelos de `conco.integrations.usig.models`.
 """
 
 import json
+from typing import Any
 
 import httpx
 from pydantic import TypeAdapter, ValidationError
 
 from conco.config import settings
+from conco.integrations.usig.cache import CacheKey, UsigCache
 from conco.integrations.usig.models import (
     UsigCategoria,
+    UsigGeometriaResponse,
     UsigMixtura,
     UsigParcela,
     UsigReferencias,
@@ -25,6 +28,7 @@ MIXTURA_PATH = "/cur3d/mixtura_usos/"
 CATEGORIAS_PATH = "/cur3d/categorias/"
 RUBROS_PATH = "/cur3d/cuadrosdeuso/rubros/"
 REFERENCIAS_PATH = "/cur3d/cuadrosdeuso/referencias/"
+GEOMETRIA_PATH = "/catastro/geometria/"
 
 
 class UsigError(Exception):
@@ -36,6 +40,15 @@ _MIXTURA = TypeAdapter(UsigMixtura)
 _CATEGORIAS = TypeAdapter(list[UsigCategoria])
 _RUBROS = TypeAdapter(UsigRubrosResponse)
 _REFERENCIAS = TypeAdapter(UsigReferencias)
+_GEOMETRIA = TypeAdapter(UsigGeometriaResponse)
+
+# S8: una sola caché por proceso, compartida por todos los clientes USIG.
+_CACHE = UsigCache()
+
+
+def clear_usig_cache() -> None:
+    """Vacía la caché USIG (tests y reinicios de configuración)."""
+    _CACHE.clear()
 
 
 def _client() -> httpx.AsyncClient:
@@ -61,13 +74,18 @@ def _parse[T](content: bytes, adapter: TypeAdapter[T]) -> T:
 
 
 async def _request[T](path: str, params: dict[str, object], adapter: TypeAdapter[T]) -> T:
-    try:
-        async with _client() as client:
-            response = await client.get(path, params=params)
-            response.raise_for_status()
-    except httpx.HTTPError as exc:
-        raise UsigError(f"No se pudo consultar USIG: {exc}") from exc
-    return _parse(response.content, adapter)
+    key: CacheKey = (path, tuple(sorted(params.items())))
+
+    async def loader() -> T:
+        try:
+            async with _client() as client:
+                response = await client.get(path, params=params)
+                response.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise UsigError(f"No se pudo consultar USIG: {exc}") from exc
+        return _parse(response.content, adapter)
+
+    return await _CACHE.get_or_set(key, loader)
 
 
 async def get_parcela(lat: float, lng: float) -> UsigParcela:
@@ -105,3 +123,11 @@ async def get_referencias(
         {"categoria": categoria, "mixtura": mixtura, "rubro": rubro},
         _REFERENCIAS,
     )
+
+
+async def get_geometria(smp: str) -> dict[str, Any] | None:
+    """Devuelve la geometría del primer feature, o None si no hay features."""
+    data = await _request(GEOMETRIA_PATH, {"smp": smp}, _GEOMETRIA)
+    if not data.features:
+        return None
+    return data.features[0].geometry

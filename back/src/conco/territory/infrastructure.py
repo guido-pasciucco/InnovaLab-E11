@@ -4,10 +4,12 @@ import asyncio
 
 from conco.integrations.usig import client as usig
 from conco.territory.domain import (
+    APPROXIMATE_LOCATION_LIMITATION,
     NO_PARCELA_LIMITATION,
     REFERENCE_LIMITATIONS,
     SOURCE,
     Category,
+    ParcelGeometry,
     Rubro,
     RubroReferences,
     TerritoryLookupError,
@@ -29,7 +31,11 @@ class UsigTerritoryService:
                     mix_area=None,
                     categories=[],
                     source=SOURCE,
-                    limitations=[NO_PARCELA_LIMITATION, *REFERENCE_LIMITATIONS],
+                    limitations=[
+                        APPROXIMATE_LOCATION_LIMITATION,
+                        NO_PARCELA_LIMITATION,
+                        *REFERENCE_LIMITATIONS,
+                    ],
                 )
             mix_area = await usig.get_mix_area(parcela.smp)
             categorias = await usig.list_categorias()
@@ -52,15 +58,19 @@ class UsigTerritoryService:
                 for categoria, rubros in zip(categorias, rubros_por_categoria)
             ],
             source=SOURCE,
-            limitations=list(REFERENCE_LIMITATIONS),
+            limitations=[APPROXIMATE_LOCATION_LIMITATION, *REFERENCE_LIMITATIONS],
         )
 
     async def resolve_references(
         self, smp: str, categoria: int, mixtura: int, rubro: int
     ) -> RubroReferences:
-        """Condiciones del rubro; `smp` se acepta para el cliente pero USIG no lo usa."""
+        """Condiciones del rubro; la mixtura se deriva del SMP, no del query param.
+
+        `mixtura` se mantiene en la firma por compatibilidad de contrato (S11).
+        """
         try:
-            referencias = await usig.get_referencias(categoria, mixtura, rubro)
+            derived_mixtura = await usig.get_mix_area(smp)
+            referencias = await usig.get_referencias(categoria, derived_mixtura, rubro)
         except usig.UsigError as exc:
             raise TerritoryLookupError(str(exc)) from exc
         return RubroReferences(
@@ -72,7 +82,19 @@ class UsigTerritoryService:
             cargaydescarga=[item.detail for item in referencias.cargaydescarga],
             observaciones=referencias.observaciones or None,
             source=SOURCE,
-            limitations=list(REFERENCE_LIMITATIONS),
+            limitations=[APPROXIMATE_LOCATION_LIMITATION, *REFERENCE_LIMITATIONS],
+        )
+
+    async def resolve_parcel_geometry(self, smp: str) -> ParcelGeometry:
+        """Geometría de la parcela; `None` cuando USIG no devuelve features."""
+        try:
+            geometry = await usig.get_geometria(smp)
+        except usig.UsigError as exc:
+            raise TerritoryLookupError(str(exc)) from exc
+        return ParcelGeometry(
+            geometry=geometry,
+            source=SOURCE,
+            limitations=[APPROXIMATE_LOCATION_LIMITATION, *REFERENCE_LIMITATIONS],
         )
 
 
@@ -96,3 +118,13 @@ class UsigRubroReferencesResolver:
         self, smp: str, categoria: int, mixtura: int, rubro: int
     ) -> RubroReferences:
         return await self._service.resolve_references(smp, categoria, mixtura, rubro)
+
+
+class UsigParcelGeometryResolver:
+    """Puerto `resolve()` para la geometría: delega en el adaptador compartido."""
+
+    def __init__(self, service: UsigTerritoryService | None = None) -> None:
+        self._service = service or UsigTerritoryService()
+
+    async def resolve(self, smp: str) -> ParcelGeometry:
+        return await self._service.resolve_parcel_geometry(smp)

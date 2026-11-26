@@ -2,11 +2,12 @@ import json
 from pathlib import Path
 from typing import Any
 
+import httpx
 import pytest
 import respx
 
 from conco.config import settings
-from conco.territory.domain import TerritoryLookupError
+from conco.territory.domain import APPROXIMATE_LOCATION_LIMITATION, TerritoryLookupError
 from conco.territory.infrastructure import UsigTerritoryService
 
 pytestmark = pytest.mark.anyio
@@ -83,6 +84,7 @@ async def test_upstream_error_becomes_territory_lookup_error() -> None:
 
 @respx.mock
 async def test_referencias_flattens_details_and_keeps_observaciones() -> None:
+    respx.get(MIXTURA_URL).respond(200, json=load_fixture("mixtura_usos.json"))
     route = respx.get(REFERENCIAS_URL).respond(
         200, json=load_fixture("referencias.json")
     )
@@ -105,7 +107,44 @@ async def test_referencias_flattens_details_and_keeps_observaciones() -> None:
 
 @respx.mock
 async def test_referencias_upstream_error_becomes_territory_lookup_error() -> None:
+    respx.get(MIXTURA_URL).respond(200, json=load_fixture("mixtura_usos.json"))
     respx.get(REFERENCIAS_URL).respond(500, text="Internal Server Error")
 
     with pytest.raises(TerritoryLookupError):
         await UsigTerritoryService().resolve_references("013-099-018", 1, 4, 102)
+
+
+@respx.mock
+async def test_approximate_location_limitation_is_present_in_every_result() -> None:
+    """RN-03 se informa en el cuadro completo, en la parcela vacía y en referencias."""
+    respx.get(PARCELA_URL).mock(
+        side_effect=[
+            httpx.Response(200, json={"smp": None}),
+            httpx.Response(200, json={"smp": "013-099-018", "direccion": "AV"}),
+        ]
+    )
+    respx.get(MIXTURA_URL).respond(200, json={"usos": [4, 0, 0]})
+    respx.get(CATEGORIAS_URL).respond(200, json=[{"id": 1, "nombre": "Comercial"}])
+    respx.get(RUBROS_URL).respond(
+        200, json={"rubros": [{"rubro_id": 102, "rubro": "Alimentación"}]}
+    )
+    respx.get(REFERENCIAS_URL).respond(
+        200,
+        json={
+            "permitido_mixtura_de_usos": [],
+            "bicicletas": [],
+            "estacionamientos": [],
+            "cargaydescarga": [],
+        },
+    )
+
+    service = UsigTerritoryService()
+    empty = await service.resolve_use_table(-34.5000, -58.4000)
+    full = await service.resolve_use_table(-34.6040, -58.4055)
+    references = await service.resolve_references("013-099-018", 1, 4, 102)
+
+    for result in (empty, full, references):
+        assert APPROXIMATE_LOCATION_LIMITATION in result.limitations
+        assert any(
+            "referencia" in item.lower() for item in result.limitations
+        ), "RN-04 se mantiene junto a RN-03"
