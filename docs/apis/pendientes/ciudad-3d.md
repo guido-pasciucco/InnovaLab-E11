@@ -8,7 +8,7 @@ Servicio de USIG que publica los datos del Código Urbanístico por parcela: dis
 
 El cuadro de usos se consume a través de la API propia de CONCO, nunca desde el navegador: el filtro por User-Agent de USIG impide las llamadas directas del front.
 
-- `GET /territory/use-table?lat=&lng=` — resuelve la parcela con Catastro y devuelve la mixtura más las 10 categorías con sus rubros.
+- `GET /territory/use-table?lat=&lng=&address=<opcional>` — resuelve la parcela con Catastro y devuelve la mixtura más las 10 categorías con sus rubros. Si el punto no da SMP, con `address` se intenta la resolución por dirección oficial (`normalizar` → `cod_calle` + `altura`).
 - `GET /territory/rubro-referencias?smp=&categoria=&mixtura=&rubro=` — condiciones del rubro seleccionado, bajo demanda. Aunque el cliente envía `mixtura`, el backend la deriva del SMP para no confiar en el cliente.
 - `GET /territory/parcel-geometry?smp=` — geometría real de la parcela (`/catastro/geometria/`), para dibujar el polígono en el mapa en lugar de una capa ilustrativa. Verificada el 2026-11-26: `FeatureCollection` con `MultiPolygon`.
 

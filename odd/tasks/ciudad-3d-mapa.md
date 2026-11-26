@@ -43,7 +43,9 @@ Interpretación autorizada: mostrar la tabla oficial completa como dato de refer
 
 **S12** — Geometría real de la parcela (verificada en vivo 2026-11-26): `GET /catastro/geometria/?smp=013-099-018` → HTTP 200, `FeatureCollection` con `geometry.type == "MultiPolygon"`. Nuevo `GET /territory/parcel-geometry?smp=` → `{"geometry": <GeoJSON geometry>|null, "source": ..., "limitations": [...]}`. El front dibuja esa geometría con `GeoJSON` dentro del `MapContainer`, desactiva la capa demo "Parcela" cuando hay geometría real y reetiqueta la capa de zonificación ilustrativa. Si no hay geometría, mantiene el comportamiento actual.
 
-**S13** — Entrega (NO implementada en este slice): push, PR, deploy de Render y deploy de Vercel requieren autorización remota explícita (destino, operación y credencial). Se pregunta al usuario al final.
+**S13** — Entrega: push a `origin` y PR #85 contra `main` autorizados y ejecutados. Deploys de Render/Vercel pendientes de autorización.
+
+**S14** — Bug reportado con screenshot: con dirección "JUANA DE IBARBOUROU 123, Comuna 6" el panel queda vacío y el mapa sigue mostrando capas ilustrativas ("Distrito comercial", "Parcela y catastro", etc.) que parecen datos reales. Diagnosticado: el punto de Georef devuelve `{}` en `/catastro/parcela/`, y USIG `normalizar` responde `Calle inexistente: JUANA DE IBARBOUROU 123` (aunque Georef conoce la calle). Verificado en vivo que `https://datosabiertos-catastro-apis.buenosaires.gob.ar/catastro/parcela/?codigo_calle=3174&altura=2801&geocodificar=true&srid=4326` resuelve SMP `013-099-018` para `CORRIENTES 2801`. Fix: (a) `GET /territory/use-table` acepta `address` opcional y, si el punto no da SMP, intenta `normalizar` → `cod_calle` + `altura` → parcela; (b) sin parcela real, el front oculta las capas ilustrativas y su leyenda, dejando marcador y estado vacío. Para la dirección reportada el resultado sigue vacío, pero deja de mostrar datos falsos; para direcciones que USIG conoce, aparece el cuadro real.
 
 ## Tasks
 
@@ -52,7 +54,9 @@ Interpretación autorizada: mostrar la tabla oficial completa como dato de refer
 - **T3** — S5/S6 verificación diferencial + docs + cierre — inline — ✅ verificado; commit de docs en este slice.
 - **T4** — S8, S9 (back), S11, S12 (back) — caché + limitación de ubicación aproximada + mixtura derivada + endpoint de geometría — delegado (unidad paralela) — ✅ commit `00c4d14` — RED→GREEN en las 4 reglas; 51 tests de `usig`; suite 220 passed / 13 deselected; integración 7 passed; differential base-vs-change idéntico.
 - **T5** — S9 (front), S10, S12 (front) — etiqueta "estimado" + filtro de rubros + dibujo de geometría real — delegado (unidad paralela) — ✅ commit `6050250` — RED 13 tests → GREEN 106 tests; typecheck y build OK; comportamiento sin geometría preservado por tests existentes.
-- **T6** — S13 verificación final + docs + pregunta de entrega — inline — ✅ verificación local; entrega remota pendiente de autorización explícita.
+- **T6** — S13 verificación final + docs + pregunta de entrega — inline — ✅ verificación local; push + PR #85 autorizados y ejecutados; deploys pendientes.
+- **T7** — S14 backend: fallback por dirección (normalizar → código de calle + altura) en `/territory/use-table` — delegado (unidad paralela) — ✅ commit `c20920c` — RED 17 tests → GREEN 68 en `usig`; suite 237 passed / 13 deselected; integración 7 passed; prueba real-DI en vivo con `CORRIENTES 2801` → SMP `013-099-018`.
+- **T8** — S14 front: enviar `address` y ocultar capas ilustrativas cuando no hay parcela real — delegado (unidad paralela) — ✅ commit `fc67450` — RED 5 tests → GREEN 113 tests; typecheck y build OK; differential de render sin punto y URL sin `address` byte-idéntico.
 
 ## Log
 
@@ -85,3 +89,9 @@ Interpretación autorizada: mostrar la tabla oficial completa como dato de refer
 **L14** (2026-11-26): S13 (push, PR, deploy Render, deploy Vercel) NO se ejecuta: el usuario todavía no autorizó destino, operación y credencial/sesión. Se pregunta al finalizar.
 
 **L15** (2026-11-26): El usuario autorizó "Push + PR a origin" (opción elegida explícitamente, sin deploys). Se pusheó `feat/ciudad-3d-mapa` a `origin` y se abrió el PR [#85](https://github.com/guido-pasciucco/InnovaLab-E11/pull/85) contra `main`, con descripción derivada del ODD document. Los deploys de Render y Vercel siguen sin autorizar. No se configuró `pr-description` en el repo; no había referencias `#NNN` que resolver, así que no hizo falta configurar namespaces.
+
+**L16** (2026-11-26): Reporte del usuario: "de momento creo que solo veo losdatos mockeados y creo que por alguna razon no se usan los datos de ciudad 3d". Con screenshot del estado vacío junto a capas ilustrativas. Verificado: no es modo mock (el texto del mock sería "Modo demostración: …"); es una respuesta real del backend. `GET /catastro/parcela/` devuelve `{}` para el punto informado y USIG `normalizar` devuelve `Calle inexistente` para esa dirección. El visor oficial usa además `datosabiertos-catastro-apis.buenosaires.gob.ar/catastro/parcela/?codigo_calle=&altura=`, verificado con CORRIENTES 2801 → SMP `013-099-018`. Se reabre el feature con S14/T7/T8.
+
+**L17** (2026-11-26): Route declaration — T7 y T8 se delegan en paralelo por Writer trigger (superficies `back/**` y `front/**`, cada una con código, tests y docs de su lado). El contrato nuevo es `GET /territory/use-table?lat=&lng=&address=<opcional>` y el callback del front `onParcelResolved(hasParcel)` para ocultar capas ilustrativas sin parcela real.
+
+**L18** (2026-11-26): Verificación del fix S14 — backend 237 passed / 13 deselected, integración 7 passed, front 113 tests + typecheck + build OK. El fallback se probó por DI real contra USIG: punto que falla + `address=CORRIENTES 2801` → SMP `013-099-018`, mix `4`, 10 categorías y limitación de resolución por dirección. Para la dirección reportada (`JUANA DE IBARBOUROU 123`) USIG responde "calle inexistente", así que el estado vacío es correcto, pero el mapa ya no muestra capas ilustrativas. Scratch `/tmp/opencode/usig-t7-diff.DR57ys`, `/tmp/opencode/usig-t7-diff.jI6pMh` e `/tmp/opencode/innovalab-t8-diff.hTIJJp` eliminados por el padre.

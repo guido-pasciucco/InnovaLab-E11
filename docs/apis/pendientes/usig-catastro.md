@@ -10,6 +10,8 @@ El backend consulta `/catastro/parcela/` para resolver el SMP a partir del punto
 
 También se usa `/catastro/geometria/?smp=` (verificado el 2026-11-26, responde un `FeatureCollection` con `MultiPolygon`) en `GET /territory/parcel-geometry?smp=`, para dibujar la parcela real en el mapa. Las respuestas se cachean con TTL/LRU en el backend. El SMP se presenta como **estimado**: el punto viene de Georef y puede caer en la parcela vecina o en la calle ([RN-03](../../REGLAS_DE_NEGOCIO.md)).
 
+Cuando el punto no resuelve parcela, `GET /territory/use-table` acepta el parámetro opcional `address` y prueba la ruta que usa el visor oficial: `normalizar` de USIG para obtener `cod_calle` + `altura`, y luego `GET https://datosabiertos-catastro-apis.buenosaires.gob.ar/catastro/parcela/?codigo_calle=&altura=&geocodificar=true&srid=4326`. Verificado: `CORRIENTES 2801` → `cod_calle=3174`, `altura=2801` → SMP `013-099-018`. Si USIG no conoce la calle, el resultado sigue siendo vacío con una limitación explícita, nunca un SMP inventado.
+
 ## 1. Ficha
 
 | Dato | Valor |
