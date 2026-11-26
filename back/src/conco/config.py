@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     caba_tramites_site_url: str = "https://buenosaires.gob.ar"
     caba_tramites_timeout_seconds: float = 10.0
 
+    # USIG (GeoEPOK): Catastro y Ciudad 3D. Sin User-Agent no curl la conexión se corta.
+    usig_base_url: str = "https://epok.buenosaires.gob.ar"
+    usig_timeout_seconds: float = 10.0
+    usig_user_agent: str = "CONCO/0.1"
+
     # Postgres con pgvector; por defecto, el Supabase local de back/supabase.
     database_url: str = "postgresql://postgres:postgres@127.0.0.1:55322/postgres"
     # Proveedor de embeddings: Cloudflare Workers AI (decisión: ADR-005).

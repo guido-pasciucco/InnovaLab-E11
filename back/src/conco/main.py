@@ -19,6 +19,7 @@ from conco.guidance.api import get_activity_directory, router as guidance_router
 from conco.guidance.domain import ActivityDirectory, ActivityDirectoryError
 from conco.guidance.embeddings import create_embedder
 from conco.request_id import REQUEST_ID_HEADER, RequestIdMiddleware, resolve_request_id
+from conco.territory.api import router as territory_router
 
 # Sin handlers propios (por ejemplo en Render), las líneas INFO por petición no se verían.
 if not logging.getLogger().handlers:
@@ -133,6 +134,7 @@ async def handle_unexpected_error(request: Request, error: Exception) -> JSONRes
 app.include_router(geolocation_router)
 app.include_router(guidance_router)
 app.include_router(consultation_router)
+app.include_router(territory_router)
 
 
 @app.get("/health", tags=["Estado"])
