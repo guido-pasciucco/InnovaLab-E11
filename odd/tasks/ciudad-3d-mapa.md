@@ -1,7 +1,7 @@
 # Ciudad 3D en el mapa
 
 Objetivo: incorporar el cuadro de usos oficial de Ciudad 3D a la sección de mapa, resolviendo la parcela (SMP) desde el punto de la consulta con USIG Catastro.
-Branch: `feat/ciudad-3d-mapa` (desde `main` 452ca24). Delivery: work-unit commits en la rama; push/PR quedan al usuario. RDD off (global).
+Branch: `feat/ciudad-3d-mapa` (desde `main` 452ca24). PR: [#85](https://github.com/guido-pasciucco/InnovaLab-E11/pull/85) contra `main`. Delivery: work-unit commits en la rama; push/PR autorizados por el usuario el 2026-11-26; deploys pendientes. RDD off (global).
 Test runners: backend `cd back && uv run pytest`, frontend `cd front && npm test` / `npm run typecheck` / `npm run build`.
 
 ## Specs
@@ -83,3 +83,5 @@ Interpretación autorizada: mostrar la tabla oficial completa como dato de refer
 **L13** (2026-11-26): Verificación final de las 5 mejoras de código — backend 220 passed / 13 deselected, integración 7 passed; front 106 tests, typecheck y build OK. Spot check del padre re-corriendo suites: mismos números. Differential base-vs-change de clientes USIG intactos: byte-idéntico. El endpoint de geometría se validó con DI real + respx (`MultiPolygon`), no contra un servidor local porque el usuario lo había detenido. Scratch `/tmp/opencode/usig-diff.5WPRck` creado fuera del worktree y eliminado por el padre.
 
 **L14** (2026-11-26): S13 (push, PR, deploy Render, deploy Vercel) NO se ejecuta: el usuario todavía no autorizó destino, operación y credencial/sesión. Se pregunta al finalizar.
+
+**L15** (2026-11-26): El usuario autorizó "Push + PR a origin" (opción elegida explícitamente, sin deploys). Se pusheó `feat/ciudad-3d-mapa` a `origin` y se abrió el PR [#85](https://github.com/guido-pasciucco/InnovaLab-E11/pull/85) contra `main`, con descripción derivada del ODD document. Los deploys de Render y Vercel siguen sin autorizar. No se configuró `pr-description` en el repo; no había referencias `#NNN` que resolver, así que no hizo falta configurar namespaces.
