@@ -145,12 +145,14 @@ export async function getActivityProcedures(slug: string, answers: ContextAnswer
   return request<ActivityProceduresResponse>(`/guidance/activities/${encodeURIComponent(slug)}/procedures${query}`);
 }
 
-/** Official Cuadro de Usos for the parcel containing the consultation point (S4). */
+/** Official Cuadro de Usos for the parcel containing the consultation point (S4).
+ * An optional address lets the backend retry USIG by street when the point has no SMP (S14). */
 export async function getUseTable(
-  point: GeoPoint, options: { signal?: AbortSignal } = {},
+  point: GeoPoint, options: { signal?: AbortSignal; address?: string } = {},
 ): Promise<UseTableResponse> {
   if (USE_MOCK) return mockUseTable();
   const params = new URLSearchParams({ lat: String(point.lat), lng: String(point.lng) });
+  if (options.address) params.set("address", options.address);
   return request<UseTableResponse>(`/territory/use-table?${params}`, { signal: options.signal });
 }
 

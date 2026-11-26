@@ -84,6 +84,15 @@ export function useTableIsEmpty(data: UseTableResponse): boolean {
   return data.smp === null && data.categories.length === 0;
 }
 
+export type ParcelOutcome =
+  | { status: "resolved"; data: UseTableResponse }
+  | { status: "no-point" | "error" | "cleared" };
+
+/** Only a response with a real SMP proves a parcel; every other outcome clears the map's claim (S14). */
+export function parcelPresence(outcome: ParcelOutcome): boolean {
+  return outcome.status === "resolved" && outcome.data.smp !== null;
+}
+
 /** One place to turn a failed consultation into the message shown in the panel. */
 export function useTableErrorMessage(error: unknown): string {
   return describeError(error) ?? (error instanceof Error ? error.message : "No pudimos consultar el cuadro de usos.");
@@ -266,10 +275,12 @@ export function UseTableResult({ data }: { data: UseTableResponse }) {
 
 /** Official Cuadro de Usos panel, mounted below the map hint. */
 export default function UseTablePanel({
-  point, onGeometry,
+  point, address, onGeometry, onParcelResolved,
 }: {
   point: GeoPoint | null;
+  address?: string | null;
   onGeometry?: (geometry: GeoJSON.Geometry | null) => void;
+  onParcelResolved?: (hasParcel: boolean) => void;
 }) {
   const [table, setTable] = useState<UseTableResponse | null>(null);
   const [loading, setLoading] = useState(Boolean(point));
@@ -277,6 +288,8 @@ export default function UseTablePanel({
   const controllerRef = useRef<AbortController | null>(null);
   const onGeometryRef = useRef(onGeometry);
   onGeometryRef.current = onGeometry;
+  const onParcelResolvedRef = useRef(onParcelResolved);
+  onParcelResolvedRef.current = onParcelResolved;
   const lat = point?.lat ?? null;
   const lng = point?.lng ?? null;
 
@@ -287,25 +300,34 @@ export default function UseTablePanel({
     // A new point (or the removal of one) invalidates any geometry drawn for the previous point.
     onGeometryRef.current?.(null);
     if (lat === null || lng === null) {
+      onParcelResolvedRef.current?.(parcelPresence({ status: "no-point" }));
       setLoading(false);
       return;
     }
+    // A new point invalidates the previous claim until this one resolves (S14).
+    onParcelResolvedRef.current?.(parcelPresence({ status: "cleared" }));
     const controller = new AbortController();
     controllerRef.current = controller;
     setLoading(true);
-    getUseTable({ lat, lng }, { signal: controller.signal })
+    getUseTable({ lat, lng }, { signal: controller.signal, address: address ?? undefined })
       .then(result => {
         if (controller.signal.aborted) return;
         setTable(result);
+        onParcelResolvedRef.current?.(parcelPresence({ status: "resolved", data: result }));
         void publishParcelGeometry(result, controller.signal, onGeometryRef.current);
       })
       .catch((cause: unknown) => {
+        if (controller.signal.aborted) return;
         const message = useTableErrorMessage(cause);
-        if (!controller.signal.aborted && message) setError(message);
+        if (message) setError(message);
+        onParcelResolvedRef.current?.(parcelPresence({ status: "error" }));
       })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
-    return () => controller.abort();
-  }, [lat, lng]);
+    return () => {
+      controller.abort();
+      onParcelResolvedRef.current?.(parcelPresence({ status: "cleared" }));
+    };
+  }, [lat, lng, address]);
 
   const source = table?.source ?? OFFICIAL_USE_TABLE_SOURCE;
 

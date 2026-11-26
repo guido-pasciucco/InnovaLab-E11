@@ -60,6 +60,33 @@ describe("territory API clients", () => {
     expect(fetchMock.mock.calls[0][1].headers["Content-Type"]).toBe("application/json");
   });
 
+  it("getUseTable adds the address to the exact query when supplied", async () => {
+    const { getUseTable } = await api("false");
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(200, useTable));
+    vi.stubGlobal("fetch", fetchMock);
+    const controller = new AbortController();
+    const address = "JUANA DE IBARBOUROU 123, Comuna 6";
+
+    expect(await getUseTable(point, { signal: controller.signal, address })).toEqual(useTable);
+
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      "/api/territory/use-table?lat=-34.604&lng=-58.4055&address=JUANA+DE+IBARBOUROU+123%2C+Comuna+6",
+    );
+    expect(fetchMock.mock.calls[0][1].signal).toBeDefined();
+  });
+
+  it("getUseTable keeps the lat/lng-only URL when no address is passed", async () => {
+    const { getUseTable } = await api("false");
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(200, useTable));
+    vi.stubGlobal("fetch", fetchMock);
+
+    expect(await getUseTable(point, {})).toEqual(useTable);
+
+    expect(fetchMock.mock.calls[0][0]).toBe("/api/territory/use-table?lat=-34.604&lng=-58.4055");
+    const url = new URL(fetchMock.mock.calls[0][0] as string, "http://localhost");
+    expect(url.searchParams.has("address")).toBe(false);
+  });
+
   it("getUseTable forwards AbortSignal and surfaces cancellation as an ApiError", async () => {
     const { getUseTable } = await api("false");
     vi.stubGlobal("fetch", vi.fn((_url: string, init: RequestInit) => new Promise((_resolve, reject) => {

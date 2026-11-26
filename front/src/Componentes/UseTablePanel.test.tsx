@@ -4,6 +4,7 @@ import { ApiError, getParcelGeometry } from "../api/client";
 import type { RubroReferencias, SourceReference, UseTableResponse } from "../types";
 import UseTablePanel, {
   OFFICIAL_USE_TABLE_SOURCE,
+  parcelPresence,
   RubroReferenciasView,
   UseTableEmptyState,
   UseTableError,
@@ -107,6 +108,22 @@ describe("cuadro de usos panel", () => {
     expect(html).toContain("role=\"status\"");
   });
 
+  it("accepts the consultation address and callback without claiming a parcel before the response", () => {
+    const onParcelResolved = vi.fn();
+    const html = renderToStaticMarkup(
+      <UseTablePanel
+        point={{ lat: -34.604, lng: -58.4055 }}
+        address="JUANA DE IBARBOUROU 123, Comuna 6"
+        onParcelResolved={onParcelResolved}
+      />,
+    );
+
+    expect(html).toMatch(/Consultando el cuadro de usos/i);
+    expect(html).toContain("No es una confirmación catastral");
+    expect(html).not.toContain("013-099-018");
+    expect(onParcelResolved).not.toHaveBeenCalled();
+  });
+
   it("shows SMP, official address and mix area from the parcel", () => {
     const html = renderToStaticMarkup(<UseTableResult data={data} />);
 
@@ -157,6 +174,16 @@ describe("cuadro de usos panel", () => {
     expect(html).toMatch(/no (es|constituye) una confirmación catastral/i);
     expect(html).toMatch(/dictamen|juicio/i);
     expect(html).toMatch(/actividad (del|de la persona|que querés hacer)/i);
+  });
+});
+
+describe("parcel presence reported to the map (S14)", () => {
+  it("is true only for a resolved non-null SMP, never for an empty, failed or cleared outcome", () => {
+    expect(parcelPresence({ status: "resolved", data })).toBe(true);
+    expect(parcelPresence({ status: "resolved", data: { ...data, smp: null, categories: [] } })).toBe(false);
+    expect(parcelPresence({ status: "no-point" })).toBe(false);
+    expect(parcelPresence({ status: "error" })).toBe(false);
+    expect(parcelPresence({ status: "cleared" })).toBe(false);
   });
 });
 

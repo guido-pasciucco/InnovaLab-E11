@@ -1,7 +1,9 @@
 import { createElement } from "react";
+import type { ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import MapPanel, {
+  MapControls,
   MapLegend,
   ParcelGeometryLayer,
   REAL_PARCEL_STYLE,
@@ -40,6 +42,8 @@ describe("MapPanel existing render is preserved", () => {
     expect(html).toContain("Todavía no hay capas territoriales disponibles para esta consulta.");
     expect(html).toContain("Mapa base");
     expect(html).toContain("Leyenda");
+    expect(html).toContain("Distrito comercial");
+    expect(html).toContain("Parcela consultada");
     expect(html).toContain("No pudimos ubicar esta dirección en el mapa.");
     expect(html).toContain("La ubicación del punto es aproximada");
     expect(html).toContain("Corrientes 2500, CABA");
@@ -59,6 +63,7 @@ describe("MapPanel existing render is preserved", () => {
     expect(html).toContain("Calles");
     expect(html).toContain("Satélite");
     expect(html).toContain("Leyenda");
+    expect(html).not.toContain("Parcela real (SMP)");
     expect(html).toContain("Consultando el cuadro de usos");
   });
 });
@@ -99,5 +104,70 @@ describe("real parcel geometry on the map (S12)", () => {
     const demo = renderToStaticMarkup(<MapLegend hasRealGeometry={false} />);
     expect(demo).toContain("Parcela consultada");
     expect(demo).not.toContain("Parcela real");
+  });
+});
+
+describe("illustrative layers only with a real parcel (S14)", () => {
+  const point = { lat: -34.604, lng: -58.4055 };
+
+  it("offers no illustrative checkbox or drawn layer once a parcel is known to be absent", () => {
+    expect(demoLayerOptions(false, false)).toEqual([]);
+    expect(visibleDemoLayerIds(["zonificacion", "parcela"], false, false)).toEqual([]);
+    // Unknown and confirmed-present still keep the pre-existing behaviour.
+    expect(demoLayerOptions(false, null)).toEqual(demoLayerOptions(false));
+    expect(visibleDemoLayerIds(["zonificacion", "parcela"], true, true)).toEqual(["zonificacion"]);
+  });
+
+  it("keeps only the marker swatch in the legend when there is no parcel", () => {
+    const html = renderToStaticMarkup(<MapLegend hasRealGeometry={false} hasParcel={false} />);
+
+    expect(html).toContain("Ubicación de la consulta");
+    expect(html).not.toContain("Distrito comercial");
+    expect(html).not.toContain("Parcela consultada");
+    expect(html).not.toContain("Parcela real");
+
+    // No point keeps today's legend, even if a previous point had no parcel.
+    const noPoint = renderToStaticMarkup(<MapLegend hasRealGeometry={false} hasParcel={null} />);
+    expect(noPoint).toContain("Distrito comercial");
+    expect(noPoint).toContain("Parcela consultada");
+  });
+
+  it("hides the demo controls without a parcel and preserves them with a real one", () => {
+    const Controls = MapControls;
+    const base: Omit<ComponentProps<typeof MapControls>, "point" | "hasParcel" | "hasRealGeometry"> = {
+      features: [],
+      visibleLayers: [],
+      visibleDemo: ["zonificacion", "parcela"],
+      satellite: false,
+      address: "JUANA DE IBARBOUROU 123, Comuna 6",
+      onToggleLayer: () => {},
+      onToggleDemo: () => {},
+      onToggleSatellite: () => {},
+    };
+
+    const absent = renderToStaticMarkup(
+      <Controls {...base} point={point} hasParcel={false} hasRealGeometry={false} />,
+    );
+    expect(absent).not.toContain("Capas de ejemplo");
+    expect(absent).not.toContain("Distrito comercial");
+    expect(absent).not.toContain("Parcela consultada");
+    expect(absent).toContain("Mapa base");
+    expect(absent).toContain("UBICACIÓN CONSULTADA");
+
+    const present = renderToStaticMarkup(
+      <Controls {...base} point={point} hasParcel={true} hasRealGeometry={true} />,
+    );
+    expect(present).toContain("Capas de ejemplo (ilustrativas)");
+    expect(present).toContain("Zonificación y usos del suelo (ilustrativa)");
+    expect(present).not.toContain("Parcela y catastro");
+    expect(present).toContain("Parcela real");
+    expect(present).not.toContain("Parcela consultada");
+
+    const noPoint = renderToStaticMarkup(
+      <Controls {...base} point={null} hasParcel={false} hasRealGeometry={false} />,
+    );
+    expect(noPoint).not.toContain("Capas de ejemplo");
+    expect(noPoint).toContain("Distrito comercial");
+    expect(noPoint).toContain("Parcela consultada");
   });
 });
