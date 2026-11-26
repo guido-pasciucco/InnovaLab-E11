@@ -1,8 +1,13 @@
+import json
 from collections.abc import Iterator
+from pathlib import Path
+from typing import Any
 
 import pytest
+import respx
 from fastapi.testclient import TestClient
 
+from conco.config import settings
 from conco.geolocation.api import get_address_finder
 from conco.geolocation.domain import Address, Coordinates
 from conco.main import app
@@ -290,3 +295,51 @@ def test_existing_geolocation_addresses_behavior_is_unchanged() -> None:
 
     assert response.status_code == 200
     assert response.json()["addresses"][0]["full_address"] == "AV CORRIENTES 2500, CABA"
+
+
+# Los tests de arriba inyectan fakes con `resolve()`. Estos dos ejercitan la
+# inyección real: sin ellos, un cambio de nombre en el adaptador pasa los tests
+# y el endpoint responde 500 en producción.
+FIXTURES_DIR = Path(__file__).parents[2] / "fixtures" / "usig"
+BASE = settings.usig_base_url
+
+
+def load_fixture(name: str) -> Any:
+    return json.loads((FIXTURES_DIR / name).read_text(encoding="utf-8"))
+
+
+@respx.mock
+def test_real_use_table_resolver_is_wired_to_the_port() -> None:
+    respx.get(f"{BASE}/catastro/parcela/").respond(
+        200, json=load_fixture("parcela_corrientes.json")
+    )
+    respx.get(f"{BASE}/cur3d/mixtura_usos/").respond(
+        200, json=load_fixture("mixtura_usos.json")
+    )
+    respx.get(f"{BASE}/cur3d/categorias/").respond(
+        200, json=load_fixture("categorias.json")
+    )
+    respx.get(f"{BASE}/cur3d/cuadrosdeuso/rubros/").respond(
+        200, json=load_fixture("rubros.json")
+    )
+
+    response = TestClient(app).get(USE_TABLE_URL, params={"lat": -34.6040, "lng": -58.4055})
+
+    assert response.status_code == 200
+    assert response.json()["smp"] == "013-099-018"
+    assert len(response.json()["categories"]) == 10
+
+
+@respx.mock
+def test_real_references_resolver_is_wired_to_the_port() -> None:
+    respx.get(f"{BASE}/cur3d/cuadrosdeuso/referencias/").respond(
+        200, json=load_fixture("referencias.json")
+    )
+
+    response = TestClient(app).get(
+        REFERENCIAS_URL,
+        params={"smp": "013-099-018", "categoria": 1, "mixtura": 4, "rubro": 102},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["permitido_mixtura_de_usos"]

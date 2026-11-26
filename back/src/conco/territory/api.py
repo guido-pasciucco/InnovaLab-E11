@@ -12,19 +12,22 @@ from conco.territory.domain import (
     UseTable,
     UseTableResolver,
 )
-from conco.territory.infrastructure import UsigTerritoryService
+from conco.territory.infrastructure import (
+    UsigRubroReferencesResolver,
+    UsigUseTableResolver,
+)
 
 router = APIRouter(prefix="/territory", tags=["Territorio"])
 
 
 def get_use_table_resolver() -> UseTableResolver:
     """Elige qué servicio resuelve el cuadro; los tests lo reemplazan por uno falso."""
-    return UsigTerritoryService()
+    return UsigUseTableResolver()
 
 
 def get_references_resolver() -> RubroReferencesResolver:
     """Elige qué servicio devuelve las condiciones; los tests lo reemplazan."""
-    return UsigTerritoryService()
+    return UsigRubroReferencesResolver()
 
 
 @router.get("/use-table", response_model=UseTable)

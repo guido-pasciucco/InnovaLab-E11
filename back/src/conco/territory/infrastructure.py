@@ -74,3 +74,25 @@ class UsigTerritoryService:
             source=SOURCE,
             limitations=list(REFERENCE_LIMITATIONS),
         )
+
+
+class UsigUseTableResolver:
+    """Puerto `resolve()` para el cuadro: delega en el adaptador compartido."""
+
+    def __init__(self, service: UsigTerritoryService | None = None) -> None:
+        self._service = service or UsigTerritoryService()
+
+    async def resolve(self, lat: float, lng: float) -> UseTable:
+        return await self._service.resolve_use_table(lat, lng)
+
+
+class UsigRubroReferencesResolver:
+    """Puerto `resolve()` para las condiciones: delega en el adaptador compartido."""
+
+    def __init__(self, service: UsigTerritoryService | None = None) -> None:
+        self._service = service or UsigTerritoryService()
+
+    async def resolve(
+        self, smp: str, categoria: int, mixtura: int, rubro: int
+    ) -> RubroReferences:
+        return await self._service.resolve_references(smp, categoria, mixtura, rubro)
