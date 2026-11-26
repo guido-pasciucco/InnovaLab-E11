@@ -146,6 +146,13 @@ export type UseTableResponse = {
   limitations: string[];
 };
 
+/** Wire shape of GET /territory/parcel-geometry: real cadastral geometry or null (S12). */
+export type ParcelGeometryResponse = {
+  geometry: GeoJSON.Geometry | null;
+  source: SourceReference;
+  limitations: string[];
+};
+
 /** Parameters of GET /territory/rubro-referencias, mirroring the query string names. */
 export type RubroReferenciasParams = {
   smp: string;

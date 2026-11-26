@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { ApiError } from "../api/client";
+import { ApiError, getParcelGeometry } from "../api/client";
 import type { RubroReferencias, SourceReference, UseTableResponse } from "../types";
 import UseTablePanel, {
   OFFICIAL_USE_TABLE_SOURCE,
@@ -8,11 +8,19 @@ import UseTablePanel, {
   UseTableEmptyState,
   UseTableError,
   UseTableResult,
+  UseTableResults,
   categoryRows,
+  publishParcelGeometry,
   referenciaSections,
   useTableErrorMessage,
   useTableIsEmpty,
 } from "./UseTablePanel";
+
+// Only the geometry client is stubbed; the real ApiError stays in place for the error-message tests.
+vi.mock("../api/client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../api/client")>();
+  return { ...actual, getParcelGeometry: vi.fn() };
+});
 
 const source: SourceReference = {
   id: "usig-ciudad-3d", title: "Ciudad 3D — Cuadro de usos",
@@ -149,5 +157,97 @@ describe("cuadro de usos panel", () => {
     expect(html).toMatch(/no (es|constituye) una confirmación catastral/i);
     expect(html).toMatch(/dictamen|juicio/i);
     expect(html).toMatch(/actividad (del|de la persona|que querés hacer)/i);
+  });
+});
+
+describe("estimated location and visible limitations (S9)", () => {
+  it("labels the SMP as estimated and lists the backend limitations next to the parcel facts", () => {
+    const limitation = "La ubicación es aproximada; puede corresponder a la parcela vecina.";
+    const html = renderToStaticMarkup(<UseTableResult data={{ ...data, limitations: [limitation] }} />);
+
+    expect(html).toMatch(/SMP estimado/i);
+    expect(html).toContain(limitation);
+    expect(html.indexOf(limitation)).toBeLessThan(html.indexOf("Categorías del cuadro de usos"));
+    // RN-04 still lives in the enclosing panel, unchanged and unsoftened.
+    expect(renderToStaticMarkup(<UseTablePanel point={null} />)).toContain("No es una confirmación catastral");
+  });
+});
+
+describe("rubro name filter (S10)", () => {
+  function filtered(query: string): string {
+    return renderToStaticMarkup(
+      <UseTableResults categories={data.categories} query={query} selected={null} onSelect={() => {}} />,
+    );
+  }
+
+  it("exposes an accessible type=search input in the result", () => {
+    const html = renderToStaticMarkup(<UseTableResult data={data} />);
+
+    expect(html).toMatch(/<input[^>]*type="search"/);
+    expect(html).toContain('id="use-table-rubro-filter"');
+    expect(html).toContain('for="use-table-rubro-filter"');
+    expect(html).toMatch(/Filtrar rubros/i);
+  });
+
+  it("filters rubros per category, accent- and case-insensitively, keeping order and filtered counts", () => {
+    const html = filtered("ALIMENTACION");
+
+    expect(html).toContain("1.5. Alimentación en general y gastronomía");
+    expect(html).not.toContain("1.4. Comercio minorista");
+    expect(html).not.toContain("2.1. Servicios");
+    expect(html).toContain("1 rubro");
+    expect(html.indexOf("Comercial")).toBeLessThan(html.indexOf("Servicios"));
+  });
+
+  it("shows a per-category empty state and a global one when nothing matches anywhere", () => {
+    const partial = filtered("alimentacion");
+    expect(partial).toMatch(/Ningún rubro de esta categoría coincide/i);
+    expect(partial).not.toMatch(/No hay rubros que coincidan/i);
+
+    const none = filtered("zzz");
+    expect(none).toMatch(/No hay rubros que coincidan/i);
+    expect(none).toContain('role="status"');
+    expect(none).not.toContain("Comercial");
+  });
+});
+
+describe("real parcel geometry wiring (S12)", () => {
+  const geometry: GeoJSON.Geometry = {
+    type: "Polygon",
+    coordinates: [[[-58.406, -34.605], [-58.405, -34.605], [-58.405, -34.604], [-58.406, -34.605]]],
+  };
+
+  it("publishes null geometry and skips the client when the use-table has no SMP", async () => {
+    const onGeometry = vi.fn();
+    vi.mocked(getParcelGeometry).mockReset();
+
+    await publishParcelGeometry({ ...data, smp: null }, new AbortController().signal, onGeometry);
+
+    expect(onGeometry).toHaveBeenCalledWith(null);
+    expect(getParcelGeometry).not.toHaveBeenCalled();
+  });
+
+  it("publishes the geometry returned for the resolved SMP", async () => {
+    const onGeometry = vi.fn();
+    vi.mocked(getParcelGeometry).mockResolvedValueOnce({ geometry, source, limitations: [] });
+
+    await publishParcelGeometry(data, new AbortController().signal, onGeometry);
+
+    expect(getParcelGeometry).toHaveBeenCalledWith("013-099-018", expect.objectContaining({ signal: expect.any(AbortSignal) }));
+    expect(onGeometry).toHaveBeenCalledWith(geometry);
+  });
+
+  it("skips geometry silently on failure and never fetches after an abort", async () => {
+    const onGeometry = vi.fn();
+    vi.mocked(getParcelGeometry).mockRejectedValueOnce(new Error("geometry service down"));
+    await publishParcelGeometry(data, new AbortController().signal, onGeometry);
+
+    const controller = new AbortController();
+    controller.abort();
+    vi.mocked(getParcelGeometry).mockClear();
+    await publishParcelGeometry(data, controller.signal, onGeometry);
+
+    expect(getParcelGeometry).not.toHaveBeenCalled();
+    expect(onGeometry).not.toHaveBeenCalled();
   });
 });

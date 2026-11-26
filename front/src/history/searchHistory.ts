@@ -24,7 +24,8 @@ export type HistoryEntry = {
 
 export type NewHistoryEntry = Omit<HistoryEntry, "id">;
 
-function normalize(text: string): string {
+/** Accent- and case-insensitive comparison criterion shared with the rubro filter (S10). */
+export function normalize(text: string): string {
   return text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().replace(/\s+/g, " ").trim();
 }
 

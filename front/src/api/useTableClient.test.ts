@@ -33,6 +33,10 @@ const referencias = {
   permitido_mixtura_de_usos: ["Permitido"], bicicletas: ["1 bicicleta"], estacionamientos: [],
   cargaydescarga: ["20 a 6 h"], observaciones: null, source, limitations: [],
 };
+const parcelGeometry = {
+  geometry: { type: "Polygon", coordinates: [[[-58.406, -34.605], [-58.405, -34.605], [-58.405, -34.604], [-58.406, -34.605]]] },
+  source, limitations: ["La ubicación es aproximada."],
+};
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -118,6 +122,46 @@ describe("territory API clients", () => {
     expect(data.cargaydescarga).toEqual([]);
     expect(data.observaciones).toBeNull();
     expect(data.limitations.join(" ")).toMatch(/demostración/i);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("getParcelGeometry sends smp through the shared request helper and returns the wire shape", async () => {
+    const { getParcelGeometry } = await api("false");
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(200, parcelGeometry));
+    vi.stubGlobal("fetch", fetchMock);
+
+    expect(await getParcelGeometry("013-099-018")).toEqual(parcelGeometry);
+
+    const url = new URL(fetchMock.mock.calls[0][0] as string, "http://localhost");
+    expect(url.pathname).toBe("/api/territory/parcel-geometry");
+    expect(url.searchParams.get("smp")).toBe("013-099-018");
+    expect(fetchMock.mock.calls[0][1].headers["Content-Type"]).toBe("application/json");
+  });
+
+  it("getParcelGeometry forwards AbortSignal and surfaces cancellation as an ApiError", async () => {
+    const { getParcelGeometry } = await api("false");
+    vi.stubGlobal("fetch", vi.fn((_url: string, init: RequestInit) => new Promise((_resolve, reject) => {
+      init.signal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
+    })));
+    const controller = new AbortController();
+
+    const pending = caught(getParcelGeometry("013-099-018", { signal: controller.signal }));
+    controller.abort();
+    const error = await pending;
+
+    expect(error.kind).toBe("aborted");
+  });
+
+  it("mock mode returns an honest null geometry with a limitation and no fetch", async () => {
+    const { getParcelGeometry } = await api("true");
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await getParcelGeometry("013-099-018");
+
+    expect(result.geometry).toBeNull();
+    expect(result.limitations.join(" ")).toMatch(/demostración/i);
+    expect(result.source.url).toBe(source.url);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

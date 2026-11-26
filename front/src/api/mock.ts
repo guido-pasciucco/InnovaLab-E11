@@ -1,6 +1,6 @@
 import type {
   ConsultationRequest, ConsultationResponse, FollowUpRequest, FollowUpResponse,
-  RubroReferencias, SourceReference, UseTableResponse,
+  ParcelGeometryResponse, RubroReferencias, SourceReference, UseTableResponse,
 } from '../types';
 
 const sources: SourceReference[] = [
@@ -53,6 +53,15 @@ export async function mockUseTable(): Promise<UseTableResponse> {
     categories: [],
     source: useTableSource,
     limitations: ['Modo demostración: el Cuadro de Usos oficial no está disponible. No se mostraron rubros simulados.'],
+  };
+}
+
+/** Mock mode never invents a cadastral parcel shape: the real geometry is simply unavailable. */
+export async function mockParcelGeometry(): Promise<ParcelGeometryResponse> {
+  return {
+    geometry: null,
+    source: useTableSource,
+    limitations: ['Modo demostración: la geometría real de la parcela no está disponible.'],
   };
 }
 

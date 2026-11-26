@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { getRubroReferencias, getUseTable } from "../api/client";
+import { getParcelGeometry, getRubroReferencias, getUseTable } from "../api/client";
 import { describeError } from "../api/errors";
+import { normalize } from "../history/searchHistory";
 import type {
   GeoPoint, RubroReferencias, SourceReference, UseTableCategory, UseTableResponse,
 } from "../types";
@@ -19,9 +20,42 @@ const DISCLAIMER = "Es información de referencia del Cuadro de Usos oficial de 
 
 export type CategoryRow = UseTableCategory & { rubroCount: number };
 
-/** Keeps the official category and rubro order; the count is derived, never taken from the wire. */
+/**
+ * Keeps the official category and rubro order; the count is derived from the visible rubros only.
+ * Reuses the search-history normalization criterion so accents and capital letters do not hide a rubro (S10).
+ */
+export function filterCategories(categories: UseTableCategory[], query: string): CategoryRow[] {
+  const needle = normalize(query);
+  return categories.map(category => {
+    const rubros = needle
+      ? category.rubros.filter(rubro => normalize(rubro.name).includes(needle))
+      : category.rubros;
+    return { ...category, rubros, rubroCount: rubros.length };
+  });
+}
+
+/** No query: every official rubro stays visible and counted. */
 export function categoryRows(categories: UseTableCategory[]): CategoryRow[] {
-  return categories.map(category => ({ ...category, rubroCount: category.rubros.length }));
+  return filterCategories(categories, "");
+}
+
+/** Best-effort real geometry: never fail the use-table panel or add error UI when Catastro has no shape (S12). */
+export async function publishParcelGeometry(
+  data: UseTableResponse,
+  signal: AbortSignal,
+  onGeometry?: (geometry: GeoJSON.Geometry | null) => void,
+): Promise<void> {
+  if (!onGeometry || signal.aborted) return;
+  if (data.smp === null) {
+    onGeometry(null);
+    return;
+  }
+  try {
+    const response = await getParcelGeometry(data.smp, { signal });
+    if (!signal.aborted) onGeometry(response.geometry);
+  } catch {
+    // A missing geometry just leaves the illustrative demo layers in place.
+  }
 }
 
 export type ReferenciaKey = 'permitido_mixtura_de_usos' | 'bicicletas' | 'estacionamientos' | 'cargaydescarga' | 'observaciones';
@@ -100,9 +134,69 @@ export function RubroReferenciasView({ referencias }: { referencias: RubroRefere
   );
 }
 
-/** Parcel facts, the official category accordion and conditions of the selected rubro. */
-export function UseTableResult({ data }: { data: UseTableResponse }) {
+/** Filtered category accordion, controlled by the query so the visible result can be verified without a DOM. */
+export function UseTableResults({ categories, query, selected, onSelect }: {
+  categories: UseTableCategory[];
+  query: string;
+  selected: { categoria: number; rubro: number } | null;
+  onSelect: (categoria: number, rubro: number) => void;
+}) {
   const [openCategoryId, setOpenCategoryId] = useState<number | null>(null);
+  const rows = filterCategories(categories, query);
+  const total = rows.reduce((sum, row) => sum + row.rubroCount, 0);
+
+  if (query.trim() && total === 0) {
+    return (
+      <p className="small-note use-table__no-results" role="status">
+        No hay rubros que coincidan con «{query}» en el cuadro de usos. Probá con otro nombre.
+      </p>
+    );
+  }
+
+  return (
+    <ul className="use-table__categories">
+      {rows.map(category => {
+        const open = openCategoryId === category.id;
+        const isFiltered = Boolean(query.trim());
+        return (
+          <li className="use-table__category" key={category.id}>
+            <button
+              type="button"
+              className="use-table__category-toggle"
+              aria-expanded={open}
+              aria-controls={`use-table-rubros-${category.id}`}
+              onClick={() => setOpenCategoryId(open ? null : category.id)}
+            >
+              <span>{category.name}</span>
+              <span className="use-table__count">{category.rubroCount} {category.rubroCount === 1 ? "rubro" : "rubros"}</span>
+            </button>
+            {isFiltered && category.rubroCount === 0 && (
+              <p className="small-note use-table__category-empty">Ningún rubro de esta categoría coincide con la búsqueda.</p>
+            )}
+            <ul className="use-table__rubros" id={`use-table-rubros-${category.id}`} hidden={!open}>
+              {category.rubros.map(rubro => (
+                <li key={rubro.id}>
+                  <button
+                    type="button"
+                    className="use-table__rubro"
+                    aria-pressed={selected?.rubro === rubro.id}
+                    onClick={() => onSelect(category.id, rubro.id)}
+                  >
+                    {rubro.name}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/** Parcel facts, rubro filter, official category accordion and conditions of the selected rubro. */
+export function UseTableResult({ data }: { data: UseTableResponse }) {
+  const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<{ categoria: number; rubro: number } | null>(null);
   const [referencias, setReferencias] = useState<RubroReferencias | null>(null);
   const [loading, setLoading] = useState(false);
@@ -139,45 +233,29 @@ export function UseTableResult({ data }: { data: UseTableResponse }) {
   return (
     <div className="use-table__result">
       <dl className="use-table__facts">
-        <div><dt>SMP</dt><dd>{data.smp ?? "Sin SMP"}</dd></div>
+        <div><dt>SMP estimado</dt><dd>{data.smp ?? "Sin SMP"}</dd></div>
         <div><dt>Dirección oficial</dt><dd>{data.official_address ?? "Sin dirección oficial"}</dd></div>
         <div><dt>Área de mixtura</dt><dd>{data.mix_area ?? "Sin dato"}</dd></div>
       </dl>
+      {data.limitations.length > 0 && (
+        <ul className="small-note use-table__limitations">
+          {data.limitations.map(limitation => <li key={limitation}>{limitation}</li>)}
+        </ul>
+      )}
+
+      <div className="use-table__filter">
+        <label htmlFor="use-table-rubro-filter">Filtrar rubros por nombre</label>
+        <input
+          id="use-table-rubro-filter"
+          type="search"
+          value={query}
+          placeholder="Buscar rubro por nombre…"
+          onChange={event => setQuery(event.target.value)}
+        />
+      </div>
 
       <h4>Categorías del cuadro de usos</h4>
-      <ul className="use-table__categories">
-        {categoryRows(data.categories).map(category => {
-          const open = openCategoryId === category.id;
-          return (
-            <li className="use-table__category" key={category.id}>
-              <button
-                type="button"
-                className="use-table__category-toggle"
-                aria-expanded={open}
-                aria-controls={`use-table-rubros-${category.id}`}
-                onClick={() => setOpenCategoryId(open ? null : category.id)}
-              >
-                <span>{category.name}</span>
-                <span className="use-table__count">{category.rubroCount} {category.rubroCount === 1 ? "rubro" : "rubros"}</span>
-              </button>
-              <ul className="use-table__rubros" id={`use-table-rubros-${category.id}`} hidden={!open}>
-                {category.rubros.map(rubro => (
-                  <li key={rubro.id}>
-                    <button
-                      type="button"
-                      className="use-table__rubro"
-                      aria-pressed={selected?.rubro === rubro.id}
-                      onClick={() => selectRubro(category.id, rubro.id)}
-                    >
-                      {rubro.name}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </li>
-          );
-        })}
-      </ul>
+      <UseTableResults categories={data.categories} query={query} selected={selected} onSelect={selectRubro} />
 
       {loading && <p className="small-note" role="status">Consultando las condiciones del rubro…</p>}
       {error && <UseTableError message={error} />}
@@ -187,11 +265,18 @@ export function UseTableResult({ data }: { data: UseTableResponse }) {
 }
 
 /** Official Cuadro de Usos panel, mounted below the map hint. */
-export default function UseTablePanel({ point }: { point: GeoPoint | null }) {
+export default function UseTablePanel({
+  point, onGeometry,
+}: {
+  point: GeoPoint | null;
+  onGeometry?: (geometry: GeoJSON.Geometry | null) => void;
+}) {
   const [table, setTable] = useState<UseTableResponse | null>(null);
   const [loading, setLoading] = useState(Boolean(point));
   const [error, setError] = useState<string | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
+  const onGeometryRef = useRef(onGeometry);
+  onGeometryRef.current = onGeometry;
   const lat = point?.lat ?? null;
   const lng = point?.lng ?? null;
 
@@ -199,6 +284,8 @@ export default function UseTablePanel({ point }: { point: GeoPoint | null }) {
     controllerRef.current?.abort();
     setTable(null);
     setError(null);
+    // A new point (or the removal of one) invalidates any geometry drawn for the previous point.
+    onGeometryRef.current?.(null);
     if (lat === null || lng === null) {
       setLoading(false);
       return;
@@ -207,7 +294,11 @@ export default function UseTablePanel({ point }: { point: GeoPoint | null }) {
     controllerRef.current = controller;
     setLoading(true);
     getUseTable({ lat, lng }, { signal: controller.signal })
-      .then(result => { if (!controller.signal.aborted) setTable(result); })
+      .then(result => {
+        if (controller.signal.aborted) return;
+        setTable(result);
+        void publishParcelGeometry(result, controller.signal, onGeometryRef.current);
+      })
       .catch((cause: unknown) => {
         const message = useTableErrorMessage(cause);
         if (!controller.signal.aborted && message) setError(message);

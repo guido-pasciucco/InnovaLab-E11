@@ -50,6 +50,48 @@ const parcelStyle = { color: "#1D3343", weight: 2, dashArray: "6 4", fillColor: 
 const protectedStyle = { color: "#035C80", weight: 2, dashArray: "6 4", fillColor: "#FFCD02", fillOpacity: 0.22 };
 const poiStyle = { radius: 7, color: "#1D3343", weight: 2, fillColor: "#FFCD02", fillOpacity: 1 };
 
+/** Distinct from the dashed illustrative rectangle so a real SMP is never confused with the demo (S12). */
+export const REAL_PARCEL_STYLE = { color: "#B42318", weight: 3, fillColor: "#FFCD02", fillOpacity: 0.35 };
+
+/** Draws the real cadastral parcel inside the existing MapContainer; no geometry leaves the demo untouched. */
+export function ParcelGeometryLayer({ geometry }: { geometry: GeoJSON.Geometry | null }) {
+  if (!geometry) return null;
+  return <GeoJSON data={geometry} style={REAL_PARCEL_STYLE} />;
+}
+
+/** The illustrative parcel toggle disappears and zoning says "ilustrativa" only with real geometry (S12). */
+export function demoLayerOptions(hasRealGeometry: boolean): { id: DemoLayerId; label: string }[] {
+  return DEMO_LAYERS
+    .filter(layer => !(hasRealGeometry && layer.id === "parcela"))
+    .map(layer => ({
+      ...layer,
+      label: hasRealGeometry && layer.id === "zonificacion"
+        ? `${layer.label} (ilustrativa)`
+        : layer.label,
+    }));
+}
+
+/** Never draw the illustrative rectangle under a real parcel. */
+export function visibleDemoLayerIds(visible: DemoLayerId[], hasRealGeometry: boolean): DemoLayerId[] {
+  return hasRealGeometry ? visible.filter(id => id !== "parcela") : visible;
+}
+
+/** The demo parcel swatch is swapped for the real-parcel one only when real geometry exists. */
+export function MapLegend({ hasRealGeometry }: { hasRealGeometry: boolean }) {
+  return (
+    <div className="map-legend">
+      <h3 className="map-controls__subtitle">Leyenda</h3>
+      <div className="map-legend__item"><i className="map-legend__swatch map-legend__swatch--zone" /><span>Distrito comercial</span></div>
+      {hasRealGeometry ? (
+        <div className="map-legend__item"><i className="map-legend__swatch map-legend__swatch--real-parcel" /><span>Parcela real (SMP)</span></div>
+      ) : (
+        <div className="map-legend__item"><i className="map-legend__swatch map-legend__swatch--parcel" /><span>Parcela consultada</span></div>
+      )}
+      <div className="map-legend__item"><i className="map-legend__swatch map-legend__swatch--dot" /><span>Ubicación de la consulta</span></div>
+    </div>
+  );
+}
+
 const zoneLabel = L.divIcon({ className: "map-demo-label", html: "<span>Distrito comercial</span>", iconSize: [150, 28], iconAnchor: [0, 0] });
 const stopIcon = L.divIcon({ className: "map-demo-stop", html: "<i></i>", iconSize: [16, 16], iconAnchor: [8, 8] });
 
@@ -122,6 +164,8 @@ export default function MapPanel({
   const [visibleLayers, setVisibleLayers] = useState<string[]>(features.map((feature) => feature.id));
   const [visibleDemo, setVisibleDemo] = useState<DemoLayerId[]>(["zonificacion", "parcela"]);
   const [satellite, setSatellite] = useState(false);
+  const [parcelGeometry, setParcelGeometry] = useState<GeoJSON.Geometry | null>(null);
+  const hasRealGeometry = parcelGeometry !== null;
 
   function toggleLayer(id: string) {
     setVisibleLayers((current) =>
@@ -160,7 +204,7 @@ export default function MapPanel({
         {point && (
           <>
             <h3 className="map-controls__subtitle">Capas de ejemplo (ilustrativas)</h3>
-            {DEMO_LAYERS.map((layer) => (
+            {demoLayerOptions(hasRealGeometry).map((layer) => (
               <label className="map-layer" key={layer.id}>
                 <input
                   type="checkbox"
@@ -177,12 +221,7 @@ export default function MapPanel({
           <button type="button" aria-pressed={!satellite} className={satellite ? "" : "is-active"} onClick={() => setSatellite(false)}>Calles</button>
           <button type="button" aria-pressed={satellite} className={satellite ? "is-active" : ""} onClick={() => setSatellite(true)}>Satélite</button>
         </div>
-        <div className="map-legend">
-          <h3 className="map-controls__subtitle">Leyenda</h3>
-          <div className="map-legend__item"><i className="map-legend__swatch map-legend__swatch--zone" /><span>Distrito comercial</span></div>
-          <div className="map-legend__item"><i className="map-legend__swatch map-legend__swatch--parcel" /><span>Parcela consultada</span></div>
-          <div className="map-legend__item"><i className="map-legend__swatch map-legend__swatch--dot" /><span>Ubicación de la consulta</span></div>
-        </div>
+        <MapLegend hasRealGeometry={hasRealGeometry} />
         <div className="map-location">
           <span>UBICACIÓN CONSULTADA</span>
           <strong>{address}</strong>
@@ -223,7 +262,8 @@ export default function MapPanel({
           {features.filter((feature) => visibleLayers.includes(feature.id)).map((feature) => (
             <GeoJSON key={feature.id} data={feature.geometry} />
           ))}
-          {point && <DemoLayers point={point} visible={visibleDemo} />}
+          {point && <ParcelGeometryLayer geometry={parcelGeometry} />}
+          {point && <DemoLayers point={point} visible={visibleDemoLayerIds(visibleDemo, hasRealGeometry)} />}
           <ZoomControls center={center} />
         </MapContainer>
         <p className="map-credit">
@@ -233,7 +273,7 @@ export default function MapPanel({
           La ubicación del punto es aproximada: la informa el servicio nacional de direcciones Georef.
           Las capas dependen de la información que entregue el backend; las capas de ejemplo son ilustrativas.
         </p>
-        <UseTablePanel point={point} />
+        <UseTablePanel point={point} onGeometry={setParcelGeometry} />
       </section>
     </div>
   );

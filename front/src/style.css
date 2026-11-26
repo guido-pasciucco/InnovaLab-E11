@@ -324,6 +324,7 @@ h1,h2,h3 { font-family:"Manrope", sans-serif; }
 .map-legend__swatch { width:14px; height:14px; flex:0 0 14px; border:1px solid var(--ink); border-radius:3px; }
 .map-legend__swatch--zone { background:rgb(3 92 128 / 20%); border-color:var(--blue); }
 .map-legend__swatch--parcel { background:#fff; border-style:dashed; }
+.map-legend__swatch--real-parcel { background:rgb(255 205 2 / 35%); border-color:#B42318; }
 .map-legend__swatch--dot { border-radius:50%; background:var(--yellow); border-color:var(--ink); }
 .map-zoom { position:absolute; z-index:800; top:10px; right:10px; display:grid; gap:6px; }
 .map-zoom button { width:34px; height:34px; padding:0; border:1px solid var(--border); border-radius:8px; background:#fff; color:var(--ink); font-size:15px; font-weight:700; box-shadow:0 2px 8px rgb(29 51 67 / 15%); }
@@ -347,6 +348,13 @@ h1,h2,h3 { font-family:"Manrope", sans-serif; }
 .use-table__rubros { margin:0 0 10px; padding:0 0 0 14px; list-style:none; }
 .use-table__rubro { padding:5px 2px; border:0; background:transparent; color:var(--text-soft); font-size:12px; line-height:1.5; text-align:left; }
 .use-table__rubro:hover,.use-table__rubro[aria-pressed="true"] { color:var(--blue); font-weight:700; }
+.use-table__limitations { margin:-6px 0 16px; padding-left:18px; }
+.use-table__filter { display:grid; gap:6px; margin:0 0 16px; }
+.use-table__filter label { color:var(--ink); font-size:12px; font-weight:700; }
+.use-table__filter input { display:block; width:100%; min-height:40px; padding:9px 12px; border:1px solid #B9C9D2; border-radius:8px; background:#fff; color:var(--ink); outline:none; }
+.use-table__filter input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgb(3 92 128 / 10%); }
+.use-table__filter input::placeholder { color:#8293A0; }
+.use-table__category-empty,.use-table__no-results { margin:0 0 8px; }
 .use-table__referencias { margin-top:14px; padding:14px; border:1px solid var(--border); border-radius:9px; background:var(--bg); }
 .use-table__group { padding:8px 0; border-top:1px solid var(--border); }
 .use-table__group:first-of-type { border-top:0; }

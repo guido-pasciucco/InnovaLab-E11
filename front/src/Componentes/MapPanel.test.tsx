@@ -1,6 +1,13 @@
+import { createElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import MapPanel from "./MapPanel";
+import MapPanel, {
+  MapLegend,
+  ParcelGeometryLayer,
+  REAL_PARCEL_STYLE,
+  demoLayerOptions,
+  visibleDemoLayerIds,
+} from "./MapPanel";
 
 // jsdom/RTL are not installed: render on the server with the Leaflet boundary replaced.
 // The assertions cover the pre-existing controls, legend and hint that must not change.
@@ -16,7 +23,8 @@ vi.mock("react-leaflet", () => ({
   TileLayer: () => null,
   Marker: () => null,
   Popup: () => null,
-  GeoJSON: () => null,
+  GeoJSON: ({ data, style }: { data: unknown; style?: unknown }) =>
+    createElement("div", { "data-geojson": JSON.stringify(data), "data-style": JSON.stringify(style ?? null) }),
   Rectangle: () => null,
   CircleMarker: () => null,
   useMap: () => ({ setView() {}, zoomIn() {}, zoomOut() {} }),
@@ -52,5 +60,44 @@ describe("MapPanel existing render is preserved", () => {
     expect(html).toContain("Satélite");
     expect(html).toContain("Leyenda");
     expect(html).toContain("Consultando el cuadro de usos");
+  });
+});
+
+describe("real parcel geometry on the map (S12)", () => {
+  const geometry: GeoJSON.Geometry = {
+    type: "Polygon",
+    coordinates: [[[-58.406, -34.605], [-58.405, -34.605], [-58.405, -34.604], [-58.406, -34.605]]],
+  };
+
+  it("renders the real geometry with a distinct style and nothing when no geometry is available", () => {
+    const withGeometry = renderToStaticMarkup(<ParcelGeometryLayer geometry={geometry} />);
+
+    expect(withGeometry).toContain("data-geojson=");
+    expect(withGeometry).toContain("Polygon");
+    expect(withGeometry).toContain(REAL_PARCEL_STYLE.color);
+    expect(renderToStaticMarkup(<ParcelGeometryLayer geometry={null} />)).toBe("");
+  });
+
+  it("hides the illustrative parcel layer and relabels zoning only with real geometry", () => {
+    expect(visibleDemoLayerIds(["zonificacion", "parcela"], true)).toEqual(["zonificacion"]);
+    expect(visibleDemoLayerIds(["zonificacion", "parcela"], false)).toEqual(["zonificacion", "parcela"]);
+
+    const realOptions = demoLayerOptions(true);
+    expect(realOptions.map(layer => layer.id)).not.toContain("parcela");
+    expect(realOptions.find(layer => layer.id === "zonificacion")?.label).toMatch(/ilustrativ/i);
+
+    const demoOptions = demoLayerOptions(false);
+    expect(demoOptions.map(layer => layer.id)).toContain("parcela");
+    expect(demoOptions.find(layer => layer.id === "zonificacion")?.label).toBe("Zonificación y usos del suelo");
+  });
+
+  it("swaps the demo parcel legend entry for a real-parcel entry only with real geometry", () => {
+    const real = renderToStaticMarkup(<MapLegend hasRealGeometry={true} />);
+    expect(real).toContain("Parcela real");
+    expect(real).not.toContain("Parcela consultada");
+
+    const demo = renderToStaticMarkup(<MapLegend hasRealGeometry={false} />);
+    expect(demo).toContain("Parcela consultada");
+    expect(demo).not.toContain("Parcela real");
   });
 });
