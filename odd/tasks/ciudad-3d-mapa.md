@@ -33,11 +33,26 @@ Interpretación autorizada: mostrar la tabla oficial completa como dato de refer
 
 **S7** — Risk: la integración agrega dos clientes HTTP externos y un endpoint público nuevo. No cambia datos persistidos ni contratos existentes; agrega rutas y un panel. Requiere verificación focused de los clientes y del render con/sin punto.
 
+**S8** — Caché: `usig_cache_ttl_seconds` (300 por defecto) y `usig_cache_max_entries` (256) en `Settings`. Caché TTL/LRU en el cliente USIG para respuestas GET exitosas, con clave `(path, params ordenados)`; errores nunca se cachean. `use-table` pasa de 13 llamadas por consulta repetida a 0 en caliente. Tests: hit, expiración por TTL, evicción por tamaño, errores no cacheados y aislamiento entre tests.
+
+**S9** — Ubicación aproximada visible: el SMP se muestra como **estimado** y la respuesta incluye una limitación explícita de RN-03 ("la ubicación es aproximada; puede corresponder a la parcela vecina"). Aplica a `use-table` y a `rubro-referencias`. El front muestra las limitaciones cerca de los datos de parcela, no solo en las condiciones del rubro.
+
+**S10** — Filtro de rubros: buscador `type="search"` en el panel que filtra rubros por nombre dentro de cada categoría, normalizando acentos y mayúsculas (reutilizar el criterio de `front/src/history/searchHistory.ts`), con estado vacío claro y accesible.
+
+**S11** — Mixtura verificada server-side: `/territory/rubro-referencias` sigue aceptando `mixtura` por compatibilidad de contrato, pero el adaptador **deriva la mixtura desde el SMP** con `get_mix_area(smp)` y usa ese valor aguas arriba. Test: enviar `mixtura` incorrecta y verificar que USIG recibe la derivada.
+
+**S12** — Geometría real de la parcela (verificada en vivo 2026-11-26): `GET /catastro/geometria/?smp=013-099-018` → HTTP 200, `FeatureCollection` con `geometry.type == "MultiPolygon"`. Nuevo `GET /territory/parcel-geometry?smp=` → `{"geometry": <GeoJSON geometry>|null, "source": ..., "limitations": [...]}`. El front dibuja esa geometría con `GeoJSON` dentro del `MapContainer`, desactiva la capa demo "Parcela" cuando hay geometría real y reetiqueta la capa de zonificación ilustrativa. Si no hay geometría, mantiene el comportamiento actual.
+
+**S13** — Entrega (NO implementada en este slice): push, PR, deploy de Render y deploy de Vercel requieren autorización remota explícita (destino, operación y credencial). Se pregunta al usuario al final.
+
 ## Tasks
 
 - **T1** — S3 backend (clientes USIG + dominio + router + tests) — delegado (unidad paralela) — ✅ commits `989bc8a` + fix `b25768b` — RED 3 collection errors → GREEN 32 tests nuevos; suite completa 203 passed / 13 deselected; integración 7 passed. El fix agregó 2 tests de cableado real (los fakes inyectados tapaban un `AttributeError` en producción).
 - **T2** — S4 front (tipos + clientes + panel + tests) — delegado (unidad paralela) — ✅ commit `55fc9f6` — RED módulo ausente + 5 tests fallidos → GREEN 93 tests; typecheck y build OK.
 - **T3** — S5/S6 verificación diferencial + docs + cierre — inline — ✅ verificado; commit de docs en este slice.
+- **T4** — S8, S9 (back), S11, S12 (back) — caché + limitación de ubicación aproximada + mixtura derivada + endpoint de geometría — delegado (unidad paralela) — ✅ commit `00c4d14` — RED→GREEN en las 4 reglas; 51 tests de `usig`; suite 220 passed / 13 deselected; integración 7 passed; differential base-vs-change idéntico.
+- **T5** — S9 (front), S10, S12 (front) — etiqueta "estimado" + filtro de rubros + dibujo de geometría real — delegado (unidad paralela) — ✅ commit `6050250` — RED 13 tests → GREEN 106 tests; typecheck y build OK; comportamiento sin geometría preservado por tests existentes.
+- **T6** — S13 verificación final + docs + pregunta de entrega — inline — ✅ verificación local; entrega remota pendiente de autorización explícita.
 
 ## Log
 
@@ -58,3 +73,13 @@ Interpretación autorizada: mostrar la tabla oficial completa como dato de refer
 **L8** (2026-11-26): Correcciones aceptadas durante la implementación: `/cuadrosdeuso/rubros/` devuelve `{"rubros": [...]}` (no una lista) y un SMP inválido responde `200` con cuerpo vacío/`usos: null`; ambos casos quedaron pinados con tests. Scratch `/tmp/opencode/territory-diff.jmAQtD` creado fuera del worktree y eliminado por el padre.
 
 **L9** (2026-11-26): Bug reportado por el usuario al seguir el flujo: `GET /territory/use-table` respondía `500` con `AttributeError: 'UsigTerritoryService' object has no attribute 'resolve'`. Reproducido en el servidor local con curl. Causa: los puertos y los fakes de los tests usaban `resolve()`, pero el adaptador real exponía `resolve_use_table()` / `resolve_references()`; los tests inyectaban fakes y nunca ejercitaban la DI real. Fix `b25768b`: dos adaptadores delgados (`UsigUseTableResolver`, `UsigRubroReferencesResolver`) exponen `resolve()` y delegan en el servicio compartido. Se agregaron dos tests sin `dependency_overrides` que pasan por la DI real con respx. Verificado: 203 tests backend, y en vivo `/territory/use-table` → 200 con SMP `013-099-018`, mix `4`, 10 categorías; `/territory/rubro-referencias` → 200 con `permitido_mixtura_de_usos`. Lección: un puerto con fakes no prueba el cableado de la inyección de dependencias.
+
+**L10** (2026-11-26): "podrias resolver todos" — el usuario pide implementar las 6 mejoras propuestas. Se reabre el feature con S8–S13 y T4–T6. La entrega remota (S13) queda condicionada a autorización explícita de destino, operación y credencial.
+
+**L11** (2026-11-26): Geometría verificada en vivo con `curl -A 'CONCO/0.1'`: `GET /catastro/geometria/?smp=013-099-018` → HTTP 200, `FeatureCollection` con `geometry.type: "MultiPolygon"` (5322 bytes). Cambia el plan original: se dibuja la parcela real y se desactiva la capa demo de parcela.
+
+**L12** (2026-11-26): Route declaration — T4 y T5 se delegan en paralelo por Writer trigger (dos unidades independientes, superficies `back/**` y `front/**`, cada una con varios archivos y tests). T6 inline. Contrato nuevo fijado en S8–S12, en especial `GET /territory/parcel-geometry?smp=` → `{"geometry": <GeoJSON geometry>|null, "source": ..., "limitations": [...]}`.
+
+**L13** (2026-11-26): Verificación final de las 5 mejoras de código — backend 220 passed / 13 deselected, integración 7 passed; front 106 tests, typecheck y build OK. Spot check del padre re-corriendo suites: mismos números. Differential base-vs-change de clientes USIG intactos: byte-idéntico. El endpoint de geometría se validó con DI real + respx (`MultiPolygon`), no contra un servidor local porque el usuario lo había detenido. Scratch `/tmp/opencode/usig-diff.5WPRck` creado fuera del worktree y eliminado por el padre.
+
+**L14** (2026-11-26): S13 (push, PR, deploy Render, deploy Vercel) NO se ejecuta: el usuario todavía no autorizó destino, operación y credencial/sesión. Se pregunta al finalizar.

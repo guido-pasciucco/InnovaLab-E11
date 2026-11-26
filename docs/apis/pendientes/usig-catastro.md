@@ -8,6 +8,8 @@ Servicio de catastro de USIG (Gobierno de la Ciudad). Dado un punto, devuelve la
 
 El backend consulta `/catastro/parcela/` para resolver el SMP a partir del punto aproximado de la consulta y lo encadena con [Ciudad 3D](ciudad-3d.md) en `GET /territory/use-table?lat=&lng=`. La cabecera `User-Agent` la pone el backend (por defecto `CONCO/0.1`), porque el navegador no puede fijarla. Si la respuesta es `{}` (punto fuera de CABA o en la calle), el endpoint devuelve un resultado vacío con una limitación, no un error.
 
+También se usa `/catastro/geometria/?smp=` (verificado el 2026-11-26, responde un `FeatureCollection` con `MultiPolygon`) en `GET /territory/parcel-geometry?smp=`, para dibujar la parcela real en el mapa. Las respuestas se cachean con TTL/LRU en el backend. El SMP se presenta como **estimado**: el punto viene de Georef y puede caer en la parcela vecina o en la calle ([RN-03](../../REGLAS_DE_NEGOCIO.md)).
+
 ## 1. Ficha
 
 | Dato | Valor |

@@ -9,9 +9,12 @@ Servicio de USIG que publica los datos del Código Urbanístico por parcela: dis
 El cuadro de usos se consume a través de la API propia de CONCO, nunca desde el navegador: el filtro por User-Agent de USIG impide las llamadas directas del front.
 
 - `GET /territory/use-table?lat=&lng=` — resuelve la parcela con Catastro y devuelve la mixtura más las 10 categorías con sus rubros.
-- `GET /territory/rubro-referencias?smp=&categoria=&mixtura=&rubro=` — condiciones del rubro seleccionado, bajo demanda.
+- `GET /territory/rubro-referencias?smp=&categoria=&mixtura=&rubro=` — condiciones del rubro seleccionado, bajo demanda. Aunque el cliente envía `mixtura`, el backend la deriva del SMP para no confiar en el cliente.
+- `GET /territory/parcel-geometry?smp=` — geometría real de la parcela (`/catastro/geometria/`), para dibujar el polígono en el mapa en lugar de una capa ilustrativa. Verificada el 2026-11-26: `FeatureCollection` con `MultiPolygon`.
 
-La lista de rubros no se filtra por mixtura: el permiso está en `referencias`. No se consultan las 401 referencias de golpe. El panel del mapa muestra estos datos como referencia con fuente oficial; no determina si una actividad es apta para el lote ([RN-04](../../REGLAS_DE_NEGOCIO.md)).
+La lista de rubros no se filtra por mixtura: el permiso está en `referencias`. No se consultan las 401 referencias de golpe. El panel del mapa muestra estos datos como referencia con fuente oficial; no determina si una actividad es apta para el lote ([RN-04](../../REGLAS_DE_NEGOCIO.md)). Las respuestas incluyen una limitación RN-03: el punto de Georef es aproximado y el SMP puede corresponder a la parcela vecina.
+
+Las respuestas exitosas de USIG se cachean en el backend con TTL/LRU configurable (`usig_cache_ttl_seconds`, `usig_cache_max_entries`); los errores nunca se cachean. Un `use-table` en caliente no hace llamadas aguas arriba.
 
 ## 1. Ficha
 
