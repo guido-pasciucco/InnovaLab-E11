@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON, Rectangle, CircleMarker, useMap } from "react-leaflet";
 import L from "leaflet";
 import type { GeoPoint, TerritorialFeature } from "../types";
+import UseTablePanel from "./UseTablePanel";
 
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -232,6 +233,7 @@ export default function MapPanel({
           La ubicación del punto es aproximada: la informa el servicio nacional de direcciones Georef.
           Las capas dependen de la información que entregue el backend; las capas de ejemplo son ilustrativas.
         </p>
+        <UseTablePanel point={point} />
       </section>
     </div>
   );

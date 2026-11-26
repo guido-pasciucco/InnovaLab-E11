@@ -330,6 +330,30 @@ h1,h2,h3 { font-family:"Manrope", sans-serif; }
 .map-zoom button:last-child { width:auto; padding:0 10px; font-size:11px; }
 .map-zoom button:hover { background:var(--bg); }
 .map-credit { margin:10px 0 0; color:var(--text-muted); font-size:10px; }
+/* Cuadro de usos (S4): reference data only, rendered below the map hint. */
+.use-table { margin-top:20px; padding-top:18px; border-top:1px solid var(--border); }
+.use-table .section-heading h2 { margin-bottom:4px; font-size:16px; }
+.use-table .section-heading { margin-bottom:12px; }
+.use-table__facts { display:grid; gap:10px; margin:0 0 18px; }
+.use-table__facts div { display:grid; gap:3px; padding-bottom:9px; border-bottom:1px solid #E8EEF1; }
+.use-table__facts dt { color:var(--text-muted); font-size:10px; font-weight:700; letter-spacing:.7px; text-transform:uppercase; }
+.use-table__facts dd { margin:0; color:var(--ink); font-size:13px; line-height:1.5; overflow-wrap:anywhere; }
+.use-table h4 { margin:0 0 8px; color:var(--ink); font-size:13px; }
+.use-table__categories { margin:0; padding:0; list-style:none; }
+.use-table__category { border-top:1px solid #E8EEF1; }
+.use-table__category-toggle { width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 2px; border:0; background:transparent; color:var(--ink); font-size:13px; text-align:left; }
+.use-table__category-toggle:hover { color:var(--blue); }
+.use-table__count { flex:0 0 auto; color:var(--text-muted); font-size:11px; }
+.use-table__rubros { margin:0 0 10px; padding:0 0 0 14px; list-style:none; }
+.use-table__rubro { padding:5px 2px; border:0; background:transparent; color:var(--text-soft); font-size:12px; line-height:1.5; text-align:left; }
+.use-table__rubro:hover,.use-table__rubro[aria-pressed="true"] { color:var(--blue); font-weight:700; }
+.use-table__referencias { margin-top:14px; padding:14px; border:1px solid var(--border); border-radius:9px; background:var(--bg); }
+.use-table__group { padding:8px 0; border-top:1px solid var(--border); }
+.use-table__group:first-of-type { border-top:0; }
+.use-table__group h5 { margin:0 0 5px; color:var(--blue); font-size:11px; font-weight:700; }
+.use-table__group ul { margin:0; padding-left:18px; color:var(--text-soft); font-size:12px; line-height:1.6; }
+.use-table__disclaimer { margin-top:14px; }
+.use-table__source a { color:var(--blue); font-weight:600; }
 .map-demo-label { background:transparent; border:0; }
 .map-demo-label span { display:inline-block; padding:3px 8px; border:1px solid var(--ink); border-radius:4px; background:#fff; color:var(--ink); font-size:10px; font-weight:700; white-space:nowrap; }
 .map-demo-stop { background:transparent; border:0; }

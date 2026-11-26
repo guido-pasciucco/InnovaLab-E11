@@ -1,4 +1,7 @@
-import type { ConsultationRequest, ConsultationResponse, FollowUpRequest, FollowUpResponse, SourceReference } from '../types';
+import type {
+  ConsultationRequest, ConsultationResponse, FollowUpRequest, FollowUpResponse,
+  RubroReferencias, SourceReference, UseTableResponse,
+} from '../types';
 
 const sources: SourceReference[] = [
   { id: 'src-procedures', title: 'Guía oficial de habilitaciones (fuente piloto)', publisher: 'Organismo oficial — reemplazar por fuente validada', url: 'https://buenosaires.gob.ar/', note: 'Referencia de demostración; no usar como asesoramiento oficial.' },
@@ -31,5 +34,36 @@ export async function mockFollowUp(payload: FollowUpRequest): Promise<FollowUpRe
     answer: `La consulta "${payload.question}" necesita verificarse contra los datos oficiales integrados. En esta versión de demostración no se genera una conclusión nueva.`,
     sourceIds: ['src-procedures'],
     limitations: ['Respuesta simulada; el modelo de IA aún no está conectado.'],
+  };
+}
+
+/** The official source is cited even in mock mode, but no rubro is invented. */
+const useTableSource: SourceReference = {
+  id: 'usig-ciudad-3d',
+  title: 'Ciudad 3D — Cuadro de usos',
+  publisher: 'USIG, Gobierno de la Ciudad de Buenos Aires',
+  url: 'https://ciudad3d.buenosaires.gob.ar',
+};
+
+export async function mockUseTable(): Promise<UseTableResponse> {
+  return {
+    smp: null,
+    official_address: null,
+    mix_area: null,
+    categories: [],
+    source: useTableSource,
+    limitations: ['Modo demostración: el Cuadro de Usos oficial no está disponible. No se mostraron rubros simulados.'],
+  };
+}
+
+export async function mockRubroReferencias(): Promise<RubroReferencias> {
+  return {
+    permitido_mixtura_de_usos: [],
+    bicicletas: [],
+    estacionamientos: [],
+    cargaydescarga: [],
+    observaciones: null,
+    source: useTableSource,
+    limitations: ['Modo demostración: las condiciones oficiales del rubro no están disponibles.'],
   };
 }
