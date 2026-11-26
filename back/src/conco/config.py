@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     usig_base_url: str = "https://epok.buenosaires.gob.ar"
     usig_timeout_seconds: float = 10.0
     usig_user_agent: str = "CONCO/0.1"
+    # S14: el normalizador y la API de catastro por dirección están en otros hosts.
+    usig_normalize_base_url: str = "https://servicios.usig.buenosaires.gob.ar"
+    usig_catastro_api_base_url: str = "https://datosabiertos-catastro-apis.buenosaires.gob.ar"
     # S8: sólo respuestas GET exitosas se cachean; LRU acotada para no crecer sin límite.
     usig_cache_ttl_seconds: float = 300.0
     usig_cache_max_entries: int = 256

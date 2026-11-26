@@ -49,10 +49,20 @@ async def use_table(
         float,
         Query(ge=-180, le=180, description="Longitud del punto a consultar en el mapa."),
     ],
+    address: Annotated[
+        str | None,
+        Query(
+            min_length=3,
+            max_length=200,
+            description="Dirección opcional: se usa si el punto no resuelve una parcela.",
+        ),
+    ] = None,
 ) -> UseTable:
-    """Devuelve el cuadro de usos completo de la parcela que contiene el punto."""
+    """Devuelve el cuadro de usos de la parcela del punto, o el de la dirección dada."""
     try:
-        return await resolver.resolve(lat, lng)
+        if address is None:
+            return await resolver.resolve(lat, lng)
+        return await resolver.resolve(lat, lng, address)
     except TerritoryLookupError as exc:
         raise TerritoryUnavailable() from exc
 

@@ -14,6 +14,28 @@ class UsigParcela(BaseModel):
     address: str | None = Field(default=None, alias="direccion")
 
 
+class UsigDireccionNormalizada(BaseModel):
+    """Un resultado de /normalizar/: los códigos necesarios para buscar la parcela."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    street_code: int | None = Field(default=None, alias="cod_calle")
+    number: int | None = Field(default=None, alias="altura")
+    partido: str | None = Field(default=None, alias="cod_partido")
+    address: str | None = Field(default=None, alias="direccion")
+
+
+class UsigNormalizarResponse(BaseModel):
+    """Respuesta de /normalizar/; `errorMessage` aparece si la calle no existe."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    direcciones: list[UsigDireccionNormalizada] = Field(
+        default_factory=list, alias="direccionesNormalizadas"
+    )
+    error_message: str | None = Field(default=None, alias="errorMessage")
+
+
 class UsigMixtura(BaseModel):
     """Respuesta de /cur3d/mixtura_usos/: el primer valor es el área de mixtura."""
 

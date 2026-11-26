@@ -90,6 +90,16 @@ REFERENCE_LIMITATIONS = [
     "Información de referencia del cuadro de usos oficial: no acredita la zonificación del lote ni confirma que una actividad esté permitida."
 ]
 NO_PARCELA_LIMITATION = "No se encontró la parcela para el punto consultado dentro de la Ciudad Autónoma de Buenos Aires."
+# S14: la parcela se obtuvo por dirección porque el punto no devolvió un SMP.
+ADDRESS_RESOLVED_LIMITATION = (
+    "La parcela se resolvió a partir de la dirección oficial de USIG porque el punto "
+    "del mapa no devolvió una parcela."
+)
+# S14: USIG no conoce la calle o no tiene parcela para la dirección indicada.
+NO_PARCELA_BY_ADDRESS_LIMITATION = (
+    "USIG no tiene una parcela asociada a la dirección consultada: verificá el nombre "
+    "de la calle y la altura."
+)
 
 
 class TerritoryLookupError(Exception):
@@ -105,9 +115,11 @@ class ParcelGeometryResolver(Protocol):
 
 
 class UseTableResolver(Protocol):
-    """Puerto: resuelve el cuadro de usos a partir de un punto."""
+    """Puerto: resuelve el cuadro de usos a partir de un punto y dirección opcional."""
 
-    async def resolve(self, lat: float, lng: float) -> UseTable:
+    async def resolve(
+        self, lat: float, lng: float, address: str | None = None
+    ) -> UseTable:
         """Devuelve el cuadro; lanza TerritoryLookupError si USIG falla."""
         ...
 

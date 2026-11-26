@@ -3,8 +3,11 @@
 import asyncio
 
 from conco.integrations.usig import client as usig
+from conco.integrations.usig.models import UsigParcela
 from conco.territory.domain import (
+    ADDRESS_RESOLVED_LIMITATION,
     APPROXIMATE_LOCATION_LIMITATION,
+    NO_PARCELA_BY_ADDRESS_LIMITATION,
     NO_PARCELA_LIMITATION,
     REFERENCE_LIMITATIONS,
     SOURCE,
@@ -20,22 +23,28 @@ from conco.territory.domain import (
 class UsigTerritoryService:
     """Resuelve el cuadro de usos con Catastro y Ciudad 3D."""
 
-    async def resolve_use_table(self, lat: float, lng: float) -> UseTable:
-        """Una consulta de Catastro, una de mixtura, una de categorías y 10 de rubros."""
+    async def resolve_use_table(
+        self, lat: float, lng: float, address: str | None = None
+    ) -> UseTable:
+        """Punto primero; sólo sin SMP y con dirección se intenta el fallback (S14)."""
+        resolved_from_address = False
         try:
             parcela = await usig.get_parcela(lat, lng)
-            if not parcela.smp:
+            if not parcela.smp and address:
+                parcela = await self._parcela_from_address(address)
+                resolved_from_address = parcela is not None and parcela.smp is not None
+            if not parcela or not parcela.smp:
+                limitations = [APPROXIMATE_LOCATION_LIMITATION, NO_PARCELA_LIMITATION]
+                if address:
+                    limitations.append(NO_PARCELA_BY_ADDRESS_LIMITATION)
+                limitations.extend(REFERENCE_LIMITATIONS)
                 return UseTable(
                     smp=None,
                     official_address=None,
                     mix_area=None,
                     categories=[],
                     source=SOURCE,
-                    limitations=[
-                        APPROXIMATE_LOCATION_LIMITATION,
-                        NO_PARCELA_LIMITATION,
-                        *REFERENCE_LIMITATIONS,
-                    ],
+                    limitations=limitations,
                 )
             mix_area = await usig.get_mix_area(parcela.smp)
             categorias = await usig.list_categorias()
@@ -45,6 +54,10 @@ class UsigTerritoryService:
         except usig.UsigError as exc:
             raise TerritoryLookupError(str(exc)) from exc
 
+        limitations = [APPROXIMATE_LOCATION_LIMITATION]
+        if resolved_from_address:
+            limitations.append(ADDRESS_RESOLVED_LIMITATION)
+        limitations.extend(REFERENCE_LIMITATIONS)
         return UseTable(
             smp=parcela.smp,
             official_address=parcela.address,
@@ -58,8 +71,20 @@ class UsigTerritoryService:
                 for categoria, rubros in zip(categorias, rubros_por_categoria)
             ],
             source=SOURCE,
-            limitations=[APPROXIMATE_LOCATION_LIMITATION, *REFERENCE_LIMITATIONS],
+            limitations=limitations,
         )
+
+    async def _parcela_from_address(self, address: str) -> UsigParcela | None:
+        """Normaliza y toma la primera dirección de CABA; sin ella devuelve None."""
+        normalized = await usig.normalize_address(address)
+        for item in normalized:
+            if (
+                (item.partido or "").lower() == "caba"
+                and item.street_code is not None
+                and item.number is not None
+            ):
+                return await usig.get_parcela_by_address(item.street_code, item.number)
+        return None
 
     async def resolve_references(
         self, smp: str, categoria: int, mixtura: int, rubro: int
@@ -104,8 +129,10 @@ class UsigUseTableResolver:
     def __init__(self, service: UsigTerritoryService | None = None) -> None:
         self._service = service or UsigTerritoryService()
 
-    async def resolve(self, lat: float, lng: float) -> UseTable:
-        return await self._service.resolve_use_table(lat, lng)
+    async def resolve(
+        self, lat: float, lng: float, address: str | None = None
+    ) -> UseTable:
+        return await self._service.resolve_use_table(lat, lng, address)
 
 
 class UsigRubroReferencesResolver:

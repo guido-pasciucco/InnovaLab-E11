@@ -423,3 +423,73 @@ def test_parcel_geometry_upstream_failure_keeps_the_standard_error_body() -> Non
         "request_id": response.headers["x-request-id"],
         "detail": "No pudimos consultar el cuadro de usos. Intentá de nuevo más tarde.",
     }
+
+
+# S14: el parámetro opcional `address` llega al puerto y la DI real lo resuelve.
+NORMALIZE_URL = "https://servicios.usig.buenosaires.gob.ar/normalizar/"
+CATASTRO_API_PARCELA_URL = (
+    "https://datosabiertos-catastro-apis.buenosaires.gob.ar/catastro/parcela/"
+)
+
+
+def test_use_table_forwards_the_optional_address_to_the_port(
+    client: TestClient, use_table_resolver: FakeResolver
+) -> None:
+    client.get(
+        USE_TABLE_URL,
+        params={"lat": -34.6040, "lng": -58.4055, "address": "CORRIENTES 2801"},
+    )
+
+    assert use_table_resolver.calls == [(-34.6040, -58.4055, "CORRIENTES 2801")]
+
+
+@pytest.mark.parametrize("address", ["AB", "A" * 201])
+def test_invalid_address_returns_422_without_resolving(
+    client: TestClient, use_table_resolver: FakeResolver, address: str
+) -> None:
+    response = client.get(
+        USE_TABLE_URL,
+        params={"lat": -34.6040, "lng": -58.4055, "address": address},
+    )
+
+    assert response.status_code == 422
+    assert use_table_resolver.calls == []
+
+
+@respx.mock
+def test_real_use_table_resolver_falls_back_to_the_official_address() -> None:
+    """Sin dependency_overrides: el endpoint público usa la DI real y el fallback."""
+    respx.get(f"{BASE}/catastro/parcela/").respond(200, json={})
+    respx.get(NORMALIZE_URL).respond(
+        200, json=load_fixture("normalizar_corrientes.json")
+    )
+    respx.get(CATASTRO_API_PARCELA_URL).respond(
+        200, json=load_fixture("parcela_corrientes.json")
+    )
+    respx.get(f"{BASE}/cur3d/mixtura_usos/").respond(
+        200, json=load_fixture("mixtura_usos.json")
+    )
+    respx.get(f"{BASE}/cur3d/categorias/").respond(
+        200, json=load_fixture("categorias.json")
+    )
+    respx.get(f"{BASE}/cur3d/cuadrosdeuso/rubros/").respond(
+        200, json=load_fixture("rubros.json")
+    )
+
+    response = TestClient(app).get(
+        USE_TABLE_URL,
+        params={"lat": -34.5000, "lng": -58.4000, "address": "CORRIENTES 2801"},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["smp"] == "013-099-018"
+    assert set(body) == {
+        "smp",
+        "official_address",
+        "mix_area",
+        "categories",
+        "source",
+        "limitations",
+    }
+    assert any("dirección" in item.lower() for item in body["limitations"])
