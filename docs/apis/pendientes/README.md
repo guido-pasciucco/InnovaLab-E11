@@ -4,6 +4,8 @@ APIs probadas con llamadas reales que **todavía no están integradas** en CONCO
 
 Cuando una candidata se integra, su documento pasa a [`../en-pr/`](../en-pr/) mientras el PR esté abierto, y a [`../implementadas/`](../implementadas/) cuando se mergea a `main`.
 
+> **2026-11-26:** USIG Catastro y Ciudad 3D ya están integradas en la rama `feat/ciudad-3d-mapa` (PR pendiente). Sus documentos siguen acá hasta que se abra/mergee el PR y se migruen a `en-pr/` / `implementadas/`.
+
 | API | Proveedor | Para qué podría servir | Verificada | Documento |
 |---|---|---|---|---|
 | USIG Catastro | USIG, Gobierno de la Ciudad | Punto → parcela (SMP), superficie, pisos y locales | 2026-11-05 | [usig-catastro.md](usig-catastro.md) |

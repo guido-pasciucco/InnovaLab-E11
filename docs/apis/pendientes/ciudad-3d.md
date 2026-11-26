@@ -2,7 +2,16 @@
 
 Servicio de USIG que publica los datos del Código Urbanístico por parcela: distrito, edificabilidad, protección patrimonial, afectaciones y **el cuadro de usos** (qué rubros se permiten y con qué condiciones). Es el backend del visor [Ciudad 3D](https://ciudad3d.buenosaires.gob.ar). Se consulta por SMP, que se obtiene con [USIG Catastro](usig-catastro.md).
 
-**Estado:** candidata, no integrada. Verificada con llamadas reales el 2026-11-05.
+**Estado:** integrada en la rama `feat/ciudad-3d-mapa` (PR pendiente). Verificada con llamadas reales el 2026-11-05 y re-verificada el 2026-11-26.
+
+## Integración en CONCO
+
+El cuadro de usos se consume a través de la API propia de CONCO, nunca desde el navegador: el filtro por User-Agent de USIG impide las llamadas directas del front.
+
+- `GET /territory/use-table?lat=&lng=` — resuelve la parcela con Catastro y devuelve la mixtura más las 10 categorías con sus rubros.
+- `GET /territory/rubro-referencias?smp=&categoria=&mixtura=&rubro=` — condiciones del rubro seleccionado, bajo demanda.
+
+La lista de rubros no se filtra por mixtura: el permiso está en `referencias`. No se consultan las 401 referencias de golpe. El panel del mapa muestra estos datos como referencia con fuente oficial; no determina si una actividad es apta para el lote ([RN-04](../../REGLAS_DE_NEGOCIO.md)).
 
 ## 1. Ficha
 

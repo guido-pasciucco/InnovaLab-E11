@@ -66,7 +66,9 @@ Convenciones comunes a todas las integraciones:
 
 ## Pendientes (candidatas en evaluación)
 
-APIs probadas que todavía no están integradas: [`pendientes/README.md`](pendientes/README.md) (USIG Catastro, Ciudad 3D, habilitaciones aprobadas de la AGC, diccionario CLAE de CEP XXI, OpenStreetMap y Mapa de Oportunidades Comerciales). APIs que requieren token o registro: [APIS_CON_REGISTRO.md](APIS_CON_REGISTRO.md).
+APIs probadas que todavía no están integradas: [`pendientes/README.md`](pendientes/README.md) (habilitaciones aprobadas de la AGC, diccionario CLAE de CEP XXI, OpenStreetMap y Mapa de Oportunidades Comerciales). APIs que requieren token o registro: [APIS_CON_REGISTRO.md](APIS_CON_REGISTRO.md).
+
+USIG Catastro y Ciudad 3D están integradas en la rama `feat/ciudad-3d-mapa` (PR pendiente) para enriquecer la sección del mapa con el cuadro de usos oficial por parcela. El front consume los datos a través de la API de CONCO, no directamente de USIG.
 
 ## Candidatas descartadas
 
