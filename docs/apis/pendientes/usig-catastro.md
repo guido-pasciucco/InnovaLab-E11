@@ -2,7 +2,15 @@
 
 Servicio de catastro de USIG (Gobierno de la Ciudad). Dado un punto, devuelve la parcela que lo contiene: su identificador (SMP), la dirección oficial y datos del edificio.
 
-**Estado:** candidata, no integrada. Verificada con llamadas reales el 2026-11-05.
+**Estado:** integrada en la rama `feat/ciudad-3d-mapa` (PR pendiente). Verificada con llamadas reales el 2026-11-05 y re-verificada el 2026-11-26.
+
+## Integración en CONCO
+
+El backend consulta `/catastro/parcela/` para resolver el SMP a partir del punto aproximado de la consulta y lo encadena con [Ciudad 3D](ciudad-3d.md) en `GET /territory/use-table?lat=&lng=`. La cabecera `User-Agent` la pone el backend (por defecto `CONCO/0.1`), porque el navegador no puede fijarla. Si la respuesta es `{}` (punto fuera de CABA o en la calle), el endpoint devuelve un resultado vacío con una limitación, no un error.
+
+También se usa `/catastro/geometria/?smp=` (verificado el 2026-11-26, responde un `FeatureCollection` con `MultiPolygon`) en `GET /territory/parcel-geometry?smp=`, para dibujar la parcela real en el mapa. Las respuestas se cachean con TTL/LRU en el backend. El SMP se presenta como **estimado**: el punto viene de Georef y puede caer en la parcela vecina o en la calle ([RN-03](../../REGLAS_DE_NEGOCIO.md)).
+
+Cuando el punto no resuelve parcela, `GET /territory/use-table` acepta el parámetro opcional `address` y prueba la ruta que usa el visor oficial: `normalizar` de USIG para obtener `cod_calle` + `altura`, y luego `GET https://datosabiertos-catastro-apis.buenosaires.gob.ar/catastro/parcela/?codigo_calle=&altura=&geocodificar=true&srid=4326`. Verificado: `CORRIENTES 2801` → `cod_calle=3174`, `altura=2801` → SMP `013-099-018`. Si USIG no conoce la calle, el resultado sigue siendo vacío con una limitación explícita, nunca un SMP inventado.
 
 ## 1. Ficha
 

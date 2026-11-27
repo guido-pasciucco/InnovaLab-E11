@@ -133,3 +133,41 @@ export type ActivityProceduresResponse = {
   /** Disclaimer shown verbatim in the requirements panel. */
   requirements_note: string;
 };
+
+/** Wire shapes of GET /territory/use-table (snake_case, as the backend sends them). */
+export type UseTableRubro = { id: number; name: string };
+export type UseTableCategory = { id: number; name: string; rubros: UseTableRubro[] };
+export type UseTableResponse = {
+  smp: string | null;
+  official_address: string | null;
+  mix_area: number | null;
+  categories: UseTableCategory[];
+  source: SourceReference;
+  limitations: string[];
+};
+
+/** Wire shape of GET /territory/parcel-geometry: real cadastral geometry or null (S12). */
+export type ParcelGeometryResponse = {
+  geometry: GeoJSON.Geometry | null;
+  source: SourceReference;
+  limitations: string[];
+};
+
+/** Parameters of GET /territory/rubro-referencias, mirroring the query string names. */
+export type RubroReferenciasParams = {
+  smp: string;
+  categoria: number;
+  mixtura: number;
+  rubro: number;
+};
+
+/** Wire shape of GET /territory/rubro-referencias (snake_case, as the backend sends it). */
+export type RubroReferencias = {
+  permitido_mixtura_de_usos: string[];
+  bicicletas: string[];
+  estacionamientos: string[];
+  cargaydescarga: string[];
+  observaciones: string | null;
+  source: SourceReference;
+  limitations: string[];
+};

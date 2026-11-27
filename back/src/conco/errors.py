@@ -58,6 +58,12 @@ class AddressesUnavailable(ConcoError):
     status_code = status.HTTP_502_BAD_GATEWAY
 
 
+class TerritoryUnavailable(ConcoError):
+    code = "TERRITORY_UNAVAILABLE"
+    message = "No pudimos consultar el cuadro de usos. Intentá de nuevo más tarde."
+    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+
+
 class ConsultationsUnavailable(ConcoError):
     code = "CONSULTATIONS_UNAVAILABLE"
     message = "El servicio de consultas no está disponible. Intentá de nuevo más tarde."

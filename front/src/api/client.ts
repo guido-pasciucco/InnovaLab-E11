@@ -1,10 +1,11 @@
 import type {
   ActivityProceduresResponse, ActivitySuggestionsResponse, AddressSearchResponse, ConsultationRequest, ContextAnswers,
-  ConsultationResponse, FollowUpRequest, FollowUpResponse,
+  ConsultationResponse, FollowUpRequest, FollowUpResponse, ParcelGeometryResponse, RubroReferencias,
+  RubroReferenciasParams, UseTableResponse,
 } from '../types';
 import type { GeoPoint } from '../types';
 import { RESULT_LIMITS, validateActivity, validateAddress, validateLimit } from '../validation';
-import { mockConsultation, mockFollowUp } from './mock';
+import { mockConsultation, mockFollowUp, mockParcelGeometry, mockRubroReferencias, mockUseTable } from './mock';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api';
 const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === 'true';
@@ -142,4 +143,38 @@ export async function getActivityProcedures(slug: string, answers: ContextAnswer
   const params = new URLSearchParams(Object.entries(answers).map(([id, value]) => [id, String(value)]));
   const query = params.toString() ? `?${params}` : '';
   return request<ActivityProceduresResponse>(`/guidance/activities/${encodeURIComponent(slug)}/procedures${query}`);
+}
+
+/** Official Cuadro de Usos for the parcel containing the consultation point (S4).
+ * An optional address lets the backend retry USIG by street when the point has no SMP (S14). */
+export async function getUseTable(
+  point: GeoPoint, options: { signal?: AbortSignal; address?: string } = {},
+): Promise<UseTableResponse> {
+  if (USE_MOCK) return mockUseTable();
+  const params = new URLSearchParams({ lat: String(point.lat), lng: String(point.lng) });
+  if (options.address) params.set("address", options.address);
+  return request<UseTableResponse>(`/territory/use-table?${params}`, { signal: options.signal });
+}
+
+/** Real geometry of the parcel containing the resolved SMP, when Catastro publishes one (S12). */
+export async function getParcelGeometry(
+  smp: string, options: { signal?: AbortSignal } = {},
+): Promise<ParcelGeometryResponse> {
+  if (USE_MOCK) return mockParcelGeometry();
+  const params = new URLSearchParams({ smp });
+  return request<ParcelGeometryResponse>(`/territory/parcel-geometry?${params}`, { signal: options.signal });
+}
+
+/** Conditions of one rubro in the official table, fetched only when the person selects it (S4). */
+export async function getRubroReferencias(
+  params: RubroReferenciasParams, options: { signal?: AbortSignal } = {},
+): Promise<RubroReferencias> {
+  if (USE_MOCK) return mockRubroReferencias();
+  const query = new URLSearchParams({
+    smp: params.smp,
+    categoria: String(params.categoria),
+    mixtura: String(params.mixtura),
+    rubro: String(params.rubro),
+  });
+  return request<RubroReferencias>(`/territory/rubro-referencias?${query}`, { signal: options.signal });
 }

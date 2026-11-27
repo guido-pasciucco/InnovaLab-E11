@@ -14,6 +14,15 @@ def normalize_address(address: str) -> str:
     return " ".join(address.split())
 
 
+def lookup_query(address: str) -> str:
+    """Georef no entiende la nomenclatura completa: descarta Comuna/provincia.
+
+    La nomenclatura que devuelve la API termina en ", Comuna N, Ciudad Autónoma…";
+    si se envía tal cual, Georef toma "3" como altura y no encuentra la dirección.
+    """
+    return normalize_address(address.split(",", 1)[0])
+
+
 async def search_addresses(
     address: str,
     province: str = "caba",
@@ -21,7 +30,7 @@ async def search_addresses(
 ) -> GeorefAddressesResponse:
     """Consulta el endpoint /direcciones de Georef y devuelve la respuesta tipada."""
     params = {
-        "direccion": normalize_address(address),
+        "direccion": lookup_query(address),
         "provincia": province,
         "max": max_results,
     }

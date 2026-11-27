@@ -2,7 +2,19 @@
 
 Servicio de USIG que publica los datos del Código Urbanístico por parcela: distrito, edificabilidad, protección patrimonial, afectaciones y **el cuadro de usos** (qué rubros se permiten y con qué condiciones). Es el backend del visor [Ciudad 3D](https://ciudad3d.buenosaires.gob.ar). Se consulta por SMP, que se obtiene con [USIG Catastro](usig-catastro.md).
 
-**Estado:** candidata, no integrada. Verificada con llamadas reales el 2026-11-05.
+**Estado:** integrada en la rama `feat/ciudad-3d-mapa` (PR pendiente). Verificada con llamadas reales el 2026-11-05 y re-verificada el 2026-11-26.
+
+## Integración en CONCO
+
+El cuadro de usos se consume a través de la API propia de CONCO, nunca desde el navegador: el filtro por User-Agent de USIG impide las llamadas directas del front.
+
+- `GET /territory/use-table?lat=&lng=&address=<opcional>` — resuelve la parcela con Catastro y devuelve la mixtura más las 10 categorías con sus rubros. Si el punto no da SMP, con `address` se intenta la resolución por dirección oficial (`normalizar` → `cod_calle` + `altura`).
+- `GET /territory/rubro-referencias?smp=&categoria=&mixtura=&rubro=` — condiciones del rubro seleccionado, bajo demanda. Aunque el cliente envía `mixtura`, el backend la deriva del SMP para no confiar en el cliente.
+- `GET /territory/parcel-geometry?smp=` — geometría real de la parcela (`/catastro/geometria/`), para dibujar el polígono en el mapa en lugar de una capa ilustrativa. Verificada el 2026-11-26: `FeatureCollection` con `MultiPolygon`.
+
+La lista de rubros no se filtra por mixtura: el permiso está en `referencias`. No se consultan las 401 referencias de golpe. El panel del mapa muestra estos datos como referencia con fuente oficial; no determina si una actividad es apta para el lote ([RN-04](../../REGLAS_DE_NEGOCIO.md)). Las respuestas incluyen una limitación RN-03: el punto de Georef es aproximado y el SMP puede corresponder a la parcela vecina.
+
+Las respuestas exitosas de USIG se cachean en el backend con TTL/LRU configurable (`usig_cache_ttl_seconds`, `usig_cache_max_entries`); los errores nunca se cachean. Un `use-table` en caliente no hace llamadas aguas arriba.
 
 ## 1. Ficha
 
